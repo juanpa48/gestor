@@ -1,0 +1,11 @@
+{
+  "name": "gestion-empresarial",
+  "version": "1.2.0",
+  "description": "Dashboard de gestión empresarial",
+  "scripts": {
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "http-server": "^14.1.1"
+  }
+}

@@ -1,0 +1,2 @@
+hacer una comparacion de el architecture.md y technical con la carpeta comparacion para 
+dejar listo la documentacion

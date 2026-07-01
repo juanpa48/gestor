@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal Avanzado TI - Dashboard Colaborador</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/themes/portal-theme.css">
+</head>
+<body class="portal">
+
+  <div class="portal-container">
+    
+    <!-- HEADER CON LOGO -->
+    <header class="portal-header">
+      <div class="logo-placeholder">
+        <!-- 🔴 REEMPLAZA ESTO: Elimina la etiqueta <i> y habilita la <img> de abajo cuando tengas tu logo -->
+        <!-- <img src="URL_DE_TU_LOGO_AQUI.png" alt="Logo de Empresa" style="display:block;"> -->
+        <i class="fa-solid fa-cube"></i>
+        <span>TU LOGO AQUÍ</span>
+      </div>
+      <div class="header-title">
+        Portal de Autogestión TI
+      </div>
+    </header>
+
+    <!-- ESTADÍSTICAS SUPERIORES -->
+    <div class="top-stats">
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fa-solid fa-ticket-simple"></i></div>
+        <div class="stat-info">
+          <div class="stat-value" id="statHoy">0</div>
+          <div class="stat-label">Tickets Hoy</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon danger"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        <div class="stat-info">
+          <div class="stat-value" id="statUrgentes">0</div>
+          <div class="stat-label">Urgencias Activas</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon success"><i class="fa-solid fa-check-double"></i></div>
+        <div class="stat-info">
+          <div class="stat-value" id="statResueltos">0</div>
+          <div class="stat-label">Resueltos Hoy</div>
+        </div>
+      </div>
+      <div class="stat-card stat-card-sistemas">
+        <div class="stat-label">ESTADO DE SISTEMAS</div>
+        <div class="sistemas-row">
+          
+          <!-- Servidor Principal -->
+          <div class="sys-container" id="sys_card_servidor" title="Servidor Principal" data-sys="servidor">
+            <div class="sys-icon" id="sys_icon_servidor">
+              <i class="fa-solid fa-server"></i>
+              <div class="sys-dot dot-green" id="sys_dot_servidor"></div>
+            </div>
+            <div class="sys-label">SERVER</div>
+          </div>
+          
+          <!-- Programa Contable -->
+          <div class="sys-container" id="sys_card_contable" title="Programa Contable" data-sys="contable">
+            <div class="sys-icon" id="sys_icon_contable">
+              <i class="fa-solid fa-calculator"></i>
+              <div class="sys-dot dot-green" id="sys_dot_contable"></div>
+            </div>
+            <div class="sys-label">CONTABLE</div>
+          </div>
+          
+          <!-- Internet Empresa -->
+          <div class="sys-container" id="sys_card_red" title="Internet / Red" data-sys="red">
+            <div class="sys-icon" id="sys_icon_red">
+              <i class="fa-solid fa-network-wired"></i>
+              <div class="sys-dot dot-green" id="sys_dot_red"></div>
+            </div>
+            <div class="sys-label">RED APP</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN GRID -->
+    <div class="main-grid">
+
+      <!-- COLUMNA IZQUIERDA: Historial -->
+      <aside class="glass-panel aside-panel">
+        <div class="panel-title">
+          <i class="fa-solid fa-clock-rotate-left"></i> Sus Tickets Recientes
+        </div>
+        
+        <div id="historialLista">
+          <div class="empty-history">
+            Seleccione su nombre en el formulario para ver su historial.
+          </div>
+        </div>
+      </aside>
+
+      <!-- COLUMNA CENTRAL: Formulario -->
+      <main class="glass-panel">
+        <div class="panel-title panel-title-form">
+          CREAR NUEVA SOLICITUD
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">SOLICITANTE</label>
+          <div class="select-wrapper">
+            <select id="nombre" class="glass-input" required>
+              <option value="" disabled selected>Identifíquese...</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">ÁREA DE GESTIÓN</label>
+          <div class="select-wrapper">
+            <select id="areaGestion" class="glass-input" required>
+              <option value="" disabled selected>Seleccione el Área...</option>
+              <option value="Área 1 (Estructurales)">Área 1 (Estructurales / Legales)</option>
+              <option value="Área 2 (Operativos)">Área 2 (Operativos / Documentales)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">TIPO DE TRÁMITE</label>
+          <div class="select-wrapper">
+            <select id="tipoTramite" class="glass-input" required>
+              <option value="" disabled selected>Primero seleccione un Área...</option>
+            </select>
+          </div>
+          <div id="alertaPresencial" class="alerta-presencial">
+            <i class="fa-solid fa-triangle-exclamation"></i> Nota: Este trámite requiere presencialidad. Será atendido por la gestora que se encuentre en oficina hoy.
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">DESCRIPCIÓN DE LA SOLICITUD</label>
+          <textarea id="solicitud" class="glass-input" placeholder="💡 Tip: Sea lo más específico posible sobre el requerimiento..." required></textarea>
+        </div>
+
+        <div class="form-group" id="grupoRutaT">
+          <label class="form-label">RUTA T / ANEXOS <span class="required-star">*</span></label>
+          <input type="text" id="rutaT" class="glass-input ruta-input" placeholder="Ej: T:\Contabilidad\Firmas\2024\...">
+        </div>
+
+        <div class="form-group check-pdf-group" id="grupoCheckPdf">
+          <input type="checkbox" id="checkPdf">
+          <label for="checkPdf">
+            Confirmo que los documentos adjuntos o en la ruta especificada están en <span class="pdf-highlight">formato PDF</span>.
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">PRIORIDAD</label>
+          <div class="priority-group">
+            <div class="priority-btn" data-val="Baja">BAJA</div>
+            <div class="priority-btn active" data-val="Media">MEDIA</div>
+            <div class="priority-btn" data-val="Alta">ALTA</div>
+            <div class="priority-btn" data-val="Urgente">URGENTE</div>
+          </div>
+          <input type="hidden" id="prioridad" value="Media">
+        </div>
+
+        <button class="btn-submit" id="btnSubmit">
+          <span>Enviar Solicitud</span>
+          <i class="fa-solid fa-paper-plane"></i>
+        </button>
+      </main>
+
+      <!-- COLUMNA DERECHA: Personal TI -->
+      <aside class="glass-panel aside-panel">
+        <div class="panel-title">
+          <i class="fa-solid fa-users-gear"></i> Personal Asignado
+        </div>
+
+        <!-- Contenedor Dinámico de Personal TI -->
+        <div id="itStaffContainer">
+          <!-- Se carga dinámicamente desde synchronizarEstadoPersonal -->
+        </div>
+
+      </aside>
+
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <!-- Módulos JS compartidos -->
+  <script src="js/db-service.js"></script>
+  <script src="js/tramites-data.js"></script>
+  <script src="js/portal/form-ui.js"></script>
+  <script src="js/portal/submit.js"></script>
+
+  <script src="js/portal/stats.js"></script>
+</body>
+
+</html>

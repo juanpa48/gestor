@@ -1,0 +1,76 @@
+Resumen del Proyecto: Sistema de Gestión de Trámites de Gestión Empresarial
+
+Este documento describe el contexto de negocio, los usuarios y el flujo del sistema.
+Para reglas técnicas ver: agent.md
+Para conexiones entre archivos ver: docs/DEPENDENCIES.md
+
+🎯 Objetivo del Proyecto
+Crear un sistema profesional de gestión de solicitudes para el departamento de Gestión Empresarial, que apoya a los contadores en diversas diligencias legales y administrativas ante entidades como la DIAN, Cámara de Comercio, etc.
+
+📌 Origen
+El proyecto nació como una plantilla de tickets para un departamento de IT ("IT Command"). Se adaptó completamente para el departamento de Gestión Empresarial, cambiando la terminología, los campos del formulario y los tipos de trámites. La transformación ya fue completada.
+
+👥 Usuarios del Sistema
+
+1. Colaboradores (contadores):
+   - Acceden al portal (portal_avanzado.html)
+   - Envían solicitudes de trámites seleccionando su área y tipo
+   - Pueden ver el historial de sus propias solicitudes
+   - Ven el estado del personal TI y los sistemas
+
+2. Gestoras TI (administradoras):
+   - Acceden al dashboard (index.html)
+   - Reciben notificaciones en tiempo real cuando llega una nueva solicitud
+   - Gestionan los tickets: asignan responsable, cambian estado y prioridad
+   - Publican el estado de los sistemas (servidor, programa contable, red)
+   - Publican su estado personal (disponible, en reunión, ocupada)
+
+🔄 Flujo Principal
+Colaborador abre portal → Selecciona área y trámite → Describe su solicitud → Envía ticket
+→ El ticket se guarda en localStorage → El dashboard detecta el cambio automáticamente
+→ La gestora recibe notificación (audio + browser) → Gestiona el ticket desde el dashboard
+
+Estructura de Responsabilidades:
+El equipo se divide en dos áreas principales de atención:
+
+Área 1 (Trámites Estructurales y Legales):
+- Creación y/o Cancelación de empresas.
+- Devolución de saldo a favor en rentas.
+- RUT por primera vez.
+- Constitución y cancelación de establecimientos de comercio.
+- Cambio de representante legal y sus anexos.
+- Anexo y retiro de revisoría fiscal.
+- Venta de acciones y compraventas.
+- Reforma de estatutos.
+- Cambio de dirección de la empresa.
+- Capitalización.
+- Anexo y cambio de actividades económicas.
+- Cambio de correos electrónicos y números telefónicos.
+- Trámites RUP y RUB.
+
+Área 2 (Trámites Operativos y Documentales):
+- Actualización de RUT.
+- Resolución de facturación.
+- Facturas electrónicas.
+- Documento soporte.
+- Certificados.
+- Firmas de documentos (Requiere ruta de carpeta en la T y formato PDF).
+
+🏗️ Estrategia de Desarrollo: "Local First"
+Para garantizar una respuesta instantánea y autonomía en el diseño, utilizamos un sistema de Entorno de Pruebas Local.
+
+1. Entorno Frontend (/entorno_local)
+- Archivos principales: index.html, portal_avanzado.html, js/, styles.css, database.html.
+- Arquitectura: Proyecto modularizado en componentes JS utilizando Event Listeners, sin lógicas inline en el HTML.
+- Persistencia (Desarrollo): Uso de un servicio de base de datos (`db-service.js`) que envuelve `localStorage` para guardar tickets, solicitantes, responsables y estados temporalmente.
+- Comunicación entre pestañas: Evento "storage" del navegador para notificaciones en tiempo real, preparado para futura migración a WebSockets.
+
+💻 Detalles Técnicos Clave
+- Gestión Dinámica: Las solicitudes se gestionan mediante objetos de datos en localStorage.
+- Indicadores Visuales: Uso de Canvas (sparklines) para mostrar tendencias de solicitudes.
+- Vistas: Tabla de actividades con filtros + Vista Kanban (Pendiente / En progreso).
+- Notificaciones: Audio con AudioContext (3 tonos) + Notificación nativa del navegador.
+- Requisitos de Solicitud:
+  - Descripciones específicas del trámite.
+  - Para firmas: Incluir ruta en la unidad T.
+  - Formato obligatorio: PDF.
