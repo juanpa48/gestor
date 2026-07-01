@@ -1,0 +1,1 @@
+Lee el archivo CONTEXT.md en la raíz del proyecto y sigue los pasos que dice. Ese archivo te guía para leer los demás documentos en el orden correcto. Cuando termines de leer todo lo que indica, dime un resumen de lo que entendiste antes de empezar a trabajar."
