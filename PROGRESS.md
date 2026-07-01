@@ -17,30 +17,30 @@
 ### Fases de Ejecución (Baby Steps)
 
 - [ ] **Fase 1: Fundación y Servicios**
-  - [ ] Inicializar dependencias (`react-router-dom`, `chart.js`, `react-chartjs-2`).
-  - [ ] Migrar `DbService.js` manteniendo las Promesas y `localStorage`.
-  - [ ] Configurar los Contextos globales (`TicketContext`, `NotificationContext`).
-  - [ ] Migrar catálogo de trámites (`tramitesData.js`).
+  - [x] Inicializar dependencias (`react-router-dom`, `chart.js`, `react-chartjs-2`).
+  - [x] Migrar `DbService.js` manteniendo las Promesas y `localStorage`.
+  - [x] Configurar los Contextos globales (`TicketContext`, `NotificationContext`).
+  - [x] Migrar catálogo de trámites (`tramitesData.js`).
 
-- [ ] **Fase 2: UI Global y Chrome del Dashboard**
-  - [ ] Portar los archivos CSS al nuevo proyecto.
-  - [ ] Componente `DashboardLayout` para envolver la app.
-  - [ ] Componentes `Sidebar` y `Topbar`.
-  - [ ] Componente funcional `NotificationCenter`.
+- [x] **Fase 2: UI Global y Chrome del Dashboard**
+  - [x] Portar los archivos CSS al nuevo proyecto.
+  - [x] Componente `DashboardLayout` para envolver la app.
+  - [x] Componentes `Sidebar` y `Topbar`.
+  - [x] Componente funcional `NotificationCenter`.
 
-- [ ] **Fase 3: Rutas del Dashboard**
-  - [ ] Componente `PanelPrincipal` (Dashboard principal con widgets y charts).
-  - [ ] Componente `Actividades` (Tabla y filtros).
-  - [ ] Componente `Gestion` (Kanban, tabla y modal de edición).
+- [x] **Fase 3: Rutas del Dashboard**
+  - [x] Componente `PanelPrincipal` (Dashboard principal con widgets y charts).
+  - [x] Componente `Actividades` (Tabla y filtros).
+  - [x] Componente `Gestion` (Kanban, tabla y modal de edición).
 
-- [ ] **Fase 4: Portal del Colaborador**
-  - [ ] Layout público del portal.
-  - [ ] Historial de tickets, formulario con lógica de firmas y áreas.
-  - [ ] Widgets del estado del sistema y personal TI.
+- [x] **Fase 4: Portal del Colaborador**
+  - [x] Layout público del portal.
+  - [x] Historial de tickets, formulario con lógica de firmas y áreas.
+  - [x] Widgets del estado del sistema y personal TI.
 
-- [ ] **Fase 5: Notificaciones Nativas y Sincronización**
-  - [ ] Lógica de AudioContext ("Do-Mi-Sol") y Notificaciones del navegador.
-  - [ ] Sincronización inter-pestañas mediante evento `storage` nativo.
+- [x] **Fase 5: Notificaciones Nativas y Sincronización**
+  - [x] Lógica de AudioContext ("Do-Mi-Sol") y Notificaciones del navegador.
+  - [x] Sincronización inter-pestañas mediante evento `storage` nativo.
 
 ---
 

@@ -1,0 +1,25 @@
+.btn-cancel { padding: 11px 28px; border-radius: 50px; border: 1.5px solid rgba(200, 215, 235, 0.7); background: rgba(255, 255, 255, 0.7); font-family: var(--font-main); font-size: 13.5px; font-weight: 500; color: var(--text-muted); cursor: pointer; transition: all var(--transition); }
+.btn-cancel:hover { border-color: rgba(232, 25, 44, 0.25); color: var(--red); }
+.btn-save { padding: 11px 28px; border-radius: 50px; border: none; background: var(--red); font-family: var(--font-main); font-size: 13.5px; font-weight: 600; color: white; cursor: pointer; transition: all var(--transition); display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 16px rgba(232, 25, 44, 0.3); }
+.btn-save:hover { background: var(--red-light); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(232, 25, 44, 0.4); }
+.btn-save:active { transform: translateY(0); }
+.btn-save:disabled { opacity: 0.7; cursor: not-allowed; }
+.btn-loader.hidden, .hidden { display: none !important; }
+.icon-btn { width: 40px; height: 40px; border-radius: 12px; border: 1.5px solid rgba(255, 255, 255, 0.85); background: rgba(255, 255, 255, 0.72); backdrop-filter: blur(10px); color: var(--text-muted); font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all var(--transition); position: relative; }
+.icon-btn:hover { background: rgba(255, 255, 255, 0.9); color: var(--dark); transform: translateY(-1px); box-shadow: var(--shadow); }
+.icon-btn.notif { position: relative; }
+.icon-btn-sm { width: 28px; height: 28px; border-radius: 8px; border: none; background: transparent; color: var(--text-muted); font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all var(--transition); }
+.icon-btn-sm:hover { background: rgba(232, 25, 44, 0.06); color: var(--red); }
+.btn-view-all { width: 100%; padding: 10px; border-radius: 10px; border: none; background: var(--dark); color: white; font-family: var(--font-main); font-size: 12.5px; font-weight: 600; cursor: pointer; transition: all var(--transition); letter-spacing: 0.01em; }
+.btn-view-all:hover { background: var(--dark-mid); transform: translateY(-1px); }
+.btn-refresh { padding: 9px 18px; border-radius: 10px; border: 1.5px solid rgba(200, 215, 235, 0.6); background: rgba(255, 255, 255, 0.7); font-family: var(--font-main); font-size: 13px; font-weight: 500; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; gap: 7px; transition: all var(--transition); }
+.btn-refresh:hover { border-color: rgba(232, 25, 44, 0.25); color: var(--red); }
+.btn-clear-filters { padding: 8px 14px; border-radius: 10px; border: 1.5px solid rgba(232, 25, 44, 0.3); background: transparent; font-family: var(--font-main); font-size: 12px; font-weight: 600; color: var(--red); cursor: pointer; display: flex; align-items: center; gap: 5px; transition: all var(--transition); }
+.btn-clear-filters:hover { background: rgba(232, 25, 44, 0.08); border-color: var(--red); }
+.toggle-btn { padding: 7px 14px; border: none; background: transparent; font-family: var(--font-main); font-size: 12px; font-weight: 600; color: var(--text-muted); cursor: pointer; border-radius: 8px; transition: all var(--transition); display: flex; align-items: center; gap: 6px; }
+.toggle-btn:hover { color: var(--dark); }
+.toggle-btn.active { background: var(--red); color: white; box-shadow: 0 2px 8px rgba(232, 25, 44, 0.3); }
+.toggle-btn i { font-size: 11px; }
+.status-circle-btn { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid transparent; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; outline: none; padding: 0; }
+.status-circle-btn:hover { transform: scale(1.15); }
+.status-circle-btn:active { transform: scale(0.9); }

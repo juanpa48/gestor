@@ -1,0 +1,204 @@
+/* PORTAL THEME OVERRIDES (Glassmorphism & Structure) */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'DM Sans', sans-serif;
+}
+
+body.portal {
+  /* ──────────────────────────────────────────────────────
+   * OVERRIDES sobre reset.css (diseñado para el Dashboard)
+   * reset.css aplica overflow:hidden y display:flex al body
+   * para que el Dashboard no haga scroll — el portal SÍ necesita
+   * scroll normal, por eso lo revertimos aquí.
+   * ────────────────────────────────────────────────────── */
+  display: block;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  min-height: 100vh;
+  background: linear-gradient(135deg, #a8c0ff 0%, #3f2b96 100%);
+  background: radial-gradient(circle at 15% 50%, rgba(255, 178, 222, 0.6), transparent 50%),
+              radial-gradient(circle at 85% 30%, rgba(135, 230, 255, 0.7), transparent 50%),
+              radial-gradient(circle at 50% 80%, rgba(200, 180, 255, 0.6), transparent 50%),
+              linear-gradient(135deg, #add8e6 0%, #ffb6c1 100%);
+  padding: 40px 20px;
+}
+
+.portal-container { max-width: 1280px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+.portal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: -4px; }
+.logo-placeholder { display: flex; align-items: center; gap: 12px; font-size: 20px; font-weight: 800; color: rgba(255,255,255,0.95); letter-spacing: 0.05em; text-transform: uppercase; text-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+.logo-placeholder img { display: block; max-height: 48px; width: auto; }
+.logo-placeholder i { font-size: 32px; color: rgba(255,255,255,0.95); }
+.header-title { font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.9); background: rgba(0,0,0,0.15); backdrop-filter: blur(5px); padding: 8px 16px; border-radius: 20px; }
+.portal .top-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+.portal .stat-card { background: rgba(255, 255, 255, 0.35); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1.5px solid rgba(255, 255, 255, 0.6); border-radius: 20px; padding: 20px 24px; display: flex; align-items: center; gap: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.05); transition: transform 0.3s ease; }
+.portal .stat-card:hover { transform: translateY(-4px); }
+.portal .stat-icon { width: 48px; height: 48px; border-radius: 14px; background: rgba(255, 255, 255, 0.6); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #3b82f6; }
+.portal .stat-info { flex: 1; }
+.portal .stat-value { font-size: 24px; font-weight: 700; color: #0f172a; line-height: 1.1; }
+.portal .stat-label { font-size: 11px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 4px; }
+.portal .main-grid { display: grid; grid-template-columns: 300px 1fr 300px; gap: 24px; align-items: start; }
+.portal .glass-panel { background: rgba(255, 255, 255, 0.35); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1.5px solid rgba(255, 255, 255, 0.6); border-radius: 24px; padding: 30px; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.05); }
+.portal .panel-title { font-size: 13px; font-weight: 700; color: #1e293b; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; border-bottom: 2px solid rgba(255,255,255,0.4); padding-bottom: 12px; }
+.empty-history { text-align: center; padding: 30px 10px; color: #64748b; font-size: 13px; font-weight: 500; }
+.history-list { display: flex; flex-direction: column; gap: 12px; }
+.history-ticket { background: rgba(255, 255, 255, 0.5); border-radius: 14px; padding: 14px; border: 1px solid rgba(255,255,255,0.8); transition: background 0.2s; }
+.history-ticket:hover { background: rgba(255, 255, 255, 0.7); }
+.ht-title { font-size: 13px; font-weight: 600; color: #1e293b; margin-bottom: 8px; }
+.ht-meta { display: flex; justify-content: space-between; align-items: center; }
+.ht-date { font-size: 11px; color: #64748b; }
+
+/* Badges de estado del historial de tickets (portal)
+   Sobrescriben el .badge circular del dashboard (widgets.css) */
+.portal .badge {
+  position: static;
+  width: auto;
+  height: auto;
+  background: none;
+  border: none;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  display: inline-block;
+  padding: 3px 10px;
+}
+.portal .badge.pendiente  { background: rgba(232, 25, 44, 0.12); color: #9f1239; }
+.portal .badge.progreso   { background: rgba(59, 130, 246, 0.12); color: #1d4ed8; }
+.portal .badge.resuelto   { background: rgba(34, 197, 94, 0.12);  color: #166534; }
+
+.portal .form-group { margin-bottom: 24px; }
+.portal .form-label { display: block; font-size: 11px; font-weight: 700; color: #333; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; margin-left: 4px; }
+.glass-input { width: 100%; background: rgba(255, 255, 255, 0.45); border: 1.5px solid rgba(255, 255, 255, 0.7); border-radius: 14px; padding: 16px 20px; font-size: 14.5px; color: #2c3e50; outline: none; transition: all 0.3s ease; box-shadow: inset 0 2px 4px rgba(255,255,255,0.3); }
+.glass-input:focus { background: rgba(255, 255, 255, 0.65); border-color: rgba(255, 255, 255, 1); box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.2); }
+select.glass-input { appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer; }
+.portal .select-wrapper { position: relative; }
+.portal .select-wrapper::after { content: '\f078'; font-family: 'Font Awesome 6 Free'; font-weight: 900; position: absolute; right: 20px; top: 50%; transform: translateY(-50%); color: #7b8898; pointer-events: none; }
+textarea.glass-input { resize: vertical; min-height: 120px; }
+.priority-group { display: flex; gap: 12px; flex-wrap: wrap; }
+.priority-btn { flex: 1; min-width: 80px; padding: 12px 0; background: rgba(255, 255, 255, 0.35); border: 1.5px solid rgba(255, 255, 255, 0.6); border-radius: 12px; font-size: 11.5px; font-weight: 700; color: #333; text-align: center; cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.3s ease; }
+.priority-btn.active { background: rgba(255, 255, 255, 0.85); border-color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+.btn-submit { width: 100%; padding: 18px; margin-top: 10px; background: linear-gradient(90deg, #ff416c 0%, #ff4b2b 100%); border: none; border-radius: 30px; color: white; font-size: 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s ease; box-shadow: 0 8px 24px rgba(255, 65, 108, 0.35); }
+.btn-submit:hover { transform: translateY(-2px); }
+.profile-card { background: rgba(255, 255, 255, 0.65); border-radius: 18px; padding: 16px; display: flex; align-items: center; gap: 16px; margin-bottom: 16px; border: 1px solid rgba(255, 255, 255, 0.9); position: relative; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+.profile-avatar { width: 56px; height: 56px; border-radius: 16px; background: #e2e8f0; object-fit: cover; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.profile-info { flex: 1; }
+.profile-name { font-size: 16px; font-weight: 700; color: #1e293b; line-height: 1.2; }
+.profile-role { font-size: 11.5px; font-weight: 500; color: #64748b; margin-top: 4px; }
+.chat-icon { width: 28px; height: 28px; border-radius: 8px; background: #0f172a; color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; }
+.sys-container { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; transition: transform 0.2s; }
+.sys-container:hover { transform: translateY(-3px); }
+.sys-icon { width: 48px; height: 48px; border-radius: 14px; background: rgba(255, 255, 255, 0.6); display: flex; align-items: center; justify-content: center; font-size: 20px; color: #475569; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
+.sys-dot { position: absolute; bottom: -4px; right: -4px; width: 14px; height: 14px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.7); }
+.sys-label { font-size: 9.5px; font-weight: 800; color: #64748b; letter-spacing: 0.05em; text-transform: uppercase; }
+.status-dot { position: absolute; top: 12px; left: 12px; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; }
+.dot-green { background: #22c55e; }
+.dot-yellow { background: #eab308; }
+.dot-blue { background: #3b82f6; }
+.dot-purple { background: #a855f7; }
+.dot-red { background: #ef4444; }
+.dot-red-intense { background: #dc2626; box-shadow: 0 0 8px #dc2626; animation: pulseRed 1.5s infinite; }
+@keyframes pulseRed { 0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(220, 38, 38, 0); } 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); } }
+.profile-activity { font-size: 10.5px; font-weight: 700; margin-top: 8px; padding: 4px 8px; border-radius: 6px; display: inline-block; }
+.text-green { color: #166534; background: #dcfce7; }
+.text-yellow { color: #854d0e; background: #fef08a; }
+.text-blue { color: #1d4ed8; background: #dbeafe; }
+.text-purple { color: #6b21a8; background: #f3e8ff; }
+.text-red { color: #b91c1c; background: #fee2e2; }
+.text-red-intense { color: #7f1d1d; background: #fecaca; }
+/* Clases auxiliares para reemplazar estilos inline */
+.portal .stat-icon.danger {
+  color: #ef4444;
+}
+.portal .stat-icon.success {
+  color: #22c55e;
+}
+
+.portal .stat-card-sistemas {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  padding: 14px 24px;
+}
+.portal .stat-card-sistemas .stat-label {
+  margin-top: 0;
+  margin-bottom: 12px;
+  text-align: center;
+}
+.portal .sistemas-row {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.portal .glass-panel.aside-panel {
+  padding: 24px;
+}
+
+.portal .panel-title-form {
+  border: none;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.portal .alerta-presencial {
+  display: none;
+  margin-top: 8px;
+  font-size: 11.5px;
+  color: #9f1239;
+  background: #ffe4e6;
+  padding: 10px;
+  border-radius: 8px;
+  font-weight: 700;
+  border: 1px solid #fda4af;
+}
+
+.portal .required-star {
+  color: #ef4444;
+}
+
+.portal .ruta-input {
+  padding: 14px 20px;
+}
+
+.portal .check-pdf-group {
+  display: none;
+  align-items: flex-start;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.45);
+  padding: 14px;
+  border-radius: 14px;
+  border: 1.5px solid rgba(255, 255, 255, 0.7);
+}
+
+.portal .check-pdf-group input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  margin-top: 2px;
+}
+
+.portal .check-pdf-group label {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #1e293b;
+  cursor: pointer;
+  line-height: 1.4;
+}
+
+.portal .pdf-highlight {
+  color: #e8192c;
+}
+
+.portal #grupoRutaT {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .portal .main-grid { grid-template-columns: 1fr; }
+  .portal .top-stats { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+  .portal .top-stats { grid-template-columns: 1fr; }
+}

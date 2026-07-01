@@ -1,0 +1,42 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  font-family: var(--font-main);
+  font-size: 14px;
+  color: var(--text);
+  overflow: hidden;
+}
+
+body {
+  display: flex;
+  background:
+    radial-gradient(ellipse 80% 60% at 15% 10%, rgba(255, 150, 160, 0.38) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 55% at 85% 85%, rgba(140, 180, 255, 0.32) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 50% 50%, rgba(200, 220, 255, 0.18) 0%, transparent 70%),
+    linear-gradient(135deg, #f8e8ec 0%, #eef2ff 50%, #e0eafb 100%);
+  min-height: 100vh;
+}
+
+/* ---- Scrollbar ---- */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(180, 200, 220, 0.4);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(232, 25, 44, 0.2);
+}
