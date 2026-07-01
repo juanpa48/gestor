@@ -8,41 +8,44 @@
 **Contexto:** Migrar la aplicación vanilla "project-visualization" (versión actualizada a Junio 2026) a React, manteniendo la arquitectura multi-página (rutas), el centro de notificaciones funcional y las gráficas dinámicas.
 
 **Decisiones Confirmadas:**
+
 - **Rutas:** Pendiente de confirmación (Propuesto: React Router).
 - **Estado:** Pendiente de confirmación (Propuesto: React Context API).
 - **Gráficos:** Pendiente de confirmación (Propuesto: react-chartjs-2).
 
 ---
 
-### Fases de Ejecución (Baby Steps)
+## Fases de Implementación (Refactorización 1:1)
 
-- [ ] **Fase 1: Fundación y Servicios**
-  - [x] Inicializar dependencias (`react-router-dom`, `chart.js`, `react-chartjs-2`).
-  - [x] Migrar `DbService.js` manteniendo las Promesas y `localStorage`.
-  - [x] Configurar los Contextos globales (`TicketContext`, `NotificationContext`).
-  - [x] Migrar catálogo de trámites (`tramitesData.js`).
+- [x] **Fase 1: Corrección de Enrutamiento y Layout Base**
+  - [x] Validar `App.jsx` y limpiar etiquetas innecesarias.
+  - [x] Restablecer la estructura exacta de `layout.js` en `DashboardLayout.jsx` (borrar `.page-content`).
+  - [x] Sincronizar el atributo `data-page` en el body según la ruta activa.
 
-- [x] **Fase 2: UI Global y Chrome del Dashboard**
-  - [x] Portar los archivos CSS al nuevo proyecto.
-  - [x] Componente `DashboardLayout` para envolver la app.
-  - [x] Componentes `Sidebar` y `Topbar`.
-  - [x] Componente funcional `NotificationCenter`.
+- [x] **Fase 2: Panel Principal (Dashboard) - `index.html`**
+  - [x] Restablecer jerarquía de clases `.section`, `.stats-grid`, `.content-row`.
+  - [x] Crear `RegistroActividadForm.jsx` con los 7 grupos de campos y el modal rápido.
+  - [x] Crear `WidgetMiEstado.jsx` con lógica de `.panel-card`.
+  - [x] Crear `WidgetSistemas.jsx` con lógica de `.panel-card`.
 
-- [x] **Fase 3: Rutas del Dashboard**
-  - [x] Componente `PanelPrincipal` (Dashboard principal con widgets y charts).
-  - [x] Componente `Actividades` (Tabla y filtros).
-  - [x] Componente `Gestion` (Kanban, tabla y modal de edición).
+- [x] **Fase 3: Página de Actividades - `actividades.html`**
+  - [x] Restablecer jerarquía de clases base `.section`.
+  - [x] Portar los selects de la barra de filtros `.filters-container`.
+  - [x] Recrear `.quick-stats` (Totales, Pendientes, Progreso, Resueltos, Urgentes) según `activity-table.js`.
+  - [x] Restablecer tabla interactiva en `.table-card`.
 
-- [x] **Fase 4: Portal del Colaborador**
-  - [x] Layout público del portal.
-  - [x] Historial de tickets, formulario con lógica de firmas y áreas.
-  - [x] Widgets del estado del sistema y personal TI.
+- [x] **Fase 4: Página de Gestión - `gestion.html`**
+  - [x] Restablecer jerarquía de clases base `.section`.
+  - [x] Implementar el `.view-toggle` (Tabla vs Kanban).
+  - [x] Portar el modal de edición complejo (`.modal-overlay`) con lógica extraída de `tickets.js`.
 
-- [x] **Fase 5: Notificaciones Nativas y Sincronización**
-  - [x] Lógica de AudioContext ("Do-Mi-Sol") y Notificaciones del navegador.
-  - [x] Sincronización inter-pestañas mediante evento `storage` nativo.
+- [x] **Fase 5: Portal del Colaborador - `portal_avanzado.html`**
+  - [x] Restablecer jerarquía de `.portal-container`, `.top-stats` y `.main-grid`.
+  - [x] Reconstruir formulario interactivo (checkbox PDF, prioridades `.priority-btn`, ruta T).
+  - [x] Reconstruir historial lateral y widget lateral de personal TI.
 
 ---
 
 ## Último objetivo completado
-*(Ninguno en este nuevo repositorio)*
+
+Fase 5: Portal del Colaborador completada con éxito. Migración total a React finalizada.

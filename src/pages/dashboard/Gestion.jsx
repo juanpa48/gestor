@@ -1,18 +1,38 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useTickets } from '../../contexts/TicketContext';
+import { tramitesArea1, tramitesArea2 } from '../../data/tramitesData';
 
 export const Gestion = () => {
-  const { actividades, responsables } = useTickets();
+  const { actividades, responsables, updateTicket } = useTickets();
   const [view, setView] = useState('tabla'); // 'tabla' o 'kanban'
   const [filtroEstado, setFiltroEstado] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Modal State
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalLoading, setModalLoading] = useState(false);
+  const [ticketEdit, setTicketEdit] = useState({
+    id: '',
+    solicitud: '',
+    solicitante: '',
+    estado: 'Pendiente',
+    responsable: '',
+    prioridad: 'Baja',
+    grupo: '',
+    clasificacion: '',
+    detalles: ''
+  });
+
   // Escuchar el evento de busqueda global del Topbar
   useEffect(() => {
     const handleSearch = (e) => {
-      setSearchQuery(e.detail.query.toLowerCase());
+      setSearchQuery(e.detail?.query?.toLowerCase() || '');
     };
     document.addEventListener('searchTriggered', handleSearch);
+    
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) setSearchQuery(searchInput.value.toLowerCase());
+
     return () => document.removeEventListener('searchTriggered', handleSearch);
   }, []);
 
@@ -40,120 +60,305 @@ export const Gestion = () => {
   
   const prioColor = { Urgente: '#ef4444', Alta: '#f59e0b', Media: '#3b82f6', Baja: '#22c55e' };
 
+  const showToast = (message, type = 'success') => {
+    const toast = document.getElementById('toast');
+    if (toast) {
+      toast.textContent = message;
+      toast.className = `toast show ${type === 'error' ? 'error' : ''}`;
+      setTimeout(() => {
+        toast.className = 'toast hidden';
+      }, 3000);
+    }
+  };
+
+  const openModal = (id) => {
+    const t = actividades.find(a => a.id === id);
+    if (!t) return;
+    setTicketEdit({
+      id: t.id,
+      solicitud: t.solicitud || t.nombre,
+      solicitante: t.solicitante || t.nombre,
+      estado: t.estado || 'Pendiente',
+      responsable: t.responsable || '',
+      prioridad: t.prioridad || 'Baja',
+      grupo: t.grupo || 'Soporte Tecnico',
+      clasificacion: t.grupoExtra || t.clasificacion || '',
+      detalles: t.detalles || ''
+    });
+    setModalOpen(true);
+  };
+
+  const handleModalChange = (e) => {
+    const { id, value } = e.target;
+    const field = id.replace('m_', ''); // e.g. m_estado -> estado
+    setTicketEdit(prev => {
+      const next = { ...prev, [field]: value };
+      if (field === 'grupo') {
+        next.clasificacion = ''; // Reset when group changes
+      }
+      return next;
+    });
+  };
+
+  const renderTramites = () => {
+    let lista = [];
+    if (ticketEdit.grupo.includes('Área 1') || ticketEdit.grupo.includes('Estructural')) {
+      lista = tramitesArea1;
+    } else if (ticketEdit.grupo.includes('Área 2') || ticketEdit.grupo.includes('Operativo')) {
+      lista = tramitesArea2;
+    }
+    return lista.map(t => <option key={t} value={t}>{t}</option>);
+  };
+
+  const saveEdits = async () => {
+    setModalLoading(true);
+    try {
+      await updateTicket(ticketEdit.id, {
+        estado: ticketEdit.estado,
+        responsable: ticketEdit.responsable,
+        prioridad: ticketEdit.prioridad,
+        grupo: ticketEdit.grupo,
+        grupoExtra: ticketEdit.clasificacion,
+        clasificacion: ticketEdit.clasificacion,
+        detalles: ticketEdit.detalles
+      });
+      showToast('Ticket actualizado correctamente', 'success');
+      setModalOpen(false);
+    } catch (err) {
+      console.error(err);
+      showToast('Error al actualizar', 'error');
+    } finally {
+      setModalLoading(false);
+    }
+  };
+
   return (
-    <div className="dashboard-wrapper">
-      <div className="page-header fade-in">
-        <h1 className="page-title">Gestión de Solicitudes</h1>
-        <p className="page-subtitle">Administración de tickets activos</p>
-      </div>
-
-      <div className="filters-bar glass-panel fade-in" style={{ animationDelay: '0.1s' }}>
-        <div className="filters-grid">
-          <div className="filter-group">
-            <label>Filtrar por Estado</label>
-            <select value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value)} className="glass-input">
-              <option value="">Todos los activos</option>
-              <option value="Pendiente">Pendiente</option>
-              <option value="En progreso">En progreso</option>
-            </select>
+    <section id="section-solicitudes" className="section active">
+      <div className="section-header">
+        <h2 className="section-title">Gestión de Tickets</h2>
+        <div className="header-actions">
+          <select id="filtroEstado" className="form-select header-select" value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value)}>
+            <option value="">Todos los estados</option>
+            <option value="Pendiente">Pendiente</option>
+            <option value="En progreso">En progreso</option>
+          </select>
+          <div className="view-toggle">
+            <button className={`toggle-btn ${view === 'tabla' ? 'active' : ''}`} onClick={() => setView('tabla')}>
+              <i className="fa-solid fa-table-list"></i> Tabla
+            </button>
+            <button className={`toggle-btn ${view === 'kanban' ? 'active' : ''}`} onClick={() => setView('kanban')}>
+              <i className="fa-solid fa-columns"></i> Kanban
+            </button>
           </div>
-        </div>
-        
-        <div className="view-toggle">
-          <button className={`toggle-btn ${view === 'tabla' ? 'active' : ''}`} onClick={() => setView('tabla')}>
-            <i className="fa-solid fa-list"></i> Tabla
-          </button>
-          <button className={`toggle-btn ${view === 'kanban' ? 'active' : ''}`} onClick={() => setView('kanban')}>
-            <i className="fa-solid fa-border-all"></i> Kanban
+          <button className="btn-refresh" id="btnRefreshGestion" onClick={() => window.location.reload()}>
+            <i className="fa-solid fa-rotate-right"></i>
           </button>
         </div>
       </div>
 
-      <div className="fade-in" style={{ animationDelay: '0.2s', marginTop: '24px' }}>
-        {view === 'tabla' ? (
-          <div className="glass-panel table-panel">
-            {activos.length === 0 ? (
-              <div className="empty-state">
-                <i className="fa-solid fa-inbox"></i>
-                <p>Sin solicitudes activas</p>
-              </div>
-            ) : (
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>ID</th><th>Solicitud</th><th>Solicitante</th><th>Estado</th><th>Prioridad</th><th>Responsable</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {activos.map(t => {
-                    const prio = t.prioridad || 'Baja';
-                    const dot = prioColor[prio] || '#94a3b8';
-                    const estadoClase = (t.estado || '').includes('progreso') ? 'progreso' : 'pendiente';
-                    return (
-                      <tr key={t.id} className="ticket-row-clickable">
-                        <td><strong>{t.id}</strong></td>
-                        <td style={{ maxWidth: '350px', whiteSpace: 'normal' }}>{t.solicitud || t.nombre}</td>
-                        <td>{t.nombre || t.solicitante}</td>
-                        <td><span className={`status-badge ${estadoClase}`}>{t.estado}</span></td>
-                        <td>
-                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                            <span className="prioridad-dot" style={{ background: dot }}></span>{prio}
-                          </span>
-                        </td>
-                        <td>{t.responsable || 'Sin asignar'}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            )}
-          </div>
-        ) : (
-          <div className="kanban-board">
-            {kanbanCols.map(col => {
-              const ticketsCol = activos.filter(t => t.estado === col.key);
-              return (
-                <div key={col.key} className="kanban-col">
-                  <div className="kanban-col-header">
-                    <div className="kanban-col-dot" style={{ background: col.color }}></div>
-                    <div className="kanban-col-title">{col.label}</div>
-                    <div className="kanban-col-count">{ticketsCol.length}</div>
-                  </div>
-                  <div className="kanban-col-body">
-                    {ticketsCol.length === 0 ? (
-                      <div className="kanban-empty">Sin tickets en esta columna</div>
-                    ) : (
-                      ticketsCol.map(t => {
-                        const prio = t.prioridad || 'Baja';
-                        const dot = prioColor[prio] || '#94a3b8';
-                        return (
-                          <div key={t.id} className={`kanban-card ${prio.toLowerCase()}`}>
-                            <div className="kanban-card-id">{t.id}</div>
-                            <div className="kanban-card-title">{t.solicitud || t.nombre}</div>
-                            <div className="kanban-card-who" style={{ marginBottom: '6px', color: '#475569' }}>
-                              <i className="fa-regular fa-user" style={{ fontSize: '10px', marginRight: '4px' }}></i>
-                              {t.nombre || t.solicitante || 'Desconocido'}
-                            </div>
-                            <div className="kanban-card-footer">
-                              <span className="kanban-card-who" title="Responsable asignado">
-                                <i className="fa-solid fa-user-tie" style={{ fontSize: '10px', marginRight: '4px' }}></i>
-                                {t.responsable || 'Sin asignar'}
-                              </span>
-                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '11px' }}>
-                                <span className="prioridad-dot" style={{ background: dot }}></span>{prio}
-                              </span>
-                            </div>
-                          </div>
-                        );
-                      })
-                    )}
-                  </div>
+      {/* Vista Tabla */}
+      <div id="gestionTabla" className="table-card" style={{ display: view === 'tabla' ? 'block' : 'none' }}>
+        <div id="solicitudesTable">
+          {activos.length === 0 ? (
+            <div className="empty-state">
+              <i className="fa-solid fa-inbox"></i>
+              <p>Sin solicitudes activas</p>
+              <span>Todos los tickets han sido resueltos o no coinciden con la búsqueda</span>
+            </div>
+          ) : (
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Solicitud</th>
+                  <th>Solicitante</th>
+                  <th>Estado</th>
+                  <th>Prioridad</th>
+                  <th>Responsable</th>
+                  <th>Creado</th>
+                </tr>
+              </thead>
+              <tbody>
+                {activos.map(t => {
+                  const prio = t.prioridad || 'Baja';
+                  const dot = prioColor[prio] || '#94a3b8';
+                  const estadoClase = (t.estado || '').toLowerCase().includes('progreso') ? 'progreso' : 'pendiente';
+                  return (
+                    <tr key={t.id} className="ticket-row-clickable" data-ticket-id={t.id} onClick={() => openModal(t.id)}>
+                      <td><strong>{t.id || ''}</strong></td>
+                      <td style={{ maxWidth: '350px', whiteSpace: 'normal', overflowWrap: 'anywhere', wordBreak: 'break-word', lineHeight: '1.4' }}>
+                        {t.solicitud || t.nombre || ''}
+                      </td>
+                      <td>{t.nombre || t.solicitante || ''}</td>
+                      <td><span className={`status-badge ${estadoClase}`}>{t.estado || ''}</span></td>
+                      <td>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                          <span className="prioridad-dot" style={{ background: dot }}></span>{prio}
+                        </span>
+                      </td>
+                      <td>{t.responsable || 'Sin asignar'}</td>
+                      <td style={{ color: '#64748b', fontSize: '11px' }}>{t.fechaCreacion || ''}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </div>
+
+      {/* Vista Kanban */}
+      <div id="gestionKanban" style={{ display: view === 'kanban' ? 'block' : 'none' }}>
+        <div id="kanbanBoard" className="kanban-board">
+          {kanbanCols.map(col => {
+            const ticketsCol = activos.filter(t => t.estado === col.key);
+            return (
+              <div key={col.key} className="kanban-col">
+                <div className="kanban-col-header">
+                  <div className="kanban-col-dot" style={{ background: col.color }}></div>
+                  <div className="kanban-col-title">{col.label}</div>
+                  <div className="kanban-col-count">{ticketsCol.length}</div>
                 </div>
-              );
-            })}
-          </div>
-        )}
+                <div className="kanban-col-body">
+                  {ticketsCol.length === 0 ? (
+                    <div className="kanban-empty">Sin tickets en esta columna</div>
+                  ) : (
+                    ticketsCol.map(t => {
+                      const prio = t.prioridad || 'Baja';
+                      const dot = prioColor[prio] || '#94a3b8';
+                      return (
+                        <div key={t.id} className={`kanban-card ${prio.toLowerCase()}`} data-ticket-id={t.id} onClick={() => openModal(t.id)}>
+                          <div className="kanban-card-id">{t.id || ''}</div>
+                          <div className="kanban-card-title">{t.solicitud || t.nombre || ''}</div>
+                          <div className="kanban-card-who" style={{ marginBottom: '6px', color: '#475569' }}>
+                            <i className="fa-regular fa-user" style={{ fontSize: '10px', marginRight: '4px' }}></i>
+                            {t.nombre || t.solicitante || 'Desconocido'}
+                          </div>
+                          <div className="kanban-card-footer">
+                            <span className="kanban-card-who" title="Responsable asignado">
+                              <i className="fa-solid fa-user-tie" style={{ fontSize: '10px', marginRight: '4px' }}></i>
+                              {t.responsable || 'Sin asignar'}
+                            </span>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '11px' }}>
+                              <span className="prioridad-dot" style={{ background: dot }}></span>{prio}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
-    </div>
+
+      {/* TOAST NOTIFICATION */}
+      <div id="toast" className="toast hidden"></div>
+
+      {/* MODAL EDICIÓN TICKET */}
+      {modalOpen && (
+        <div id="modalOverlay" className="modal-overlay active">
+          <div className="modal-content">
+            <div className="modal-header">
+              <div>
+                <div className="kanban-label-small">GESTIONANDO TICKET</div>
+                <div id="modalTicketId" className="kanban-title-large">{ticketEdit.id}</div>
+              </div>
+              <button type="button" className="modal-close" onClick={() => setModalOpen(false)}>
+                <i className="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+
+            <div id="modalSolicitudDesc" className="kanban-desc-box">
+              {ticketEdit.solicitud} {ticketEdit.solicitante ? `- Solicitante: ${ticketEdit.solicitante}` : ''}
+            </div>
+
+            <div className="form-grid form-grid-2">
+              <div className="form-group">
+                <label className="form-label">Estado</label>
+                <div className="select-wrapper">
+                  <i className="fa-regular fa-clock select-icon-left red"></i>
+                  <select id="m_estado" className="form-select padded-left" value={ticketEdit.estado} onChange={handleModalChange}>
+                    <option value="Pendiente">Pendiente</option>
+                    <option value="En progreso">En progreso</option>
+                    <option value="Resuelto">Resuelto</option>
+                    <option value="Cerrado">Cerrado</option>
+                  </select>
+                  <i className="fa-solid fa-chevron-down select-arrow"></i>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Responsable</label>
+                <div className="select-wrapper">
+                  <i className="fa-solid fa-user-tie select-icon-left"></i>
+                  <select id="m_responsable" className="form-select padded-left" value={ticketEdit.responsable} onChange={handleModalChange}>
+                    <option value="">Sin asignar</option>
+                    {responsables.map(r => (
+                      <option key={r.nombre || r} value={r.nombre || r}>{r.nombre || r}</option>
+                    ))}
+                  </select>
+                  <i className="fa-solid fa-chevron-down select-arrow"></i>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Prioridad</label>
+                <div className="select-wrapper">
+                  <i className="fa-solid fa-arrow-down select-icon-left"></i>
+                  <select id="m_prioridad" className="form-select padded-left" value={ticketEdit.prioridad} onChange={handleModalChange}>
+                    <option value="Baja">Baja</option>
+                    <option value="Media">Media</option>
+                    <option value="Alta">Alta</option>
+                    <option value="Urgente">Urgente</option>
+                  </select>
+                  <i className="fa-solid fa-chevron-down select-arrow"></i>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Área de Gestión</label>
+                <div className="select-wrapper">
+                  <i className="fa-solid fa-users-gear select-icon-left"></i>
+                  <select id="m_grupo" className="form-select padded-left" value={ticketEdit.grupo} onChange={handleModalChange}>
+                    <option value="" disabled>Seleccione el Área...</option>
+                    <option value="Área 1 (Estructurales)">Área 1 (Estructurales / Legales)</option>
+                    <option value="Área 2 (Operativos)">Área 2 (Operativos / Documentales)</option>
+                  </select>
+                  <i className="fa-solid fa-chevron-down select-arrow"></i>
+                </div>
+              </div>
+
+              <div className="form-group form-group-full">
+                <label className="form-label">Tipo de Trámite</label>
+                <div className="select-wrapper">
+                  <i className="fa-solid fa-layer-group select-icon-left"></i>
+                  <select id="m_clasificacion" className="form-select padded-left" value={ticketEdit.clasificacion} onChange={handleModalChange}>
+                    <option value="" disabled>Seleccione un Trámite...</option>
+                    {renderTramites()}
+                  </select>
+                  <i className="fa-solid fa-chevron-down select-arrow"></i>
+                </div>
+              </div>
+
+              <div className="form-group form-group-full">
+                <label className="form-label">Ruta T / Anexos</label>
+                <input type="text" id="m_detalles" className="form-input form-input-full" placeholder="Ej: T:\Contabilidad\..." value={ticketEdit.detalles} onChange={handleModalChange} />
+              </div>
+            </div>
+
+            <div className="form-actions form-actions-mt">
+              <button type="button" className="btn-cancel" onClick={() => setModalOpen(false)}>Cancelar</button>
+              <button type="button" className="btn-save" onClick={saveEdits}>
+                <span className={modalLoading ? 'hidden' : ''}>Guardar Cambios</span>
+                <span className={`btn-loader ${modalLoading ? '' : 'hidden'}`}><i className="fa-solid fa-spinner fa-spin"></i></span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </section>
   );
 };

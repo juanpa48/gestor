@@ -14,3 +14,6 @@
 @import "components/forms.css";
 @import "components/buttons.css";
 @import "components/widgets.css";
+
+/* Themes */
+@import "themes/portal-theme.css";
