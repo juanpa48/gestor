@@ -34,7 +34,8 @@ window.DbService = {
         const open = acts.filter(a => a.estado === 'Pendiente').length;
         const inProg = acts.filter(a => a.estado === 'En progreso').length;
         const urgent = acts.filter(a => a.prioridad === 'Urgente').length;
-        resolve({success:true, totalOpen:open, inProgress:inProg, urgentTasks:urgent, avgResolve:'1.5h'});
+        const resolved = acts.filter(a => a.estado === 'Resuelto' || a.estado === 'Cerrado').length;
+        resolve({success:true, totalOpen:open, inProgress:inProg, urgentTasks:urgent, resolvedTickets:resolved});
       }, 300);
     });
   },
@@ -62,6 +63,7 @@ window.DbService = {
         const acts = JSON.parse(localStorage.getItem('db_actividades')) || [];
         const newId = 'TKT-' + String(acts.length + 1).padStart(3, '0');
         formObj.id = newId;
+        formObj.fechaISO = new Date().toISOString();
         formObj.fechaCreacion = new Date().toLocaleString();
         formObj.nombre = formObj.solicitante;
         formObj.area = formObj.grupo || formObj.clasificacion || 'General';

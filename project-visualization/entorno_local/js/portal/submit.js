@@ -58,6 +58,7 @@ function enviarTicket() {
 
       const nuevoTicket = {
         id:              newId,
+        fechaISO:        new Date().toISOString(),
         fechaCreacion:   new Date().toLocaleString(),
         nombre:          nombre,
         solicitante:     nombre,

@@ -47,15 +47,57 @@ Para garantizar el éxito en desarrollos complejos y EVITAR errores por límite 
 
 ## Reglas Críticas
 
+### 🚫 REGLA ABSOLUTA — CERO ESTILOS INLINE
+
+> Esta es la regla más importante del proyecto. Fue el resultado de una refactorización completa ejecutada en mayo 2026.
+> **VIOLAR ESTA REGLA ES UN ERROR GRAVE**, sin importar que sea "solo un estilo pequeño" o "más rápido hacerlo inline".
+
+**ESTÁ PROHIBIDO** escribir `style="..."` en cualquier etiqueta HTML de estos archivos:
+- `entorno_local/index.html`
+- `entorno_local/portal_avanzado.html`
+
+**ESTÁ PROHIBIDO** escribir JavaScript inline (`onclick`, `onchange`, `oninput`, etc.) en los mismos archivos.
+
+---
+
+### 🖌️ Protocolo Obligatorio para CSS
+
+Antes de agregar cualquier estilo, identifica a qué superficie pertenece el elemento:
+
+| Superficie | Archivo CSS correcto |
+|---|---|
+| Dashboard (`index.html`) — Layout/Estructura | `css/layout/sidebar.css`, `css/layout/topbar.css`, `css/layout/grids.css` |
+| Dashboard — Componentes visuales | `css/components/cards.css`, `css/components/forms.css`, `css/components/buttons.css`, `css/components/widgets.css` |
+| Portal (`portal_avanzado.html`) | `css/themes/portal-theme.css` |
+| Ambas superficies (tokens globales) | `css/base/variables.css` |
+
+**Para AGREGAR un estilo nuevo:**
+1. Identifica el archivo CSS correspondiente según la tabla anterior.
+2. Crea una clase con nombre semántico o usa un selector de ID si el elemento es único.
+3. Escribe la regla en ese archivo CSS — **nunca en el HTML**.
+4. Agrega la clase al elemento HTML o usa el selector directamente.
+
+**Para EDITAR un estilo existente:**
+1. Busca la regla en el archivo CSS (usa `grep -rn "nombre-clase" css/`).
+2. Modifica la regla en ese archivo CSS.
+3. **Nunca** sobreescribas con `style="..."` en el HTML.
+
+**Para OCULTAR/MOSTRAR un elemento:**
+- Agrega `display: none;` en el CSS del componente correspondiente (patrón: `#id-del-elemento { display: none; }`).
+- Ejemplo existente: `#grupo_mensaje { display: none; }` en `widgets.css`.
+- **Nunca** uses `style="display:none"` en el HTML.
+
+---
+
 ### Frontend (🎨)
 - NUNCA modificar el diseño Glassmorphism existente sin autorización
-- `portal_avanzado.html` tiene CSS/JS inline (DEC-002) — no intentar "limpiar" esto
+- ~~`portal_avanzado.html` tiene CSS/JS inline~~ → **DEC-002 RESUELTA**: el portal tiene 0 líneas inline desde mayo 2026. No asumir que tiene inline.
 - Mantener compatibilidad con modo oscuro en `index.html`
-- Toda clase CSS nueva debe seguir los patrones existentes en `styles.css`
+- Toda clase CSS nueva debe ir en el archivo CSS de su superficie (ver Protocolo Obligatorio arriba)
 
 ### Datos (⚙️)
 - localStorage es el backend actual (DEC-001) — no es un error
-- `tramitesArea1`/`tramitesArea2` están duplicados en `script.js` Y `portal_avanzado.html` (DEC-003) — **cambiar en AMBOS archivos**
+- `tramitesArea1`/`tramitesArea2`: fuente única en `js/tramites-data.js` (DEC-003 resuelta) — editar solo ese archivo
 - IDs de tickets: `TKT-XXX` (dashboard) vs `REQ-XXX` (portal) — intencional (DEC-005)
 - Audio usa `AudioContext`, NO `new Audio()` — política de Chrome (DEC-004)
 

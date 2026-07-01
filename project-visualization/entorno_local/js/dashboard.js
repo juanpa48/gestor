@@ -11,12 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
           animateValue('statTotalOpen', 0, data.totalOpen, 800);
           animateValue('statInProgress', 0, data.inProgress, 800);
           animateValue('statUrgentTasks', 0, data.urgentTasks, 800);
-          const avgResolveEl = document.getElementById('statAvgResolve');
-          if (avgResolveEl) avgResolveEl.textContent = data.avgResolve || '0h';
-          
-          // Actualizar badge de notificaciones
-          const badge = document.getElementById('notifBadge');
-          if (badge) badge.textContent = data.urgentTasks || 0;
+          animateValue('statAvgResolve', 0, data.resolvedTickets || 0, 800);
+          // Nota: el badge de la campana lo gestiona el centro de notificaciones (notif-center.js)
         } else {
           setDefaultStats();
         }
@@ -34,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (el) el.textContent = '00';
     });
     const avgEl = document.getElementById('statAvgResolve');
-    if (avgEl) avgEl.textContent = '0h';
+    if (avgEl) avgEl.textContent = '00';
   }
 
   // ============================================================
@@ -168,16 +164,19 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('actividadGuardada', () => {
     window.loadDashboardData();
     window.loadRecentTickets();
+    if (window.drawSparklines) window.drawSparklines();
   });
 
   document.addEventListener('ticketActualizado', () => {
     window.loadDashboardData();
     window.loadRecentTickets();
+    if (window.drawSparklines) window.drawSparklines();
   });
 
   // Escuchar tickets nuevos desde otras pestañas (portal_avanzado.html)
   document.addEventListener('nuevoTicketExterno', () => {
     window.loadDashboardData();
     window.loadRecentTickets();
+    if (window.drawSparklines) window.drawSparklines();
   });
 });

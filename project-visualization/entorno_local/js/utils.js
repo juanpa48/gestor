@@ -36,6 +36,10 @@ document.addEventListener('DOMContentLoaded', () => {
   if (searchInput) {
     searchInput.addEventListener('input', (e) => {
       const value = e.target.value;
+      
+      // Emitir evento para filtrar vistas en tiempo real
+      document.dispatchEvent(new CustomEvent('searchTriggered', { detail: { query: value } }));
+
       clearTimeout(searchTimeout);
       removeSearchResults();
       if (value.trim().length < 2) return;

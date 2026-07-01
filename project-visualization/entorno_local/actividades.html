@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IT Command - Actividades</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/main.css">
+</head>
+
+<body data-page="recents">
+
+  <!-- SIDEBAR (inyectado por layout.js) -->
+  <div id="appSidebar"></div>
+
+  <!-- ============================================================ -->
+  <!-- MAIN CONTENT -->
+  <!-- ============================================================ -->
+  <main class="main-content">
+
+    <!-- TOP BAR (inyectado por layout.js) -->
+    <div id="appTopbar"></div>
+
+    <!-- ============================================================ -->
+    <!-- ACTIVIDADES SECTION -->
+    <!-- ============================================================ -->
+    <section id="section-recents" class="section active">
+      <div class="section-header">
+        <h2 class="section-title">Actividades</h2>
+        <button class="btn-refresh" id="btnRefreshActivityTable">
+          <i class="fa-solid fa-rotate-right"></i> Actualizar
+        </button>
+      </div>
+
+      <!-- FILTROS DE ANÁLISIS -->
+      <div class="filters-container">
+        <div class="filter-group">
+          <label class="filter-label"><i class="fa-solid fa-filter"></i> Filtros:</label>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Estado</label>
+          <select id="filtroEstadoAct" class="filter-select filter-actividades">
+            <option value="">Todos</option>
+            <option value="Pendiente">Pendiente</option>
+            <option value="En progreso">En progreso</option>
+            <option value="Resuelto">Resuelto</option>
+            <option value="Cerrado">Cerrado</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Prioridad</label>
+          <select id="filtroPrioridadAct" class="filter-select filter-actividades">
+            <option value="">Todas</option>
+            <option value="Urgente">Urgente</option>
+            <option value="Alta">Alta</option>
+            <option value="Media">Media</option>
+            <option value="Baja">Baja</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Responsable</label>
+          <select id="filtroResponsableAct" class="filter-select filter-actividades">
+            <option value="">Todos</option>
+          </select>
+        </div>
+        <!-- FILTRO GRUPO: comentado — no aplica a este proyecto, descomentar para reutilizar
+        <div class="filter-group">
+          <label class="filter-label">Grupo</label>
+          <select id="filtroGrupoAct" class="filter-select filter-actividades">
+            <option value="">Todos</option>
+            <option value="Soporte Técnico">Soporte Técnico</option>
+            <option value="Infraestructura">Infraestructura</option>
+            <option value="Redes">Redes</option>
+            <option value="Seguridad">Seguridad</option>
+          </select>
+        </div>
+        -->
+        <div class="filter-group">
+          <label class="filter-label">Período</label>
+          <select id="filtroPeriodoAct" class="filter-select filter-actividades">
+            <option value="">Todo</option>
+            <option value="hoy">Hoy</option>
+            <option value="semana">Esta semana</option>
+            <option value="mes">Este mes</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <button class="btn-clear-filters" id="btnLimpiarFiltros">
+            <i class="fa-solid fa-xmark"></i> Limpiar
+          </button>
+        </div>
+      </div>
+
+      <!-- ESTADÍSTICAS RÁPIDAS -->
+      <div class="quick-stats">
+        <div class="quick-stat-card">
+          <div class="qs-value" id="qsTotal">0</div>
+          <div class="qs-label">Total</div>
+        </div>
+        <div class="quick-stat-card pendiente">
+          <div class="qs-value" id="qsPendientes">0</div>
+          <div class="qs-label">Pendientes</div>
+        </div>
+        <div class="quick-stat-card progreso">
+          <div class="qs-value" id="qsProgreso">0</div>
+          <div class="qs-label">En Progreso</div>
+        </div>
+        <div class="quick-stat-card resueltos">
+          <div class="qs-value" id="qsResueltos">0</div>
+          <div class="qs-label">Resueltos</div>
+        </div>
+        <div class="quick-stat-card urgentes">
+          <div class="qs-value" id="qsUrgentes">0</div>
+          <div class="qs-label">Urgentes</div>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div id="activityTable">
+          <div class="loading-state">
+            <i class="fa-solid fa-spinner fa-spin"></i> Cargando actividades...
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="toast hidden"></div>
+
+  </main>
+
+  <!-- Scripts Modulares -->
+  <script src="js/utils.js"></script>
+  <script src="js/db-service.js"></script>
+  <script src="js/tramites-data.js"></script>
+  <script src="js/data-manager.js"></script>
+  <script src="js/activity-table.js"></script>
+  <script src="js/notifications.js"></script>
+  <!-- Chrome compartido: debe ir antes de notif-center.js (usa #notifBtn) -->
+  <script src="js/layout.js"></script>
+  <script src="js/notif-center.js"></script>
+  <!-- Init específico de esta página -->
+  <script src="js/init-actividades.js"></script>
+</body>
+
+</html>

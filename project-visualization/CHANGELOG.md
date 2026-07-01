@@ -16,6 +16,81 @@
 
 ---
 
+## Junio 2026
+
+### [2026-06-29] — Gráficas funcionales en el Dashboard con Chart.js
+
+- **Archivos:** `entorno_local/index.html`, `entorno_local/js/sparklines.js`, `entorno_local/js/dashboard.js`
+- **Cambio:**
+  - Importación de la librería **Chart.js v4** (vía CDN) en `index.html`.
+  - Reescritura total de `sparklines.js`: Se eliminaron los canvas dibujados manualmente con datos estáticos y en su lugar se instanciaron 4 gráficas de Chart.js consumiendo tickets reales vía `DbService.getActividades()`.
+  - Las nuevas gráficas son: Pastel/Pie (Total Abiertos por prioridad con leyenda), Barras Horizontales (En Progreso por estado, sin contar cerrados), Barras Verticales (Volumen por área, sin "Otro") y Dona (Tareas Urgentes pendientes vs resueltas).
+  - El card estático "Prom. Resolución (1.5h)" fue rediseñado y programado dinámicamente como **"TOTAL RESUELTOS"** mostrando la suma total de tickets cerrados/resueltos. Se modificó el evento de animación en `dashboard.js` y la lectura en `db-service.js`.
+  - Los gráficos tienen `height: 100px` vía `cards.css` para optimizar visibilidad.
+  - Actualización reactiva en tiempo real gracias a la adición de `drawSparklines()` dentro de los event listeners en `dashboard.js`.
+- **Razón:** Proveer observabilidad real de los datos en localStorage mediante vistas interactivas (dashboards) en lugar de gráficos figurativos que no aportaban valor analítico al usuario.
+
+### [2026-06-29] — Refactor: separación del dashboard en páginas independientes (multi-página)
+
+- **Archivos:** `entorno_local/index.html`, `entorno_local/actividades.html` (NUEVO), `entorno_local/gestion.html` (NUEVO), `entorno_local/js/layout.js` (NUEVO), `entorno_local/js/init-actividades.js` (NUEVO), `entorno_local/js/init-gestion.js` (NUEVO), `entorno_local/js/navigation.js` (ELIMINADO), `entorno_local/js/tickets.js`, `entorno_local/js/activity-table.js`, `entorno_local/js/dashboard.js`
+- **Cambio:** El dashboard dejó de ser una SPA de una sola página con secciones que se mostraban/ocultaban. Ahora cada módulo es una página real (ver **DEC-008**):
+  - `index.html` → **Panel Principal** (formulario, widgets, modal Registro Rápido).
+  - `actividades.html` → **Actividades** (filtros, quick-stats, tabla).
+  - `gestion.html` → **Gestión** (toggle Tabla/Kanban, modal de edición).
+  - **Chrome compartido:** nuevo `js/layout.js` inyecta sidebar + topbar (con el centro de notificaciones) en las 3 páginas. El ítem activo se marca según `<body data-page="...">`. Navegación por enlaces `<a href>` reales.
+  - **Init por página:** `init-actividades.js` y `init-gestion.js` arrancan solo la lógica de su página (evitan el `app.js` acoplado al dashboard). `init-gestion.js` replica el toggle Tabla/Kanban y `window.loadGestion` que vivían en `navigation.js`.
+  - **Limpieza:** `navigation.js` eliminado (motor de la SPA). Removidos listeners `sectionChanged` muertos y la auto-navegación SPA en `tickets.js` y `activity-table.js`; quitados `console.log` de depuración.
+- **Razón:** Código más legible y mantenible, menor carga por página y app más modular. El `index.html` pasó de ~753 a ~390 líneas.
+
+### [2026-06-29] — Centro de notificaciones funcional (campana de la topbar)
+
+- **Archivos:** `entorno_local/index.html`, `entorno_local/js/notif-center.js` (NUEVO), `entorno_local/js/dashboard.js`, `entorno_local/css/layout/topbar.css`
+- **Cambio:**
+  - El icono de campana (`#notifBtn`) ahora es funcional: muestra un badge con el conteo de notificaciones **sin leer** y abre un panel desplegable con el detalle.
+  - Nuevo módulo `js/notif-center.js` que escucha los eventos existentes de la app (arquitectura por eventos):
+    - `actividadGuardada` → ticket creado en el dashboard (consulta el último vía `DbService.getActividades`).
+    - `nuevoTicketExterno` → solicitud enviada desde el portal en otra pestaña.
+  - Notificaciones persistidas en `localStorage` (`db_notificaciones`, máx. 30). Al abrir el panel se marcan como leídas; botón "Limpiar" para borrarlas. Cierre con clic afuera o tecla Escape.
+  - En `dashboard.js` se eliminó la línea que pisaba `#notifBadge` con `urgentTasks` (el badge ahora lo gestiona el centro de notificaciones).
+  - Estilos del panel en `topbar.css` siguiendo el glassmorphism del tema (sin estilos ni JS inline).
+
+### [2026-06-29] — Eliminación de secciones Reportes y Acerca de (Dashboard)
+
+- **Archivos:** `entorno_local/index.html`
+- **Cambio:**
+  - Eliminados los enlaces del menú lateral `data-section="reports"` y `data-section="about"`.
+  - Eliminadas las secciones de contenido `#section-reports` y `#section-about`.
+  - El menú queda con: Panel Principal, Actividades y Gestión.
+- **Razón:** Ambas secciones eran solo placeholders vacíos (marcadores 🔴 sin contenido real) y no cumplían ninguna función. Se optó por eliminarlas en lugar de ocultarlas para no acumular código muerto.
+
+### [2026-06-29] — Buscador visible solo en Actividades y Gestión
+
+- **Archivos:** `entorno_local/js/navigation.js`, `entorno_local/css/layout/topbar.css`
+- **Cambio:**
+  - En `navigation.js` se expone la sección activa en `document.body.dataset.section` (al cambiar de sección y en el estado inicial), sin JS inline.
+  - En `topbar.css` se oculta `.search-wrapper` por defecto y solo se muestra en `body[data-section="recents"]` y `body[data-section="solicitudes"]`.
+- **Razón:** El buscador solo filtra contenido en Actividades y Gestión; en el Panel Principal (y otras vistas) no tenía función. La solución sigue la arquitectura por eventos del proyecto y mantiene el HTML del input intacto.
+
+### [2026-06-23] — Refuerzo de Reglas en agent.md (Protocolo CSS Obligatorio)
+
+- **Archivos:** `agent.md`
+- **Cambio:**
+  - Agregada **REGLA ABSOLUTA** de cero `style="..."` inline y cero JS inline en `index.html` y `portal_avanzado.html`.
+  - Agregado **Protocolo Obligatorio para CSS**: tabla de a qué archivo CSS pertenece cada tipo de estilo, e instrucciones explícitas para AGREGAR, EDITAR y OCULTAR estilos.
+  - Corregida la referencia obsoleta a DEC-002 (decía que el portal tenía CSS/JS inline — eso fue resuelto en mayo 2026).
+  - Corregida la referencia obsoleta a DEC-003 (ya no hay arrays duplicados — la fuente única es `tramites-data.js`).
+- **Razón:** Una IA agregó `style="..."` inline al hacer cambios de logo, violando el principio de 0 estilos inline. La regla existía implícitamente pero no estaba documentada de forma que no pudiera ignorarse. Se documentó explícitamente y se elevó al primer lugar de las Reglas Críticas.
+
+### [2026-06-23] — Ocultamiento del Panel "Control Estado Sistemas" en el Dashboard
+
+- **Archivos:** `entorno_local/index.html`, `entorno_local/css/components/widgets.css`
+- **Cambio:**
+  - Agregado `id="panelControlSistemas"` a la `div.panel-card` del bloque "CONTROL ESTADO SISTEMAS" en `index.html`.
+  - Agregada regla `#panelControlSistemas { display: none; }` en `widgets.css` (sección "Control Alertas Sistemas").
+- **Razón:** Ocultar el widget de control de sistemas del panel derecho del dashboard. La decisión sigue el patrón arquitectónico existente (igual que `#grupo_mensaje`): el ocultamiento es vía CSS puro, sin tocar el JS. Para reactivarlo basta con eliminar o comentar la regla CSS.
+
+---
+
 ## Mayo 2026
 
 ### [2026-05-23] — Nueva Documentación Técnica Profesional ✅
@@ -25,6 +100,7 @@
   - **Arquitectura Detallada:** Generación de `ARCHITECTURE.md` con diagramas Mermaid de flujo de datos, secuencia y mapas de módulos validados contra el código fuente real.
   - **Especificaciones Técnicas:** Creación de `TECHNICAL_SPECS.md` detallando patrones (PubSub, Service Layer), modelo de datos de 16 campos y una auditoría de **8 Riesgos Técnicos** críticos (IDs frágiles, fechas locale-dependientres, etc.).
   - **Auditoría de Código Muerto:** Identificación y documentación de nodos DOM inexistentes en `dashboard.js`.
+  - **Unificación Maestra:** Fusión de las especificaciones propias con las de referencia para crear una "Versión Maestra" superior que combina rigor técnico con visión sistémica.
 - **Razón:** Proveer un manual de ingeniería estricto, neutral y granular que facilite el onboarding de humanos e IAs, eliminando el tono corporativo innecesario y enfocándose en la realidad operativa del sistema.
 
 ### [2026-05-23] — Limpieza y Refactorización del Dashboard (0 Estilos Inline) ✅

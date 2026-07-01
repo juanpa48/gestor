@@ -23,6 +23,14 @@ Lee `docs/DEPENDENCIES.md` → Mapa de cómo se conectan los archivos entre sí 
 
 Lee `docs/DECISIONS.md` → Decisiones de diseño que parecen raras pero son a propósito.
 
+## Paso 6: Mapa de Arquitectura
+
+Lee `docs/ARCHITECTURE.md` → Diagramas y visión sistémica real validada.
+
+## Paso 7: Manual de Ingeniería
+
+Lee `docs/TECHNICAL_SPECS.md` → Patrones, riesgos, modelo de datos y reglas operativas.
+
 ---
 
 ## Orden de lectura rápido
@@ -34,15 +42,20 @@ Lee `docs/DECISIONS.md` → Decisiones de diseño que parecen raras pero son a p
 | 3   | `CHANGELOG.md`         | Cambios recientes            |
 | 4   | `docs/DEPENDENCIES.md` | Conexiones entre archivos    |
 | 5   | `docs/DECISIONS.md`    | Decisiones intencionales     |
+| 6   | `docs/ARCHITECTURE.md` | Mapa de Arquitectura real    |
+| 7   | `docs/TECHNICAL_SPECS.md`| Manual de Ingeniería / Riesgos|
 
 ---
 
-## Estado actual del proyecto (Mayo 2026)
+## Estado actual del proyecto (Junio 2026)
 
 - ✅ Modularización de script.js: **COMPLETADA** (Archivo único eliminado).
 - ✅ Refactorización HTML (Cleanup): **COMPLETADA** (Eventos inline eliminados de index.html).
 - ✅ Dashboard funcional con arquitectura de Eventos y DbService (Promesas).
 - ✅ Migración total de módulos JS al sistema de eventos: **COMPLETADA** (tickets.js, activity-table.js, dashboard.js 100% desacoplados).
+- ✅ Centro de notificaciones funcional (campana de la topbar): **COMPLETADA** (`notif-center.js`).
+- ✅ Arquitectura multi-página (DEC-008): **COMPLETADA** — el dashboard SPA se separó en 3 páginas reales (`index.html` Panel Principal, `actividades.html`, `gestion.html`) con chrome compartido inyectado por `js/layout.js`. `navigation.js` eliminado.
+- ✅ Gráficas funcionales en Dashboard: **COMPLETADA** (Chart.js dinámico leyendo tickets reales de DbService).
 - 🔲 Migración a backend real (Node.js/Express + PostgreSQL).
 - ✅ Modularización CSS y Extracción de estilos (Dashboard y Portal): **COMPLETADA**
 - ✅ Modularizar JS de portal_avanzado.html: **COMPLETADA** (0 líneas inline — 4 módulos: form-ui.js, submit.js, stats.js + tramites-data.js compartido)

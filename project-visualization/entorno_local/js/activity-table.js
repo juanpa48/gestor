@@ -12,7 +12,8 @@ document.addEventListener('DOMContentLoaded', function() {
   const filtroEstado = document.getElementById('filtroEstadoAct');
   const filtroPrioridad = document.getElementById('filtroPrioridadAct');
   const filtroResponsable = document.getElementById('filtroResponsableAct');
-  const filtroGrupo = document.getElementById('filtroGrupoAct');
+  // GRUPO: comentado — no aplica a este proyecto, descomentar para reutilizar
+  // const filtroGrupo = document.getElementById('filtroGrupoAct');
   const filtroPeriodo = document.getElementById('filtroPeriodoAct');
   const btnLimpiar = document.getElementById('btnLimpiarFiltros');
   const btnActualizar = document.getElementById('btnRefreshActivityTable');
@@ -20,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
   if (filtroEstado) filtroEstado.addEventListener('change', filtrarActividades);
   if (filtroPrioridad) filtroPrioridad.addEventListener('change', filtrarActividades);
   if (filtroResponsable) filtroResponsable.addEventListener('change', filtrarActividades);
-  if (filtroGrupo) filtroGrupo.addEventListener('change', filtrarActividades);
+  // if (filtroGrupo) filtroGrupo.addEventListener('change', filtrarActividades); // GRUPO comentado
   if (filtroPeriodo) filtroPeriodo.addEventListener('change', filtrarActividades);
   if (btnLimpiar) btnLimpiar.addEventListener('click', limpiarFiltrosActividades);
   if (btnActualizar) btnActualizar.addEventListener('click', loadActivityTable);
@@ -39,46 +40,72 @@ document.addEventListener('DOMContentLoaded', function() {
     loadActivityTable();
   });
 
-  // Cargar tabla cuando se navega a la seccion Actividades
-  document.addEventListener('sectionChanged', function(e) {
-    console.log("[v0] sectionChanged recibido:", e.detail);
-    if (e.detail && e.detail.section === 'recents') {
-      console.log("[v0] Seccion es recents, llamando loadActivityTable");
-      loadActivityTable();
-    }
+  // Escuchar evento de búsqueda en tiempo real
+  document.addEventListener('searchTriggered', function() {
+    filtrarActividades();
   });
 
   // --- Funciones ---
 
-  function loadActivityTable() {
-    console.log("[v0] loadActivityTable llamada");
-    const container = document.getElementById('activityTable');
-    if (!container) {
-      console.log("[v0] activityTable container NO encontrado");
-      return;
+  /**
+   * Parsea la fecha de un ticket de forma robusta.
+   * Prioriza fechaISO (tickets nuevos), luego intenta new Date(),
+   * y como fallback parsea el formato locale DD/MM/YYYY, HH:mm:ss.
+   * @param {Object} ticket — objeto de actividad
+   * @returns {Date|null} — Date válido o null si no se pudo parsear
+   */
+  function parseFechaCreacion(ticket) {
+    // 1. Campo ISO (tickets nuevos)
+    if (ticket.fechaISO) {
+      var d = new Date(ticket.fechaISO);
+      if (!isNaN(d.getTime())) return d;
     }
-    console.log("[v0] activityTable container encontrado");
+
+    var raw = ticket.fechaCreacion || '';
+    if (!raw) return null;
+
+    // 2. Intento directo (funciona con formatos que JS entiende)
+    var d2 = new Date(raw);
+    if (!isNaN(d2.getTime())) return d2;
+
+    // 3. Fallback: parsear formato locale español DD/MM/YYYY, HH:mm:ss
+    var match = raw.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if (match) {
+      var day = parseInt(match[1], 10);
+      var month = parseInt(match[2], 10) - 1; // 0-indexed
+      var year = parseInt(match[3], 10);
+
+      // Extraer hora si existe
+      var timeMatch = raw.match(/(\d{1,2}):(\d{2}):?(\d{2})?/);
+      var hours = 0, minutes = 0, seconds = 0;
+      if (timeMatch) {
+        hours = parseInt(timeMatch[1], 10);
+        minutes = parseInt(timeMatch[2], 10);
+        seconds = timeMatch[3] ? parseInt(timeMatch[3], 10) : 0;
+
+        // Detectar AM/PM si existe
+        if (/p\.?\s*m\.?/i.test(raw) && hours < 12) hours += 12;
+        if (/a\.?\s*m\.?/i.test(raw) && hours === 12) hours = 0;
+      }
+
+      var d3 = new Date(year, month, day, hours, minutes, seconds);
+      if (!isNaN(d3.getTime())) return d3;
+    }
+
+    return null;
+  }
+
+
+  function loadActivityTable() {
+    const container = document.getElementById('activityTable');
+    if (!container) return;
     container.innerHTML = '<div class="loading-state"><i class="fa-solid fa-spinner fa-spin"></i> Cargando...</div>';
 
     // Cargar responsables en el filtro dinámicamente
     cargarFiltroResponsables();
 
-    console.log("[v0] Llamando DbService.getActividades()");
-    window.DbService.getActividades()
-      .then(function(data) {
-        console.log("[v0] DbService.getActividades() respondio:", data);
-        if (data && data.length > 0) {
-          renderActivityTable(data);
-          actualizarEstadisticasRapidas(data);
-        } else {
-          container.innerHTML = '<div class="empty-state"><i class="fa-solid fa-inbox"></i><p>Sin actividades registradas</p></div>';
-          actualizarEstadisticasRapidas([]);
-        }
-      })
-      .catch(function(err) {
-        console.log("[v0] DbService.getActividades() ERROR:", err);
-        container.innerHTML = '<div class="empty-state"><i class="fa-solid fa-triangle-exclamation"></i><p>Error al cargar datos</p></div>';
-      });
+    // Cargar y filtrar actividades respetando los filtros y búsqueda
+    filtrarActividades();
   }
 
   function cargarFiltroResponsables() {
@@ -103,37 +130,57 @@ document.addEventListener('DOMContentLoaded', function() {
     const filtroEstadoVal = (document.getElementById('filtroEstadoAct') || {}).value || '';
     const filtroPrioridadVal = (document.getElementById('filtroPrioridadAct') || {}).value || '';
     const filtroResponsableVal = (document.getElementById('filtroResponsableAct') || {}).value || '';
-    const filtroGrupoVal = (document.getElementById('filtroGrupoAct') || {}).value || '';
+    // const filtroGrupoVal = (document.getElementById('filtroGrupoAct') || {}).value || ''; // GRUPO comentado
     const filtroPeriodoVal = (document.getElementById('filtroPeriodoAct') || {}).value || '';
+
+    // Obtener valor de la barra de búsqueda
+    const searchInput = document.getElementById('searchInput');
+    const searchVal = searchInput ? searchInput.value.trim().toLowerCase() : '';
 
     window.DbService.getActividades()
       .then(function(acts) {
+        if (acts.length === 0) {
+          container.innerHTML = '<div class="empty-state"><i class="fa-solid fa-inbox"></i><p>Sin actividades registradas</p></div>';
+          actualizarEstadisticasRapidas([]);
+          return;
+        }
+
         // Filtrar
         let filtrados = acts.filter(function(a) {
           if (filtroEstadoVal && a.estado !== filtroEstadoVal) return false;
           if (filtroPrioridadVal && a.prioridad !== filtroPrioridadVal) return false;
           if (filtroResponsableVal && a.responsable !== filtroResponsableVal) return false;
-          if (filtroGrupoVal && a.grupo !== filtroGrupoVal) return false;
+          // if (filtroGrupoVal && a.grupo !== filtroGrupoVal) return false; // GRUPO comentado
 
           // Filtro de período
           if (filtroPeriodoVal) {
-            const fecha = new Date(a.fechaCreacion || '');
-            const hoy = new Date();
+            var fecha = parseFechaCreacion(a);
+            if (!fecha) return false; // fecha inválida: excluir
+            var hoy = new Date();
             hoy.setHours(0, 0, 0, 0);
 
             if (filtroPeriodoVal === 'hoy') {
-              const fechaAct = new Date(fecha);
+              var fechaAct = new Date(fecha.getTime());
               fechaAct.setHours(0, 0, 0, 0);
               if (fechaAct.getTime() !== hoy.getTime()) return false;
             } else if (filtroPeriodoVal === 'semana') {
-              const semanaAtras = new Date(hoy);
+              var semanaAtras = new Date(hoy);
               semanaAtras.setDate(semanaAtras.getDate() - 7);
               if (fecha < semanaAtras) return false;
             } else if (filtroPeriodoVal === 'mes') {
-              const mesAtras = new Date(hoy);
+              var mesAtras = new Date(hoy);
               mesAtras.setMonth(mesAtras.getMonth() - 1);
               if (fecha < mesAtras) return false;
             }
+          }
+
+          // Filtro de búsqueda (ID, solicitud, solicitante/nombre, responsable)
+          if (searchVal) {
+            const matchesId = (a.id || '').toLowerCase().includes(searchVal);
+            const matchesSolicitud = (a.solicitud || '').toLowerCase().includes(searchVal);
+            const matchesNombre = (a.nombre || a.solicitante || '').toLowerCase().includes(searchVal);
+            const matchesResponsable = (a.responsable || '').toLowerCase().includes(searchVal);
+            if (!matchesId && !matchesSolicitud && !matchesNombre && !matchesResponsable) return false;
           }
 
           return true;
@@ -143,7 +190,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (filtrados.length > 0) {
           renderActivityTable(filtrados);
         } else {
-          container.innerHTML = '<div class="empty-state"><i class="fa-solid fa-filter"></i><p>Sin resultados para los filtros aplicados</p></div>';
+          container.innerHTML = '<div class="empty-state"><i class="fa-solid fa-filter"></i><p>Sin resultados para los filtros aplicados o búsqueda</p></div>';
         }
 
         actualizarEstadisticasRapidas(filtrados);
@@ -154,13 +201,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const filtroEstadoEl = document.getElementById('filtroEstadoAct');
     const filtroPrioridadEl = document.getElementById('filtroPrioridadAct');
     const filtroResponsableEl = document.getElementById('filtroResponsableAct');
-    const filtroGrupoEl = document.getElementById('filtroGrupoAct');
+    // const filtroGrupoEl = document.getElementById('filtroGrupoAct'); // GRUPO comentado
     const filtroPeriodoEl = document.getElementById('filtroPeriodoAct');
 
     if (filtroEstadoEl) filtroEstadoEl.value = '';
     if (filtroPrioridadEl) filtroPrioridadEl.value = '';
     if (filtroResponsableEl) filtroResponsableEl.value = '';
-    if (filtroGrupoEl) filtroGrupoEl.value = '';
+    // if (filtroGrupoEl) filtroGrupoEl.value = ''; // GRUPO comentado
     if (filtroPeriodoEl) filtroPeriodoEl.value = '';
 
     loadActivityTable();

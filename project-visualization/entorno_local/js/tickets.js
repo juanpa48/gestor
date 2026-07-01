@@ -87,15 +87,27 @@ document.addEventListener('DOMContentLoaded', function() {
     container.innerHTML = '<div class="loading-state"><i class="fa-solid fa-spinner fa-spin"></i> Cargando...</div>';
 
     const filtro = (document.getElementById('filtroEstado') || {}).value || '';
+    const searchInput = document.getElementById('searchInput');
+    const searchVal = searchInput ? searchInput.value.trim().toLowerCase() : '';
 
     window.DbService.getActividades()
       .then(function(acts) {
         const activos = acts.filter(function(a) {
-          return !ESTADOS_INACTIVOS.includes(a.estado) && (!filtro || a.estado === filtro);
+          const matchesEstado = !ESTADOS_INACTIVOS.includes(a.estado) && (!filtro || a.estado === filtro);
+          if (!matchesEstado) return false;
+
+          if (searchVal) {
+            const matchesId = (a.id || '').toLowerCase().includes(searchVal);
+            const matchesSolicitud = (a.solicitud || '').toLowerCase().includes(searchVal);
+            const matchesNombre = (a.nombre || a.solicitante || '').toLowerCase().includes(searchVal);
+            const matchesResponsable = (a.responsable || '').toLowerCase().includes(searchVal);
+            if (!matchesId && !matchesSolicitud && !matchesNombre && !matchesResponsable) return false;
+          }
+          return true;
         });
 
         if (activos.length === 0) {
-          container.innerHTML = '<div class="empty-state"><i class="fa-solid fa-inbox"></i><p>Sin solicitudes activas</p><span>Todos los tickets han sido resueltos</span></div>';
+          container.innerHTML = '<div class="empty-state"><i class="fa-solid fa-inbox"></i><p>Sin solicitudes activas</p><span>Todos los tickets han sido resueltos o no coinciden con la búsqueda</span></div>';
           return;
         }
 
@@ -134,10 +146,23 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!board) return;
     board.innerHTML = '';
 
+    const searchInput = document.getElementById('searchInput');
+    const searchVal = searchInput ? searchInput.value.trim().toLowerCase() : '';
+
     window.DbService.getActividades()
       .then(function(acts) {
         const activos = acts.filter(function(a) {
-          return !ESTADOS_INACTIVOS.includes(a.estado);
+          const matchesEstado = !ESTADOS_INACTIVOS.includes(a.estado);
+          if (!matchesEstado) return false;
+
+          if (searchVal) {
+            const matchesId = (a.id || '').toLowerCase().includes(searchVal);
+            const matchesSolicitud = (a.solicitud || '').toLowerCase().includes(searchVal);
+            const matchesNombre = (a.nombre || a.solicitante || '').toLowerCase().includes(searchVal);
+            const matchesResponsable = (a.responsable || '').toLowerCase().includes(searchVal);
+            if (!matchesId && !matchesSolicitud && !matchesNombre && !matchesResponsable) return false;
+          }
+          return true;
         });
 
         const prioColor = { Urgente: '#ef4444', Alta: '#f59e0b', Media: '#3b82f6', Baja: '#22c55e' };
@@ -361,13 +386,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (typeof window.loadGestion === 'function') window.loadGestion();
   });
 
-  // Cargar gestion cuando se navega a la seccion Gestion
-  document.addEventListener('sectionChanged', function(e) {
-    if (e.detail && e.detail.section === 'solicitudes') {
-      if (typeof window.loadGestion === 'function') window.loadGestion();
-    }
-  });
-
   // Funcion para actualizar tramites en el modal segun el grupo seleccionado
   function actualizarTramitesModal() {
     const grupo = document.getElementById('m_grupo').value;
@@ -382,6 +400,18 @@ document.addEventListener('DOMContentLoaded', function() {
       lista.map(function(t) { return '<option value="' + t + '">' + t + '</option>'; }).join('');
   }
 
+  // Escuchar evento de búsqueda en tiempo real
+  document.addEventListener('searchTriggered', function() {
+    if (typeof window.loadGestion === 'function') window.loadGestion();
+  });
 
+  // Escuchar cuando se selecciona un ticket desde la búsqueda autocomplete.
+  // tickets.js solo se carga en gestion.html, así que ya estamos en la página
+  // correcta: basta con abrir el modal de edición del ticket seleccionado.
+  document.addEventListener('ticketSeleccionado', function(e) {
+    if (e.detail && e.detail.id) {
+      abrirModalEdicion(e.detail.id);
+    }
+  });
 
 });

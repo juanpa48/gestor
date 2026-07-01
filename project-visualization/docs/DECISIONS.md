@@ -20,6 +20,26 @@
 
 ---
 
+## DEC-008: Arquitectura multi-página (separar el dashboard SPA en páginas)
+- **Estado:** ✅ Vigente
+- **Fecha:** Junio 2026
+- **Contexto:** `index.html` era una SPA: un solo archivo con las secciones Panel Principal, Actividades y Gestión que se mostraban/ocultaban con `navigation.js` (`showSection`). El archivo había crecido a ~753 líneas y cargaba TODOS los módulos JS aunque la mayoría no se usaran en cada vista, dificultando la lectura y el mantenimiento.
+- **Decisión:** Separar cada módulo en su propia página HTML real:
+  - `index.html` → Panel Principal (formulario, widgets, modal Registro Rápido).
+  - `actividades.html` → Actividades (filtros, quick-stats, tabla).
+  - `gestion.html` → Gestión (toggle Tabla/Kanban, modal de edición).
+  - **Chrome compartido vía JS:** `js/layout.js` inyecta el sidebar y la topbar (con el centro de notificaciones) en las 3 páginas, evitando duplicar ese HTML. El ítem de menú activo se determina por `<body data-page="dashboard|actividades|gestion">`. La navegación es por enlaces `<a href>` reales.
+  - **Init por página:** cada página carga solo los scripts que necesita + un init propio (`init-actividades.js`, `init-gestion.js`). `index.html` mantiene `app.js`.
+- **Consecuencias:**
+  - ✅ Código más legible y modular; `index.html` pasó de ~753 a ~390 líneas.
+  - ✅ Cada página carga solo su JS necesario (menor carga).
+  - ✅ Si se cambia el menú/topbar, se edita un solo archivo (`layout.js`).
+  - ❌ El chrome depende de que `layout.js` cargue (aceptable: la app ya es 100% JS).
+  - ❌ Navegar entre módulos recarga la página (no hay transición SPA), pero el estado vive en `localStorage`, así que no se pierde nada.
+- **Regla:** Para agregar una página nueva, incluir los placeholders `<div id="appSidebar"></div>` y `<div id="appTopbar"></div>`, marcar `<body data-page="...">`, cargar `layout.js` y un init propio. Para cambiar el menú, editar `js/layout.js`.
+
+---
+
 ## DEC-002: CSS y JS inline en portal_avanzado.html
 - **Estado:** ✅ RESUELTA (Mayo 2026)
 - **Fecha:** Marzo 2026 (original) / Mayo 2026 (resolución)

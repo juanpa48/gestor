@@ -1,7 +1,7 @@
 # 🔗 Mapa de Dependencias — Gestión Empresarial
 
 > **REGLA:** Antes de modificar cualquier archivo, consulta este mapa para saber qué otros archivos se verán afectados.
-> Última actualización: 2026-05-15
+> Última actualización: 2026-06-29
 
 ---
 
@@ -57,19 +57,29 @@ portal_avanzado.html           index.html (Dashboard)
 
 ---
 
-### 📄 index.html (DASHBOARD ADMINISTRATIVO — para gestoras TI)
-- **Propósito:** Panel de control para ver, gestionar y editar tickets
-- **CSS:** Usa `styles.css` (enlace externo)
-- **JS:** **100% Desacoplado.** Carga 11 módulos JS (`entorno_local/js/*.js`). No contiene eventos inline (`onclick`, etc).
-- **Secciones:** Dashboard, Actividades (tabla + filtros), Gestión (tabla + kanban), Reportes, Acerca de
-- **Modales:** Modal edición de ticket, Modal registro rápido
-- **Widgets:** Mi Estado (personal), Control Estado Sistemas
-- **IDs críticos del DOM:**
-  - Estadísticas: `statTotalOpen`, `statInProgress`, `statAvgResolve`, `statUrgentTasks`
-  - Formulario: `solicitante`, `responsable`, `solicitud`, `estado`, `prioridad`, `grupo`, `clasificacion`
-  - Filtros: `filtroEstadoAct`, `filtroPrioridadAct`, `filtroResponsableAct`, `filtroGrupoAct`, `filtroPeriodoAct`
-  - Canvas: `sparkline1` a `sparkline4`
-  - Modal: `modalOverlay`, `m_estado`, `m_responsable`, `m_prioridad`, `m_grupo`, `m_clasificacion`
+### 📄 DASHBOARD ADMINISTRATIVO (multi-página — para gestoras TI)
+
+> **DEC-008 (Junio 2026):** El dashboard dejó de ser una SPA de un solo `index.html` con secciones ocultas. Ahora son **3 páginas HTML independientes** que comparten el chrome (sidebar + topbar) inyectado por `js/layout.js`. La navegación es por enlaces `<a href>` reales. El ítem de menú activo se determina por `<body data-page="...">`.
+
+#### 📄 index.html → Panel Principal
+- **Propósito:** Formulario de "Registrar Actividad", widgets y registro rápido.
+- **`<body data-page="dashboard">`**
+- **Contiene:** Formulario de registro, widgets (Mi Estado, Control Estado Sistemas), modal Registro Rápido.
+- **Scripts:** `utils`, `db-service`, `tramites-data`, `data-manager`, `dashboard`, `sparklines`, `tickets`, `widgets`, `notifications`, `layout`, `notif-center`, `app`.
+- **IDs críticos:** estadísticas (`statTotalOpen`, `statInProgress`, `statAvgResolve`), formulario (`solicitante`, `responsable`, `solicitud`, `estado`, `prioridad`, `grupo`, `clasificacion`), canvas (`sparkline1`–`sparkline4`), modal rápido (`modalRapidoOverlay`).
+
+#### 📄 actividades.html → Actividades
+- **Propósito:** Tabla de actividades con filtros y estadísticas rápidas.
+- **`<body data-page="actividades">`**
+- **Scripts:** `utils`, `db-service`, `tramites-data`, `data-manager`, `activity-table`, `notifications`, `layout`, `notif-center`, `init-actividades`.
+- **IDs críticos:** `activityTable`, filtros (`filtroEstadoAct`, `filtroPrioridadAct`, `filtroResponsableAct`, `filtroGrupoAct`, `filtroPeriodoAct`), quick-stats (`qsTotal`, `qsPendientes`, `qsProgreso`, `qsResueltos`, `qsUrgentes`).
+
+#### 📄 gestion.html → Gestión
+- **Propósito:** Gestión de tickets con vista Tabla/Kanban y modal de edición.
+- **`<body data-page="gestion">`**
+- **Scripts:** `utils`, `db-service`, `tramites-data`, `data-manager`, `tickets`, `notifications`, `layout`, `notif-center`, `init-gestion`.
+- **IDs críticos:** `gestionTabla`, `solicitudesTable`, `gestionKanban`, `kanbanBoard`, toggle `[data-view="tabla|kanban"]`, modal (`modalOverlay`, `m_estado`, `m_responsable`, `m_prioridad`, `m_grupo`, `m_clasificacion`).
+- **Común a las 3:** sin eventos inline (`onclick`, etc). El sidebar y la topbar NO están en el HTML: los inyecta `layout.js` en los placeholders `#appSidebar` y `#appTopbar`.
 
 ---
 
@@ -86,17 +96,21 @@ portal_avanzado.html           index.html (Dashboard)
   - `db_sistemas` → Publicar alertas de sistemas
   - `db_mi_seleccion` → Persistir selección del widget
 - **Módulos:**
-  - `app.js`: Estado global e inicialización (`DOMContentLoaded`).
+  - `app.js`: Estado global e inicialización del Panel Principal (`DOMContentLoaded`). **Solo lo carga `index.html`.**
+  - `layout.js`: **(NUEVO, DEC-008)** Inyecta el chrome compartido (sidebar + topbar + centro de notificaciones) en las 3 páginas. Marca el menú activo según `<body data-page>`. **Cargado por las 3 páginas.**
+  - `init-actividades.js`: **(NUEVO)** Init mínimo de `actividades.html` (arranca tabla + notificaciones).
+  - `init-gestion.js`: **(NUEVO)** Init mínimo de `gestion.html`. Replica el toggle Tabla/Kanban, `window.loadGestion`, filtro y refresh (lógica que antes vivía en `navigation.js`).
+  - `notif-center.js`: Centro de notificaciones (badge + panel desplegable). Escucha `actividadGuardada` y `nuevoTicketExterno`. **Cargado por las 3 páginas.**
   - `db-service.js`: Servicio de Base de Datos temporal (envuelve localStorage).
   - `utils.js`: Funciones auxiliares (`escapeHtml`, Toast, Búsqueda global).
   - `data-manager.js`: Carga de catálogos y guardado de formulario.
-  - `navigation.js`: Cambios de vista (Tabla/Kanban) y secciones.
-  - `dashboard.js`: Stats, animaciones de números y tickets recientes.
-  - `activity-table.js`: Tabla principal de Recientes con sistema de filtros.
-  - `sparklines.js`: Gráficos Canvas.
-  - `tickets.js`: Solicitudes activas, Kanban, Edición de tickets y Registro Rápido.
-  - `widgets.js`: Mi Estado y alertas de sistema.
+  - `dashboard.js`: Stats, animaciones de números y tickets recientes. (Solo `index.html`.)
+  - `activity-table.js`: Tabla principal de Actividades con sistema de filtros. (Solo `actividades.html`.)
+  - `sparklines.js`: Gráficos interactivos de Chart.js conectados a DbService. (Solo `index.html`.)
+  - `tickets.js`: Solicitudes activas, Kanban, Edición de tickets y Registro Rápido. (`gestion.html` + el registro rápido de `index.html`.)
+  - `widgets.js`: Mi Estado y alertas de sistema. (Solo `index.html`.)
   - `notifications.js`: API de notificaciones y audios, comunicación inter-pestañas (`storage`).
+  - ~~`navigation.js`~~: **ELIMINADO (DEC-008)** — era el motor de la SPA. Su lógica de toggle/`loadGestion` vive ahora en `init-gestion.js`.
 - **Módulos exclusivos del portal** (`js/portal/`):
   - `form-ui.js`: `setPriority`, `actualizarTramites`, `verificarPresencialidad`, `verInfoSistema`.
   - `submit.js`: `enviarTicket` con `DbService` + manejo de error.
@@ -140,10 +154,10 @@ portal_avanzado.html           index.html (Dashboard)
 ---
 
 ### 📄 server.js (SERVIDOR LOCAL)
-- **Propósito:** Servidor Express para servir archivos estáticos
+- **Propósito:** Servidor estático para desarrollo local
 - **Sirve:** Carpeta `entorno_local/`
 - **Puerto:** 3000
-- **Dependencias:** express (ver package.json)
+- **Dependencias:** `http-server` (NO Express) — ver `package.json`. Comando: `npm run dev`.
 
 ---
 

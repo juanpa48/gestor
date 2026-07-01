@@ -1,56 +1,127 @@
 // ============================================================
-// SPARKLINES (Canvas)
+// DASHBOARD CHARTS (Chart.js)
 // ============================================================
-function drawSparklines() {
-  const configs = [
-    { id: 'sparkline1', color: '#e8192c', data: [3, 5, 4, 7, 5, 8, 6, 9, 7, 11, 9, 12] },
-    { id: 'sparkline2', color: '#1e3a5f', data: [2, 4, 3, 5, 4, 6, 5, 7, 6, 8, 7, 8] },
-    { id: 'sparkline3', color: '#1e3a5f', data: [1, 3, 2, 4, 3, 5, 4, 6, 5, 7, 6, 8] },
-    { id: 'sparkline4', color: '#e8192c', data: [1, 2, 1, 3, 2, 4, 3, 5, 3, 6, 4, 7] }
-  ];
+// Reemplaza a las antiguas sparklines por gráficas funcionales conectadas a DbService
 
-  configs.forEach(function (cfg) {
-    const canvas = document.getElementById(cfg.id);
-    if (!canvas) return;
+let dashboardCharts = {};
 
-    setTimeout(function () {
-      const dpr = window.devicePixelRatio || 1;
-      const w = canvas.offsetWidth || 200;
-      const h = canvas.offsetHeight || 50;
-      canvas.width = w * dpr;
-      canvas.height = h * dpr;
+window.drawSparklines = function() {
+  if (!window.DbService || typeof Chart === 'undefined') return;
 
-      const ctx = canvas.getContext('2d');
-      ctx.scale(dpr, dpr);
+  window.DbService.getActividades().then(function(acts) {
+    acts = acts || [];
+    
+    // 1. Datos: Total Abiertos (Distribución por prioridad)
+    let abiertos = acts.filter(a => a.estado === 'Pendiente' || a.estado === 'En progreso');
+    let pUrgente = abiertos.filter(a => a.prioridad === 'Urgente').length;
+    let pAlta = abiertos.filter(a => a.prioridad === 'Alta').length;
+    let pMedia = abiertos.filter(a => a.prioridad === 'Media').length;
+    let pBaja = abiertos.filter(a => a.prioridad === 'Baja').length;
 
-      const points = cfg.data.map(function (val, i) {
-        return { x: (i / (cfg.data.length - 1)) * w, y: h - (val / 15) * h };
-      });
+    // 2. Datos: En Progreso (Distribución por estado global sin Cerrado)
+    let ePendiente = acts.filter(a => a.estado === 'Pendiente').length;
+    let eProgreso = acts.filter(a => a.estado === 'En progreso').length;
+    let eResuelto = acts.filter(a => a.estado === 'Resuelto').length;
 
-      const grad = ctx.createLinearGradient(0, 0, 0, h);
-      grad.addColorStop(0, cfg.color + '25');
-      grad.addColorStop(1, cfg.color + '00');
+    // 3. Datos: Prom. Resolución (Volumen por Área)
+    let strArea = (grupo) => (grupo || '').toLowerCase();
+    let aArea1 = acts.filter(a => strArea(a.grupo).includes('área 1') || strArea(a.grupo).includes('area 1')).length;
+    let aArea2 = acts.filter(a => strArea(a.grupo).includes('área 2') || strArea(a.grupo).includes('area 2')).length;
+    let aGeneral = acts.length - aArea1 - aArea2; // El resto
 
-      ctx.beginPath();
-      ctx.moveTo(points[0].x, h);
-      points.forEach(function (p) { ctx.lineTo(p.x, p.y); });
-      ctx.lineTo(points[points.length - 1].x, h);
-      ctx.closePath();
-      ctx.fillStyle = grad;
-      ctx.fill();
+    // 4. Datos: Tareas Urgentes (Urgentes pendientes vs resueltas)
+    let urgentes = acts.filter(a => a.prioridad === 'Urgente');
+    let uResueltas = urgentes.filter(a => a.estado === 'Resuelto' || a.estado === 'Cerrado').length;
+    let uPendientes = urgentes.filter(a => a.estado === 'Pendiente' || a.estado === 'En progreso').length;
 
-      ctx.beginPath();
-      ctx.moveTo(points[0].x, points[0].y);
-      for (let i = 1; i < points.length; i++) {
-        const prev = points[i - 1];
-        const curr = points[i];
-        const cpx = (prev.x + curr.x) / 2;
-        ctx.bezierCurveTo(cpx, prev.y, cpx, curr.y, curr.x, curr.y);
+    // Config global recomendada para el dashboard oscuro
+    Chart.defaults.color = '#94a3b8';
+    Chart.defaults.font.family = "'DM Sans', sans-serif";
+
+    // Chart 1: Total Abiertos (Pastel con leyenda lateral)
+    crearGrafico('sparkline1', 'pie', {
+      labels: ['Urgente', 'Alta', 'Media', 'Baja'],
+      datasets: [{
+        data: [pUrgente, pAlta, pMedia, pBaja],
+        backgroundColor: ['#e8192c', '#f59e0b', '#3b82f6', '#10b981'],
+        borderWidth: 0
+      }]
+    }, {
+      layout: { padding: 0 },
+      plugins: {
+        legend: {
+          display: true,
+          position: 'right',
+          labels: {
+            boxWidth: 10,
+            padding: 8,
+            font: { size: 10 },
+            color: '#cbd5e1'
+          }
+        }
       }
-      ctx.strokeStyle = cfg.color;
-      ctx.lineWidth = 2;
-      ctx.lineJoin = 'round';
-      ctx.stroke();
-    }, 100);
+    });
+
+    // Chart 2: En Progreso (Barras Horizontales - Estados)
+    crearGrafico('sparkline2', 'bar', {
+      labels: ['Pend.', 'Progr.', 'Res.'],
+      datasets: [{
+        data: [ePendiente, eProgreso, eResuelto],
+        backgroundColor: '#3b82f6',
+        borderRadius: 4
+      }]
+    }, {
+      indexAxis: 'y',
+      layout: { padding: 0 },
+      plugins: { legend: { display: false } },
+      scales: { x: { display: false }, y: { border: { display: false }, grid: { display: false }, ticks: { font: { size: 10 } } } }
+    });
+
+    // Chart 3: Prom. Resolución (Barras Verticales - Áreas)
+    crearGrafico('sparkline3', 'bar', {
+      labels: ['Área 1', 'Área 2'],
+      datasets: [{
+        data: [aArea1, aArea2],
+        backgroundColor: '#10b981',
+        borderRadius: 4
+      }]
+    }, {
+      layout: { padding: 0 },
+      plugins: { legend: { display: false } },
+      scales: { y: { display: false }, x: { border: { display: false }, grid: { display: false }, ticks: { font: { size: 10 } } } }
+    });
+
+    // Chart 4: Urgentes (Dona - Resueltos vs Pendientes)
+    crearGrafico('sparkline4', 'doughnut', {
+      labels: ['Pendientes', 'Resueltos'],
+      datasets: [{
+        data: [uPendientes, uResueltas],
+        backgroundColor: ['#e8192c', '#10b981'],
+        borderWidth: 0
+      }]
+    }, {
+      cutout: '60%',
+      layout: { padding: 0 },
+      plugins: { legend: { display: false } }
+    });
+  });
+};
+
+function crearGrafico(canvasId, type, data, options) {
+  const ctx = document.getElementById(canvasId);
+  if (!ctx) return;
+  
+  if (dashboardCharts[canvasId]) {
+    dashboardCharts[canvasId].destroy();
+  }
+  
+  dashboardCharts[canvasId] = new Chart(ctx, {
+    type: type,
+    data: data,
+    options: Object.assign({
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 800 }
+    }, options)
   });
 }

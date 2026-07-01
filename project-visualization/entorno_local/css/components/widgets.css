@@ -101,3 +101,8 @@
 #grupo_mensaje {
   display: none;
 }
+
+/* Panel de Control Estado Sistemas (oculto — descomentar para activar) */
+#panelControlSistemas {
+  display: none;
+}

@@ -23,6 +23,12 @@
   border-bottom: 1.5px solid rgba(232, 25, 44, 0.10);
 }
 
+.sidebar-logo img {
+  max-height: 48px;
+  width: auto;
+  display: block;
+}
+
 .logo-icon {
   width: 36px;
   height: 36px;

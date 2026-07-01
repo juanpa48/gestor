@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IT Command - Gestión</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/main.css">
+</head>
+
+<body data-page="solicitudes">
+
+  <!-- SIDEBAR (inyectado por layout.js) -->
+  <div id="appSidebar"></div>
+
+  <!-- ============================================================ -->
+  <!-- MAIN CONTENT -->
+  <!-- ============================================================ -->
+  <main class="main-content">
+
+    <!-- TOP BAR (inyectado por layout.js) -->
+    <div id="appTopbar"></div>
+
+    <!-- ============================================================ -->
+    <!-- GESTIÓN SECTION (Unificado: Tabla + Kanban) -->
+    <!-- ============================================================ -->
+    <section id="section-solicitudes" class="section active">
+      <div class="section-header">
+        <h2 class="section-title">Gestión de Tickets</h2>
+        <div class="header-actions">
+          <select id="filtroEstado" class="form-select header-select">
+            <option value="">Todos los estados</option>
+            <option value="Pendiente">Pendiente</option>
+            <option value="En progreso">En progreso</option>
+          </select>
+          <div class="view-toggle">
+            <button class="toggle-btn active" data-view="tabla">
+              <i class="fa-solid fa-table-list"></i> Tabla
+            </button>
+            <button class="toggle-btn" data-view="kanban">
+              <i class="fa-solid fa-columns"></i> Kanban
+            </button>
+          </div>
+          <button class="btn-refresh" id="btnRefreshGestion">
+            <i class="fa-solid fa-rotate-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Vista Tabla -->
+      <div id="gestionTabla" class="table-card">
+        <div id="solicitudesTable">
+          <div class="loading-state"><i class="fa-solid fa-spinner fa-spin"></i> Cargando...</div>
+        </div>
+      </div>
+
+      <!-- Vista Kanban -->
+      <div id="gestionKanban">
+        <div id="kanbanBoard" class="kanban-board">
+          <div class="loading-state"><i class="fa-solid fa-spinner fa-spin"></i> Cargando tablero...</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="toast hidden"></div>
+
+  </main>
+
+  <!-- MODAL EDICIÓN TICKET -->
+  <div id="modalOverlay" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <div class="kanban-label-small">GESTIONANDO TICKET</div>
+          <div id="modalTicketId" class="kanban-title-large">TKT-001</div>
+        </div>
+        <button class="modal-close" id="btnCloseModalEdicion"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div id="modalSolicitudDesc" class="kanban-desc-box">
+      </div>
+
+      <div class="form-grid form-grid-2">
+
+        <div class="form-group">
+          <label class="form-label">Estado</label>
+          <div class="select-wrapper">
+            <i class="fa-regular fa-clock select-icon-left red"></i>
+            <select id="m_estado" class="form-select padded-left">
+              <option value="Pendiente">Pendiente</option>
+              <option value="En progreso">En progreso</option>
+              <option value="Resuelto">Resuelto</option>
+              <option value="Cerrado">Cerrado</option>
+            </select>
+            <i class="fa-solid fa-chevron-down select-arrow"></i>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Responsable</label>
+          <div class="select-wrapper">
+            <i class="fa-solid fa-user-tie select-icon-left"></i>
+            <select id="m_responsable" class="form-select padded-left">
+              <option value="">Sin asignar</option>
+            </select>
+            <i class="fa-solid fa-chevron-down select-arrow"></i>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Prioridad</label>
+          <div class="select-wrapper">
+            <i class="fa-solid fa-arrow-down select-icon-left"></i>
+            <select id="m_prioridad" class="form-select padded-left">
+              <option value="Baja">Baja</option>
+              <option value="Media">Media</option>
+              <option value="Alta">Alta</option>
+              <option value="Urgente">Urgente</option>
+            </select>
+            <i class="fa-solid fa-chevron-down select-arrow"></i>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Área de Gestión</label>
+          <div class="select-wrapper">
+            <i class="fa-solid fa-users-gear select-icon-left"></i>
+            <select id="m_grupo" class="form-select padded-left">
+              <option value="" disabled selected>Seleccione el Área...</option>
+              <option value="Área 1 (Estructurales)">Área 1 (Estructurales / Legales)</option>
+              <option value="Área 2 (Operativos)">Área 2 (Operativos / Documentales)</option>
+            </select>
+            <i class="fa-solid fa-chevron-down select-arrow"></i>
+          </div>
+        </div>
+
+        <div class="form-group form-group-full">
+          <label class="form-label">Tipo de Trámite</label>
+          <div class="select-wrapper">
+            <i class="fa-solid fa-layer-group select-icon-left"></i>
+            <select id="m_clasificacion" class="form-select padded-left">
+              <option value="" disabled selected>Seleccione un Trámite...</option>
+            </select>
+            <i class="fa-solid fa-chevron-down select-arrow"></i>
+          </div>
+        </div>
+
+        <div class="form-group form-group-full">
+          <label class="form-label">Ruta T / Anexos</label>
+          <input type="text" id="m_detalles" class="form-input form-input-full" placeholder="Ej: T:\Contabilidad\...">
+        </div>
+
+      </div>
+
+      <div class="form-actions form-actions-mt">
+        <button class="btn-cancel" id="btnCancelModalEdicion">Cancelar</button>
+        <button class="btn-save" id="btnGuardarEdicion">
+          <span id="modalBtnText">Guardar Cambios</span>
+          <span id="modalBtnLoader" class="btn-loader hidden"><i class="fa-solid fa-spinner fa-spin"></i></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts Modulares -->
+  <script src="js/utils.js"></script>
+  <script src="js/db-service.js"></script>
+  <script src="js/tramites-data.js"></script>
+  <script src="js/data-manager.js"></script>
+  <script src="js/tickets.js"></script>
+  <script src="js/notifications.js"></script>
+  <!-- Chrome compartido: debe ir antes de notif-center.js (usa #notifBtn) -->
+  <script src="js/layout.js"></script>
+  <script src="js/notif-center.js"></script>
+  <!-- Init específico de esta página -->
+  <script src="js/init-gestion.js"></script>
+</body>
+
+</html>
