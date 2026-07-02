@@ -5,6 +5,8 @@ import { Actividades } from './pages/dashboard/Actividades'
 import { Gestion } from './pages/dashboard/Gestion'
 import { Portal } from './pages/Portal'
 
+import { Database } from './pages/Database'
+
 function App() {
   return (
     <Router>
@@ -18,6 +20,7 @@ function App() {
         </Route>
         
         <Route path="/portal" element={<Portal />} />
+        <Route path="/database" element={<Database />} />
       </Routes>
     </Router>
   )

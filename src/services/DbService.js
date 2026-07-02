@@ -14,6 +14,16 @@ export const DbService = {
       }, 300);
     });
   },
+
+  saveSolicitantes: async (sols) => {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        localStorage.setItem('db_solicitantes', JSON.stringify(sols));
+        resolve({ success: true });
+      }, 300);
+    });
+  },
+
   
   getResponsables: async () => {
     return new Promise(resolve => {
@@ -27,6 +37,15 @@ export const DbService = {
           const parsedList = rawList.map(r => typeof r === 'object' ? r.nombre : r);
           resolve(parsedList);
         }
+      }, 300);
+    });
+  },
+
+  saveResponsables: async (resps) => {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        localStorage.setItem('db_responsables', JSON.stringify(resps));
+        resolve({ success: true });
       }, 300);
     });
   },

@@ -1,0 +1,141 @@
+.database-container {
+  font-family: Arial, sans-serif;
+  background-color: #f4f7f6;
+  padding: 20px;
+  min-height: 100vh;
+}
+.database-container h1 {
+  color: #333;
+}
+.db-table-container {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  overflow-x: auto;
+}
+.db-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+.db-table th, .db-table td {
+  border: 1px solid #ddd;
+  padding: 12px 15px;
+  text-align: left;
+}
+.db-table th {
+  background-color: #f0f0f0;
+  color: #333;
+  font-weight: bold;
+}
+.db-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+.db-table tr:hover {
+  background-color: #f1f1f1;
+}
+.empty-msg {
+  color: #777;
+  font-style: italic;
+}
+.btn-refresh {
+  background-color: #0066cc;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-bottom: 15px;
+}
+.btn-refresh:hover {
+  background-color: #005bb5;
+}
+.col-letter {
+  background-color: #e8eaed !important;
+  text-align: center !important;
+  color: #5f6368 !important;
+  font-weight: bold;
+  font-size: 12px;
+  padding: 6px 10px;
+}
+.row-num {
+  background-color: #e8eaed !important;
+  color: #5f6368 !important;
+  text-align: center;
+  font-weight: bold;
+  width: 30px;
+  font-size: 12px;
+}
+
+/* Tabs */
+.db-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+.db-tab-btn {
+  padding: 10px 20px;
+  border: 1px solid #ddd;
+  background: #eef2ff;
+  color: #333;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+.db-tab-btn.active {
+  background: #0066cc;
+  color: #fff;
+  border-color: #0066cc;
+}
+.db-tab-content {
+  display: none;
+}
+.db-tab-content.active {
+  display: block;
+}
+
+/* Forms */
+.list-table {
+  width: 100%;
+  max-width: 600px;
+}
+.btn-action {
+  background: #e8192c;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.btn-add {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 15px;
+}
+.add-wrapper {
+  margin-bottom: 15px;
+  display: flex;
+  gap: 10px;
+}
+.add-input {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  flex: 1;
+  max-width: 300px;
+}
+.database-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid #ddd;
+}
+

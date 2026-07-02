@@ -4,9 +4,10 @@ import { tramitesArea1, tramitesArea2 } from '../data/tramitesData';
 import { DbService } from '../services/DbService';
 
 export const Portal = () => {
-  const { actividades, solicitantes, addTicket } = useTickets();
+  const { actividades, solicitantes, addTicket, responsables } = useTickets();
   const [sistemas, setSistemas] = useState({});
   const [personalTI, setPersonalTI] = useState({});
+  const [rawResponsables, setRawResponsables] = useState([]);
 
   // Form State
   const [nombre, setNombre] = useState('');
@@ -31,12 +32,17 @@ export const Portal = () => {
         setSistemas(sys);
         const stf = JSON.parse(localStorage.getItem('db_estado_personal') || '{}');
         setPersonalTI(stf);
+        const rawResp = JSON.parse(localStorage.getItem('db_responsables') || '[]');
+        setRawResponsables(rawResp.length > 0 ? rawResp : [
+          { nombre: 'Alex Henderson', cargo: 'Admin Sistema / Nivel 1', foto: 'https://i.pravatar.cc/150?u=ti1' },
+          { nombre: 'Marcus Vance', cargo: 'Especialista Infraestructura', foto: 'https://i.pravatar.cc/150?img=11' }
+        ]);
       } catch (e) { }
     };
     handleStorage();
     window.addEventListener('storage', handleStorage);
     return () => window.removeEventListener('storage', handleStorage);
-  }, []);
+  }, [responsables]);
 
   // Mis Tickets
   const misTickets = useMemo(() => {
@@ -163,26 +169,15 @@ export const Portal = () => {
     }
   };
 
-  const getStatusDetails = (estado) => {
-    switch (estado) {
-      case 'disponible': return { icon: 'circle-check', dot: '#22c55e' };
-      case 'en_desarrollo': return { icon: 'code', dot: '#3b82f6' };
-      case 'reunion': return { icon: 'users', dot: '#a855f7' };
-      case 'atendiendo': return { icon: 'headset', dot: '#ef4444' };
-      case 'urgente': return { icon: 'triangle-exclamation', dot: '#ef4444' };
-      default: return { icon: 'user', dot: '#94a3b8' };
-    }
-  };
-
-  const getEstadoLabel = (estado) => {
-    const labels = {
-      'disponible': 'Disponible (Oficina)',
-      'en_desarrollo': 'Disponible (Home)',
-      'reunion': 'En Reunión',
-      'atendiendo': 'Ocupada',
-      'urgente': 'Atendiendo Urgencia'
+  const getEstadoDetails = (estado) => {
+    const estadoMap = {
+      disponible:    { dot: 'dot-green',       txt: 'text-green',       label: 'Disponible (Oficina)'    },
+      en_desarrollo: { dot: 'dot-blue',        txt: 'text-blue',        label: 'Disponible (Home Office)' },
+      reunion:       { dot: 'dot-purple',      txt: 'text-purple',      label: 'En Reunión'    },
+      atendiendo:    { dot: 'dot-red',         txt: 'text-red',         label: 'Ocupada (Trámite)'    },
+      urgente:       { dot: 'dot-red-intense', txt: 'text-red-intense', label: 'Urgencia'       }
     };
-    return labels[estado] || 'Desconocido';
+    return estadoMap[estado] || estadoMap.disponible;
   };
 
   return (
@@ -264,24 +259,38 @@ export const Portal = () => {
             ) : misTickets.length === 0 ? (
               <div className="empty-history" style={{ opacity: 0.8 }}>
                 <i className="fa-regular fa-folder-open" style={{ fontSize: '24px', marginBottom: '8px', display: 'block' }}></i>
-                Aún no tienes tickets registrados
+                No tiene tickets recientes registrados.
               </div>
             ) : (
-              misTickets.slice(0, 5).map(t => (
-                <div key={t.id} className="history-item">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                    <strong>{t.id}</strong>
-                    <span className={`status-badge-sm ${(t.estado || '').toLowerCase().includes('progreso') ? 'progreso' : (t.estado || '').toLowerCase().includes('resuelto') ? 'resuelto' : 'pendiente'}`}>
-                      {t.estado}
-                    </span>
-                  </div>
-                  <div className="history-desc">{t.solicitud}</div>
-                  <div className="history-date">
-                    <i className="fa-regular fa-calendar" style={{ marginRight: '4px' }}></i>
-                    {t.fechaCreacion}
-                  </div>
-                </div>
-              ))
+              <div className="history-list">
+                {misTickets.slice(0, 5).map(t => {
+                  let estadoTxt = t.estado || 'Pendiente';
+                  if (estadoTxt === 'En progreso') estadoTxt = 'Iniciado';
+
+                  let bqClass = 'pendiente';
+                  if (estadoTxt === 'Iniciado') bqClass = 'progreso';
+                  else if (estadoTxt.includes('esuelto') || estadoTxt.includes('errado')) bqClass = 'resuelto';
+
+                  const truncar = t.solicitud
+                    ? (t.solicitud.length > 40 ? t.solicitud.substring(0, 40) + '...' : t.solicitud)
+                    : 'Sin detalles';
+
+                  return (
+                    <div key={t.id} className="history-ticket">
+                      <div className="ht-title">{truncar}</div>
+                      {t.responsable && (
+                        <div style={{ fontSize: '10px', color: '#475569', marginBottom: '6px' }}>
+                          <i className="fa-solid fa-user-check" style={{ color: '#3b82f6' }}></i> Asignado a: <strong>{t.responsable}</strong>
+                        </div>
+                      )}
+                      <div className="ht-meta">
+                        <span className={`badge ${bqClass}`}>{estadoTxt}</span>
+                        <span className="ht-date">{t.id || '--'}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             )}
           </div>
         </aside>
@@ -407,26 +416,28 @@ export const Portal = () => {
           </div>
 
           <div id="itStaffContainer">
-            {Object.keys(personalTI).length === 0 ? (
+            {rawResponsables.length === 0 ? (
               <div style={{ color: '#94a3b8', fontSize: '13px', textAlign: 'center', marginTop: '20px' }}>
                 <i className="fa-solid fa-user-slash" style={{ fontSize: '20px', marginBottom: '8px', display: 'block' }}></i>
-                Sin datos de estado del personal
+                Sin datos de personal
               </div>
             ) : (
-              Object.values(personalTI).map((p, idx) => {
-                const details = getStatusDetails(p.estado);
+              rawResponsables.map((resp, idx) => {
+                const nombre = typeof resp === 'object' ? resp.nombre : resp;
+                const cargo  = typeof resp === 'object' ? resp.cargo  : 'Personal TI';
+                const foto   = (typeof resp === 'object' && resp.foto) ? resp.foto : `https://i.pravatar.cc/150?u=${idx}`;
+                
+                const info = personalTI[nombre];
+                const st = getEstadoDetails(info ? info.estado : 'disponible');
+
                 return (
-                  <div key={idx} className="staff-card">
-                    <div className="staff-avatar">
-                      <i className="fa-solid fa-user"></i>
-                      <div className="staff-status-indicator" style={{ backgroundColor: details.dot }}></div>
-                    </div>
-                    <div className="staff-info">
-                      <div className="staff-name">{p.nombre}</div>
-                      <div className="staff-role">
-                        <i className={`fa-solid fa-${details.icon}`} style={{ marginRight: '4px' }}></i>
-                        {getEstadoLabel(p.estado)}
-                      </div>
+                  <div key={idx} className="profile-card">
+                    <div className={`status-dot ${st.dot}`}></div>
+                    <img src={foto} alt={nombre} className="profile-avatar" />
+                    <div className="profile-info">
+                      <div className="profile-name">{nombre}</div>
+                      <div className="profile-role">{cargo}</div>
+                      <div className={`profile-activity ${st.txt}`}>{st.label}</div>
                     </div>
                   </div>
                 );

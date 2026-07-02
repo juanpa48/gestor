@@ -49,3 +49,61 @@
 ## Último objetivo completado
 
 Fase 5: Portal del Colaborador completada con éxito. Migración total a React finalizada.
+
+---
+
+## Nuevo Objetivo: Migración del Administrador de Datos (database.html) a React
+
+**Contexto:** El usuario necesita agregar nuevo personal y solicitantes. En Vanilla esto se hacía mediante `database.html`. Se migrará esta herramienta a una nueva ruta nativa en React para compartir el mismo `localStorage` (`localhost:5173`).
+
+### Fases de Implementación:
+
+- [x] **Fase 1: Actualización de la Capa de Datos (`DbService.js` y `TicketContext.jsx`)**
+  - [x] Añadir métodos estáticos `saveSolicitantes` y `saveResponsables` en `DbService.js`.
+  - [x] Exponer funciones de CRUD en `TicketContext.jsx` (`addSolicitante`, `removeSolicitante`, `addResponsable`, `removeResponsable`).
+
+- [x] **Fase 2: Creación de la página `Database.jsx`**
+  - [x] Recrear la lógica de pestañas (Tabs) en React.
+  - [x] Pestaña Actividades (Solo lectura, mostrando los 16 campos).
+  - [x] Pestaña Solicitantes (Añadir y borrar nombres).
+  - [x] Pestaña Responsables (Añadir nombre, cargo, foto y borrar).
+
+- [x] **Fase 3: Integración de Rutas en `App.jsx`**
+  - [x] Registrar la ruta `/database` en `App.jsx`.
+
+---
+
+## Último objetivo completado
+
+Migración del Administrador de Datos completada. Ruta `/database` habilitada con soporte CRUD de Solicitantes y Responsables conectado al Context API.
+
+---
+
+## Nuevo Objetivo: Integración de Gráficos del Dashboard Original
+
+**Contexto:** Los gráficos del Dashboard (`StatCards.jsx`) estaban usando gráficos de líneas aleatorios como placeholders. Se migrarán los gráficos reales usando la lógica de `sparklines.js` y `react-chartjs-2`.
+
+### Fases de Implementación:
+
+- [x] **Fase 1: Configuración de Chart.js**
+  - [x] Importar los componentes necesarios en `StatCards.jsx` (`ArcElement`, `BarElement`, `Pie`, `Bar`, `Doughnut`).
+
+- [x] **Fase 2: Transcripción de Algoritmos**
+  - [x] Calcular distribución por prioridad (Abiertos).
+  - [x] Calcular distribución por estado (En Progreso).
+  - [x] Calcular volumen por área (Resolución).
+  - [x] Calcular urgencias (Pendientes vs Resueltas).
+
+- [x] **Fase 3: Renderizado de Gráficos**
+  - [x] Reemplazar `LineChart` falsos.
+  - [x] Renderizar `Pie` para Total Abiertos.
+  - [x] Renderizar `Bar` horizontal para En Progreso.
+  - [x] Renderizar `Bar` vertical para Total Resueltos (Prom. Resolución).
+  - [x] Renderizar `Doughnut` para Tareas Urgentes.
+  - [x] Ajustar colores (`#e8192c`, `#f59e0b`, `#3b82f6`, `#10b981`).
+
+---
+
+## Último objetivo completado
+
+Integración de Gráficos de Chart.js completada. El Dashboard (`PanelPrincipal.jsx`) ahora muestra métricas reales e interactivas correspondientes a los tickets.

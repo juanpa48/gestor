@@ -73,6 +73,45 @@ export const TicketProvider = ({ children }) => {
     // DbService.saveActividades triggers 'ticketActualizado' event, so fetchTickets will be called.
   };
 
+  const addSolicitante = async (nombre) => {
+    const newSols = [...solicitantes, nombre];
+    setSolicitantes(newSols);
+    await DbService.saveSolicitantes(newSols);
+  };
+
+  const removeSolicitante = async (index) => {
+    const newSols = [...solicitantes];
+    newSols.splice(index, 1);
+    setSolicitantes(newSols);
+    await DbService.saveSolicitantes(newSols);
+  };
+
+  const addResponsable = async (respData) => {
+    // DbService getResponsables can return an array of strings, but originally it stored objects too.
+    // If it's a string array, we just push the name. To support objects, we push the object.
+    // Let's assume we store the object for full fidelity: {nombre, cargo, foto}
+    
+    // Actually, getting from localStorage directly returns whatever is there.
+    // We should get raw list from localStorage, update it, and then update our state.
+    const rawList = JSON.parse(localStorage.getItem('db_responsables')) || [];
+    rawList.push(respData);
+    await DbService.saveResponsables(rawList);
+    
+    // Update local state (which expects strings according to DbService.getResponsables mapping)
+    const newResps = [...responsables, respData.nombre];
+    setResponsables(newResps);
+  };
+
+  const removeResponsable = async (index) => {
+    const rawList = JSON.parse(localStorage.getItem('db_responsables')) || [];
+    rawList.splice(index, 1);
+    await DbService.saveResponsables(rawList);
+    
+    const newResps = [...responsables];
+    newResps.splice(index, 1);
+    setResponsables(newResps);
+  };
+
   const value = {
     actividades,
     solicitantes,
@@ -80,6 +119,10 @@ export const TicketProvider = ({ children }) => {
     loading,
     addTicket,
     updateTicket,
+    addSolicitante,
+    removeSolicitante,
+    addResponsable,
+    removeResponsable,
     refreshTickets: fetchTickets
   };
 
