@@ -13,9 +13,14 @@ export const Database = () => {
   const [newRespCargo, setNewRespCargo] = useState('');
   const [newRespFoto, setNewRespFoto] = useState('');
 
-  // The database page should wipe out global body classes from portal or dashboard
+  // The database page should override global body classes from portal or dashboard
   useEffect(() => {
-    document.body.className = '';
+    document.documentElement.classList.add('database-page');
+    document.body.classList.add('database-page');
+    return () => { 
+      document.documentElement.classList.remove('database-page');
+      document.body.classList.remove('database-page'); 
+    };
   }, []);
 
   const handleAddSoli = async () => {

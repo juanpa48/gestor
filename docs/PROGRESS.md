@@ -106,4 +106,19 @@ Migración del Administrador de Datos completada. Ruta `/database` habilitada co
 
 ## Último objetivo completado
 
-Integración de Gráficos de Chart.js completada. El Dashboard (`PanelPrincipal.jsx`) ahora muestra métricas reales e interactivas correspondientes a los tickets.
+Integración del Centro de Notificaciones y gráficos de Dashboard con Chart.js finalizada.
+
+---
+
+# 🚀 Progreso de la Refactorización a React (Gestor TI)
+
+## Sprint Actual: Solución de Estilos y Scroll en Database
+
+**Objetivo:** Sincronizar el layout visual y el comportamiento de las tablas del administrador de base de datos (`Database.jsx`) para que igualen perfectamente la versión anterior en Vanilla JS, corrigiendo los problemas de scroll horizontal y vertical causados por el layout global.
+
+- [x] **Fase 1: Corrección de Contenedor y Scroll Global**
+  - [x] Asignar la clase `database-page` al montar el componente `Database.jsx`.
+  - [x] Añadir overrides en `database-theme.css` para anular `overflow: hidden` del `body` y el `display: flex` de `#root`.
+- [x] **Fase 2: Ajustes de Tabla y Scroll Horizontal**
+  - [x] Refinar las reglas CSS de `.db-table-container` y celdas `th`/`td`.
+  - [x] Aplicar `white-space: nowrap` a las columnas extensas para forzar la activación de la barra de desplazamiento horizontal.

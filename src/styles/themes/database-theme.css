@@ -1,3 +1,15 @@
+/* Overrides para evitar que el reset del Dashboard bloquee el layout */
+html.database-page,
+body.database-page {
+  overflow: auto !important;
+  height: auto !important;
+}
+
+body.database-page #root {
+  display: block;
+  height: auto !important;
+}
+
 .database-container {
   font-family: Arial, sans-serif;
   background-color: #f4f7f6;
@@ -13,6 +25,7 @@
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0,0,0,0.1);
   overflow-x: auto;
+  width: 100%;
 }
 .db-table {
   width: 100%;
