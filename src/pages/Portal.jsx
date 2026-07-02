@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useTickets } from '../contexts/TicketContext';
 import { tramitesArea1, tramitesArea2 } from '../data/tramitesData';
 import { DbService } from '../services/DbService';
+import Logo from '../assets/img/Logo.png';
 
 export const Portal = () => {
   const { actividades, solicitantes, addTicket, responsables } = useTickets();
@@ -161,7 +162,6 @@ export const Portal = () => {
       setPrioridad('Media');
       
       showToast(`¡Solicitud <strong>${newId}</strong> enviada exitosamente!`, 'success', 'check');
-      window.dispatchEvent(new CustomEvent('nuevoTicketExterno')); // Optional: in case dashboard is open in another tab
     } catch (err) {
       showToast('Error al enviar la solicitud. Intente de nuevo.', 'error', 'triangle-exclamation');
     } finally {
@@ -184,7 +184,7 @@ export const Portal = () => {
     <div className="portal-container">
       <header className="portal-header">
         <div className="logo-placeholder">
-          <img src="/img/Logo.png" alt="Logo de Empresa" />
+          <img src={Logo} alt="Logo de Empresa" />
         </div>
         <div className="header-title">
           Portal de Autogestión TI

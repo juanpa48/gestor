@@ -26,10 +26,7 @@ export const useStorageSync = () => {
           // 1. Refrescar el estado global de tickets (Contexto)
           refreshTickets();
           
-          // 2. Disparar evento para que el NotificationCenter interno se entere
-          window.dispatchEvent(new CustomEvent('nuevoTicketExterno', { detail: newTicket }));
-          
-          // 3. Notificación nativa y sonido si estamos en el dashboard
+          // 2. Notificación nativa y sonido si estamos en el dashboard
           // (Si el cambio vino de OTRA pestaña de portal, e.key es detectado)
           if (window.location.pathname.includes('/dashboard')) {
              NotificationHelper.notify(

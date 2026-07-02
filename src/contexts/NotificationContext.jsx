@@ -28,6 +28,15 @@ export const NotificationProvider = ({ children }) => {
 
   useEffect(() => {
     setNotificaciones(load());
+    
+    // Sincronizar estado entre múltiples pestañas (Portal vs Dashboard)
+    const handleStorage = (e) => {
+      if (e.key === STORAGE_KEY) {
+        setNotificaciones(JSON.parse(e.newValue || '[]'));
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
   }, [load]);
 
   const addNotification = useCallback((titulo, texto) => {
@@ -77,7 +86,7 @@ export const NotificationProvider = ({ children }) => {
           const acts = JSON.parse(localStorage.getItem('db_actividades')) || [];
           const ultimo = acts.length ? acts[acts.length - 1] : null;
           if (ultimo) {
-            addNotification(`Nuevo ticket: ${ultimo.id || ''}`, ultimo.solicitud || ultimo.nombre || 'Solicitud registrada');
+            addNotification(`Nuevo ticket: ${ultimo.id || ''}`, `${ultimo.solicitante || ultimo.nombre || 'Un colaborador'} registró una solicitud.`);
           } else {
             addNotification('Nuevo ticket', 'Se registró una nueva actividad.');
           }
@@ -87,17 +96,10 @@ export const NotificationProvider = ({ children }) => {
       }, 100);
     };
 
-    const handleTicketExterno = (e) => {
-      const t = e.detail || {};
-      addNotification(`Nueva solicitud: ${t.id || ''}`, `${t.solicitante || 'Un colaborador'} envió una nueva solicitud.`);
-    };
-
     window.addEventListener('actividadGuardada', handleNuevoTicket);
-    window.addEventListener('nuevoTicketExterno', handleTicketExterno);
 
     return () => {
       window.removeEventListener('actividadGuardada', handleNuevoTicket);
-      window.removeEventListener('nuevoTicketExterno', handleTicketExterno);
     };
   }, [addNotification]);
 

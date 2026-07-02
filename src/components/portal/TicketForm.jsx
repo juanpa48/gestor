@@ -60,9 +60,6 @@ export const TicketForm = () => {
     };
 
     const res = await addTicket(ticketData);
-    
-    // Disparar evento para notificación nativa
-    window.dispatchEvent(new CustomEvent('nuevoTicketExterno', { detail: ticketData }));
 
     setLoading(false);
     if (res.success) {
