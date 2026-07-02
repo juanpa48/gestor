@@ -33,6 +33,16 @@
   - **CSS:** Se mantuvo la arquitectura CSS intacta, logrando un refactor 1:1 de los estilos visuales mediante uso de `className`.
 - **Razón:** Proveer al sistema de una arquitectura frontend moderna, predecible y altamente escalable para prepararlo hacia la integración futura con un backend real (Node/Express/PostgreSQL).
 
+### [2026-07-02] — Correcciones de Interfaz y Lógica de Sincronización
+- **Correcciones visuales en Portal y Database:**
+  - Solucionado el ancho comprimido del formulario en el Portal sobreescribiendo el `display: flex` heredado del contenedor `#root`.
+  - Reparado el import sensible a mayúsculas (`Logo.png`) que rompía el icono superior izquierdo del Portal.
+  - Corregido el scroll vertical inoperante en `/database` al anular el `overflow: hidden` declarado en `html` y `body` del `reset.css`.
+  - Restaurado el salto de línea y la proporción del "estilo hoja de cálculo" de la tabla de la Base de Datos.
+- **Sincronización y Notificaciones:**
+  - Eliminado el bug de 3 notificaciones simultáneas al registrar una solicitud. La lógica se centralizó en `actividadGuardada` dentro del `NotificationContext`.
+  - Implementación de sincronización robusta entre pestañas (Dashboard y Portal) mediante el evento de `storage` para el array de notificaciones.
+
 ---
 
 ## Junio 2026
