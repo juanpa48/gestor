@@ -9,6 +9,7 @@ export const Database = () => {
 
   // Forms state
   const [newSoli, setNewSoli] = useState('');
+  const [newSoliCargo, setNewSoliCargo] = useState('');
   const [newRespNombre, setNewRespNombre] = useState('');
   const [newRespCargo, setNewRespCargo] = useState('');
   const [newRespFoto, setNewRespFoto] = useState('');
@@ -25,8 +26,13 @@ export const Database = () => {
 
   const handleAddSoli = async () => {
     if (!newSoli.trim()) return;
-    await addSolicitante(newSoli.trim());
+    const solObj = {
+      nombre: newSoli.trim(),
+      cargo: newSoliCargo.trim() || ''
+    };
+    await addSolicitante(solObj);
     setNewSoli('');
+    setNewSoliCargo('');
   };
 
   const handleAddResp = async () => {
@@ -78,11 +84,17 @@ export const Database = () => {
   // Leer estado "crudo" de localStorage para responsables porque useTickets normaliza a nombres string.
   // Pero necesitamos renderizar foto y cargo.
   const [rawResponsables, setRawResponsables] = useState([]);
+  const [rawSolicitantes, setRawSolicitantes] = useState([]);
   
   useEffect(() => {
     const raw = JSON.parse(localStorage.getItem('db_responsables')) || [];
     setRawResponsables(raw);
   }, [responsables]);
+
+  useEffect(() => {
+    const raw = JSON.parse(localStorage.getItem('db_solicitantes')) || [];
+    setRawSolicitantes(raw);
+  }, [solicitantes]);
 
   return (
     <div className="database-container">
@@ -140,6 +152,13 @@ export const Database = () => {
               value={newSoli} 
               onChange={e => setNewSoli(e.target.value)} 
             />
+            <input 
+              type="text" 
+              className="add-input" 
+              placeholder="Cargo (ej: Contador, Auxiliar)" 
+              value={newSoliCargo} 
+              onChange={e => setNewSoliCargo(e.target.value)} 
+            />
             <button className="btn-add" onClick={handleAddSoli}>Añadir Solicitante</button>
           </div>
           
@@ -147,19 +166,25 @@ export const Database = () => {
             <thead>
               <tr>
                 <th>Nombre del Solicitante</th>
+                <th>Cargo</th>
                 <th style={{ width: '80px' }}>Acción</th>
               </tr>
             </thead>
             <tbody>
-              {solicitantes.length === 0 ? (
-                <tr><td colSpan={2} className="empty-msg">No hay registros.</td></tr>
+              {rawSolicitantes.length === 0 ? (
+                <tr><td colSpan={3} className="empty-msg">No hay registros.</td></tr>
               ) : (
-                solicitantes.map((s, idx) => (
-                  <tr key={idx}>
-                    <td>{s}</td>
-                    <td><button className="btn-action" onClick={() => handleDeleteSoli(idx)}>Borrar</button></td>
-                  </tr>
-                ))
+                rawSolicitantes.map((s, idx) => {
+                  const nombre = typeof s === 'object' ? s.nombre : s;
+                  const cargo = typeof s === 'object' ? s.cargo : '';
+                  return (
+                    <tr key={idx}>
+                      <td>{nombre}</td>
+                      <td>{cargo}</td>
+                      <td><button className="btn-action" onClick={() => handleDeleteSoli(idx)}>Borrar</button></td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>

@@ -43,6 +43,18 @@
   - Eliminado el bug de 3 notificaciones simultáneas al registrar una solicitud. La lógica se centralizó en `actividadGuardada` dentro del `NotificationContext`.
   - Implementación de sincronización robusta entre pestañas (Dashboard y Portal) mediante el evento de `storage` para el array de notificaciones.
 
+### [2026-07-16] — Campo "Cargo" en Solicitantes + Correcciones de Arranque
+- **Archivos:** `DbService.js`, `TicketContext.jsx`, `Database.jsx`, `RegistroActividadForm.jsx`, `Portal.jsx`, `vite.config.js`.
+- **Cambio:**
+  - **Solicitantes con Cargo:** Los solicitantes ahora se almacenan como objetos `{nombre, cargo}` en `localStorage` (antes eran strings simples). Es retrocompatible con datos existentes.
+  - **DbService.js:** `getSolicitantes` normaliza objetos a strings para los dropdowns (mismo patrón que `getResponsables`).
+  - **TicketContext.jsx:** `addSolicitante` recibe objetos, `removeSolicitante` opera sobre raw localStorage. Nueva función `getSolicitanteCargo(nombre)` para lookup de cargo.
+  - **Database.jsx:** Pestaña Solicitantes ahora incluye input de cargo y columna Cargo en la tabla. Lee `rawSolicitantes` de localStorage para mostrar objetos completos.
+  - **Inyección de cargo en tickets:** Tanto `RegistroActividadForm.jsx` como `Portal.jsx` inyectan el `cargo` del solicitante al crear un ticket, visible en la tabla de Actividades del Database.
+  - **Corrección de arranque:** Escapadas las backslashes en placeholders de `Portal.jsx` y `RegistroActividadForm.jsx` que causaban error de parseo octal en Vite 8.
+  - **Vite config:** Excluida la carpeta `project-visualization/` del escaneo de dependencias para evitar errores de build.
+- **Razón:** Permitir que los tickets reflejen el cargo del solicitante en las métricas y tablas de actividades.
+
 ---
 
 ## Junio 2026

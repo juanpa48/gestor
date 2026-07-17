@@ -7,10 +7,15 @@ export const DbService = {
   getSolicitantes: async () => {
     return new Promise(resolve => {
       setTimeout(() => {
-        const list = JSON.parse(localStorage.getItem('db_solicitantes'));
+        const rawList = JSON.parse(localStorage.getItem('db_solicitantes'));
         const defaultList = ['Juan Perez (Local)', 'Maria Lopez (Local)'];
-        if (!list) localStorage.setItem('db_solicitantes', JSON.stringify(defaultList));
-        resolve(list || defaultList);
+        if (!rawList) {
+          localStorage.setItem('db_solicitantes', JSON.stringify(defaultList));
+          resolve(defaultList);
+        } else {
+          const parsedList = rawList.map(s => typeof s === 'object' ? s.nombre : s);
+          resolve(parsedList);
+        }
       }, 300);
     });
   },

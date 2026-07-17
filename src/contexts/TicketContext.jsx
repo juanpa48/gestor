@@ -73,17 +73,32 @@ export const TicketProvider = ({ children }) => {
     // DbService.saveActividades triggers 'ticketActualizado' event, so fetchTickets will be called.
   };
 
-  const addSolicitante = async (nombre) => {
+  const addSolicitante = async (solData) => {
+    // solData puede ser string (legacy) u objeto {nombre, cargo}
+    const rawList = JSON.parse(localStorage.getItem('db_solicitantes')) || [];
+    rawList.push(solData);
+    await DbService.saveSolicitantes(rawList);
+
+    // Update local state (normalized to strings for dropdown compatibility)
+    const nombre = typeof solData === 'object' ? solData.nombre : solData;
     const newSols = [...solicitantes, nombre];
     setSolicitantes(newSols);
-    await DbService.saveSolicitantes(newSols);
   };
 
   const removeSolicitante = async (index) => {
+    const rawList = JSON.parse(localStorage.getItem('db_solicitantes')) || [];
+    rawList.splice(index, 1);
+    await DbService.saveSolicitantes(rawList);
+
     const newSols = [...solicitantes];
     newSols.splice(index, 1);
     setSolicitantes(newSols);
-    await DbService.saveSolicitantes(newSols);
+  };
+
+  const getSolicitanteCargo = (nombre) => {
+    const rawList = JSON.parse(localStorage.getItem('db_solicitantes')) || [];
+    const found = rawList.find(s => typeof s === 'object' && s.nombre === nombre);
+    return found ? found.cargo || '' : '';
   };
 
   const addResponsable = async (respData) => {
@@ -121,6 +136,7 @@ export const TicketProvider = ({ children }) => {
     updateTicket,
     addSolicitante,
     removeSolicitante,
+    getSolicitanteCargo,
     addResponsable,
     removeResponsable,
     refreshTickets: fetchTickets

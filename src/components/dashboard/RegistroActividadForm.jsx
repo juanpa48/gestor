@@ -4,7 +4,7 @@ import { DbService } from '../../services/DbService';
 import { tramitesArea1, tramitesArea2 } from '../../data/tramitesData';
 
 export const RegistroActividadForm = () => {
-  const { addTicket } = useTickets();
+  const { addTicket, getSolicitanteCargo } = useTickets();
   const [solicitantes, setSolicitantes] = useState([]);
   const [responsables, setResponsables] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -97,6 +97,7 @@ export const RegistroActividadForm = () => {
         fechaCreacion: new Date().toLocaleString(),
         nombre: formData.solicitante,
         solicitante: formData.solicitante,
+        cargo: getSolicitanteCargo(formData.solicitante),
         solicitud: formData.solicitud,
         estado: formData.estado,
         prioridad: formData.prioridad,
@@ -150,6 +151,7 @@ export const RegistroActividadForm = () => {
         fechaCreacion: new Date().toLocaleString(),
         nombre: quickFormData.qr_solicitante,
         solicitante: quickFormData.qr_solicitante,
+        cargo: getSolicitanteCargo(quickFormData.qr_solicitante),
         solicitud: quickFormData.qr_solicitud,
         estado: quickFormData.qr_estado,
         prioridad: quickFormData.qr_prioridad || 'Baja',
@@ -327,7 +329,7 @@ export const RegistroActividadForm = () => {
           {/* Fila 7 - Detalle técnico - full width */}
           <div className="form-group full-width">
             <label className="form-label" htmlFor="detalles">Ruta T / Anexos (Obligatorio para Firmas)</label>
-            <input type="text" id="detalles" name="detalles" className="form-input form-input-full" placeholder="Ej: T:\Contabilidad\Firmas\2024\..." value={formData.detalles} onChange={handleInputChange} />
+            <input type="text" id="detalles" name="detalles" className="form-input form-input-full" placeholder="Ej: T:\\Contabilidad\\Firmas\\2024\\..." value={formData.detalles} onChange={handleInputChange} />
           </div>
         </div>
 

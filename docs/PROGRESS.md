@@ -115,3 +115,36 @@ Integración del Centro de Notificaciones y gráficos de Dashboard con Chart.js 
 - **Database:** Corrección del scroll vertical/horizontal y override de variables globales para recuperar la fidelidad 1:1 al Vanilla JS.
 - **Portal:** Solución de la compresión del ancho del formulario.
 - **Notificaciones:** Eliminación definitiva de notificaciones duplicadas y sincronización cruzada entre ventanas.
+
+---
+
+## Nuevo Objetivo: Campo "Cargo" en Solicitantes
+
+**Contexto:** Los solicitantes se almacenan como strings simples. Se necesita agregar un campo `cargo` para que al crear un ticket se refleje en la tabla de actividades del Database. Sin imagen (a diferencia de responsables).
+
+### Fases de Implementación:
+
+- [x] **Fase 1: Capa de Datos (`DbService.js` + `TicketContext.jsx`)**
+  - [x] `DbService.getSolicitantes` normaliza objetos `{nombre, cargo}` → extrae `.nombre` para dropdowns.
+  - [x] `TicketContext.addSolicitante` recibe `{nombre, cargo}` y guarda el objeto completo en localStorage.
+  - [x] Exponer función `getSolicitanteCargo(nombre)` en el Context para lookup de cargo al crear tickets.
+
+- [x] **Fase 2: UI de Database (`Database.jsx`)**
+  - [x] Agregar input de cargo en el formulario de solicitantes.
+  - [x] Agregar columna "Cargo" en la tabla de solicitantes.
+  - [x] Leer `rawSolicitantes` de localStorage para mostrar objetos completos.
+
+- [x] **Fase 3: Inyección de cargo al crear tickets**
+  - [x] `RegistroActividadForm.jsx`: al crear ticket, buscar cargo del solicitante e inyectarlo.
+  - [x] `Portal.jsx`: al crear ticket, buscar cargo del solicitante e inyectarlo.
+
+- [x] **Fase 4: Verificación**
+  - [x] Crear solicitante con cargo desde `/database`.
+  - [x] Crear ticket desde Dashboard y Portal, verificar que cargo aparezca en la tabla de actividades.
+
+---
+
+## Último objetivo completado
+
+Campo "Cargo" en Solicitantes implementado. Los solicitantes se almacenan como objetos `{nombre, cargo}`, los tickets inyectan el cargo automáticamente, y la tabla de actividades en `/database` lo refleja correctamente.
+

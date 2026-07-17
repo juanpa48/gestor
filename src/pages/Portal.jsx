@@ -5,7 +5,7 @@ import { DbService } from '../services/DbService';
 import Logo from '../assets/img/Logo.png';
 
 export const Portal = () => {
-  const { actividades, solicitantes, addTicket, responsables } = useTickets();
+  const { actividades, solicitantes, addTicket, responsables, getSolicitanteCargo } = useTickets();
   const [sistemas, setSistemas] = useState({});
   const [personalTI, setPersonalTI] = useState({});
   const [rawResponsables, setRawResponsables] = useState([]);
@@ -141,6 +141,7 @@ export const Portal = () => {
         fechaCreacion: new Date().toLocaleString(),
         nombre: nombre,
         solicitante: nombre,
+        cargo: getSolicitanteCargo(nombre),
         solicitud: solicitud,
         estado: 'Pendiente',
         prioridad: prioridad,
@@ -363,7 +364,7 @@ export const Portal = () => {
                   <input 
                     type="text" 
                     className="glass-input ruta-input" 
-                    placeholder="Ej: T:\Contabilidad\Firmas\2024\..." 
+                    placeholder="Ej: T:\\Contabilidad\\Firmas\\2024\\..." 
                     required={isFirmas}
                     value={rutaT} 
                     onChange={(e) => setRutaT(e.target.value)}
