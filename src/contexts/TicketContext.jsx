@@ -58,6 +58,36 @@ export const TicketProvider = ({ children }) => {
   }, [fetchTickets]);
 
   const addTicket = async (ticketData) => {
+    // Si se crea en estado "En progreso" y no tiene fecha inicio, registrarla
+    if (ticketData.estado === 'En progreso' && !ticketData.fechaInicio) {
+      ticketData.fechaInicio = new Date().toLocaleString();
+      ticketData.fechaInicioTimestamp = Date.now();
+    }
+    
+    // Si se crea ya resuelto (registro retrospectivo)
+    if (ticketData.estado === 'Resuelto' || ticketData.estado === 'Finalizado' || ticketData.estado === 'Cerrado') {
+      if (!ticketData.fechaFin) {
+        ticketData.fechaFin = new Date().toLocaleString();
+        ticketData.fechaFinTimestamp = Date.now();
+      }
+      
+      // Si el usuario proporcionó fechas manuales (string YYYY-MM-DD), generar timestamps para el cálculo
+      if (!ticketData.fechaInicioTimestamp && ticketData.fechaInicio) {
+        const parsedStart = new Date(ticketData.fechaInicio).getTime();
+        if (!isNaN(parsedStart)) ticketData.fechaInicioTimestamp = parsedStart;
+      }
+      if (!ticketData.fechaFinTimestamp && ticketData.fechaFin) {
+        const parsedFin = new Date(ticketData.fechaFin).getTime();
+        if (!isNaN(parsedFin)) ticketData.fechaFinTimestamp = parsedFin;
+      }
+      
+      // Calcular tiempo final
+      if (ticketData.fechaInicioTimestamp && ticketData.fechaFinTimestamp) {
+        const diff = ticketData.fechaFinTimestamp - ticketData.fechaInicioTimestamp;
+        ticketData.tiempo = formatDuration(Math.abs(diff)); // Math.abs por si ponen fecha fin antes que inicio
+      }
+    }
+
     const response = await DbService.guardarActividad(ticketData);
     if (response.success) {
       await fetchTickets();
@@ -65,10 +95,48 @@ export const TicketProvider = ({ children }) => {
     return response;
   };
 
+  const formatDuration = (ms) => {
+    const diffSecs = Math.floor(ms / 1000);
+    const diffMins = Math.floor(diffSecs / 60);
+    const totalHours = Math.floor(diffMins / 60);
+    
+    const secs = diffSecs % 60;
+    const mins = diffMins % 60;
+    
+    const pad = (num) => String(num).padStart(2, '0');
+    
+    // Formato apto para Excel / Bases de datos: HH:mm:ss (donde HH puede ser mayor a 24)
+    return `${pad(totalHours)}:${pad(mins)}:${pad(secs)}`;
+  };
+
   const updateTicket = async (id, updatedFields) => {
-    const newActs = actividades.map(a => 
-      a.id === id ? { ...a, ...updatedFields } : a
-    );
+    const newActs = actividades.map(a => {
+      if (a.id === id) {
+        const merged = { ...a, ...updatedFields };
+        
+        // Registrar fecha de inicio si entra a "En progreso" por primera vez
+        if (merged.estado === 'En progreso' && !merged.fechaInicio) {
+          merged.fechaInicio = new Date().toLocaleString();
+          merged.fechaInicioTimestamp = Date.now();
+        }
+        
+        // Registrar fecha de fin y calcular tiempo si se resuelve/cierra
+        if ((merged.estado === 'Resuelto' || merged.estado === 'Finalizado' || merged.estado === 'Cerrado') && !merged.fechaFin) {
+          merged.fechaFin = new Date().toLocaleString();
+          merged.fechaFinTimestamp = Date.now();
+          
+          // Calcular el tiempo transcurrido (Columna K) si existe una fecha de inicio registrada
+          if (merged.fechaInicioTimestamp) {
+            const diff = merged.fechaFinTimestamp - merged.fechaInicioTimestamp;
+            merged.tiempo = formatDuration(diff);
+          }
+        }
+        
+        return merged;
+      }
+      return a;
+    });
+    
     await DbService.saveActividades(newActs);
     // DbService.saveActividades triggers 'ticketActualizado' event, so fetchTickets will be called.
   };

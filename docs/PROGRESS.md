@@ -118,6 +118,22 @@ Integración del Centro de Notificaciones y gráficos de Dashboard con Chart.js 
 
 ---
 
+## Nuevo Objetivo: Métricas de Tiempos y Fechas en Tickets
+
+**Objetivo:** Restaurar y automatizar el registro de fechas clave (`fechaInicio`, `fechaFin`) y el cálculo automático del `tiempo` transcurrido de los tickets, además de proveer campos para registrar la `fechaProgramada` y `accion` técnica por parte del resolutor.
+
+### Fases de Implementación:
+- [x] **Fase 1: Contexto de Tickets** (Interceptar "En progreso" y "Resuelto").
+- [x] **Fase 2: Modal de Gestión** (Añadir inputs de `fechaProgramada` y `accion`).
+
+---
+
+## Último objetivo completado
+
+Métricas de Tiempos y Fechas: Cálculo automático de `tiempo` de resolución implementado en el Context y adición de inputs `fechaProgramada` y `accion` al modal de Gestión.
+
+---
+
 ## Nuevo Objetivo: Campo "Cargo" en Solicitantes
 
 **Contexto:** Los solicitantes se almacenan como strings simples. Se necesita agregar un campo `cargo` para que al crear un ticket se refleje en la tabla de actividades del Database. Sin imagen (a diferencia de responsables).

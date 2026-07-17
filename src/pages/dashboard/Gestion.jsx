@@ -83,7 +83,9 @@ export const Gestion = () => {
       prioridad: t.prioridad || 'Baja',
       grupo: t.grupo || 'Soporte Tecnico',
       clasificacion: t.grupoExtra || t.clasificacion || '',
-      detalles: t.detalles || ''
+      detalles: t.detalles || '',
+      fechaProgramada: t.fechaProgramada || '',
+      accion: t.accion || ''
     });
     setModalOpen(true);
   };
@@ -120,7 +122,9 @@ export const Gestion = () => {
         grupo: ticketEdit.grupo,
         grupoExtra: ticketEdit.clasificacion,
         clasificacion: ticketEdit.clasificacion,
-        detalles: ticketEdit.detalles
+        detalles: ticketEdit.detalles,
+        fechaProgramada: ticketEdit.fechaProgramada,
+        accion: ticketEdit.accion
       });
       showToast('Ticket actualizado correctamente', 'success');
       setModalOpen(false);
@@ -346,6 +350,16 @@ export const Gestion = () => {
               <div className="form-group form-group-full">
                 <label className="form-label">Ruta T / Anexos</label>
                 <input type="text" id="m_detalles" className="form-input form-input-full" placeholder="Ej: T:\Contabilidad\..." value={ticketEdit.detalles} onChange={handleModalChange} />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Fecha Programada</label>
+                <input type="date" id="m_fechaProgramada" className="form-input form-input-full" value={ticketEdit.fechaProgramada} onChange={handleModalChange} />
+              </div>
+
+              <div className="form-group form-group-full">
+                <label className="form-label">Acción Técnica / Notas</label>
+                <textarea id="m_accion" className="form-input form-input-full" rows="2" placeholder="Describe lo que hiciste para resolverlo..." value={ticketEdit.accion} onChange={handleModalChange}></textarea>
               </div>
             </div>
 

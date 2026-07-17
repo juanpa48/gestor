@@ -16,6 +16,14 @@
 
 ## Julio 2026
 
+### [2026-07-16] — Implementación de Métricas de Tiempo y Fechas (Dashboard & Context)
+- **Cálculo automático de duración (Columna K):**
+  - El sistema ahora genera la propiedad `tiempo` en formato `HH:mm:ss` para facilitar el análisis en bases de datos y Excel.
+  - La lógica se inyectó a nivel global en `TicketContext.jsx`, interceptando los estados `En progreso` (crea `fechaInicio` y su timestamp) y `Resuelto/Cerrado` (crea `fechaFin` y calcula la diferencia matemática).
+  - Soporte robusto para registros retrospectivos: Si se crea un ticket desde el formulario de registro rápido directamente en estado "Resuelto" con fechas manuales (strings `YYYY-MM-DD`), el Context parsea las fechas, genera los timestamps y arroja la misma métrica `HH:mm:ss`.
+- **Nuevos campos en Modal de Gestión:**
+  - Se agregó el campo visual de `fechaProgramada` (input tipo `date`) y `accion` (text-area para notas técnicas) dentro del componente `Gestion.jsx`, sincronizados correctamente con el backend local.
+
 ### [2026-07-01] — Refactorización Completa y Migración a React (Vite) ✅
 
 - **Archivos:** Todo el directorio `src/`, `package.json`, `index.html`.
