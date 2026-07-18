@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { DbService } from '../services/DbService';
+import { DbService } from '../shared/services/DbService';
 
 const TicketContext = createContext();
 

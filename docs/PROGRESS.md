@@ -134,6 +134,20 @@ Métricas de Tiempos y Fechas: Cálculo automático de `tiempo` de resolución i
 
 ---
 
+## Nuevo Objetivo: Expansión Multi-Área (GE + GH + TI)
+
+**Objetivo:** Expandir el sistema de 1 área (Gestión Empresarial) a 3 áreas independientes con arquitectura modular + Factory Pattern.
+
+### Fases de Implementación:
+- [x] **Fase 0: Reorganización de carpetas** — Mover archivos a `shared/` y `areas/gestion-empresarial/`, crear `areasConfig.js`, actualizar todos los imports. App funciona igual que antes.
+- [ ] **Fase 1: Factory + GEContext** — Extraer lógica del TicketContext a `createAreaContext.js`.
+- [ ] **Fase 2: Portal con selector de área** — 3 botones para elegir área + formulario dinámico.
+- [ ] **Fase 3: Dashboards + Rutas dinámicas** — Link directo por área.
+- [ ] **Fase 4: Database multi-área** — CRUD separado por área.
+- [ ] **Fase 5: Pulir GH** — Campos exclusivos y adjuntar archivos.
+
+---
+
 ## Nuevo Objetivo: Campo "Cargo" en Solicitantes
 
 **Contexto:** Los solicitantes se almacenan como strings simples. Se necesita agregar un campo `cargo` para que al crear un ticket se refleje en la tabla de actividades del Database. Sin imagen (a diferencia de responsables).

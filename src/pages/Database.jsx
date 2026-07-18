@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTickets } from '../contexts/TicketContext';
-import '../styles/themes/database-theme.css'; // Import directly here
+import '../shared/styles/themes/database-theme.css'; // Import directly here
 
 export const Database = () => {
   const { actividades, solicitantes, responsables, addSolicitante, removeSolicitante, addResponsable, removeResponsable, refreshTickets } = useTickets();

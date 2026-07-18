@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useTickets } from '../../contexts/TicketContext';
-import { DbService } from '../../services/DbService';
+import { useTickets } from '../../../contexts/TicketContext';
+import { DbService } from '../../../shared/services/DbService';
 
 // Parsea fecha según la lógica original de JS
 const parseFechaCreacion = (ticket) => {

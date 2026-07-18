@@ -7,11 +7,12 @@ Este documento describe la arquitectura real del proyecto a fecha de julio de 20
 - El proyecto es una Single Page Application (SPA) en **React 18** servida localmente mediante **Vite**.
 - La persistencia sigue sin usar un backend real y se apoya en `localStorage` (encapsulado en `DbService`).
 - La aplicación usa **React Router** para enrutamiento cliente, y **Context API** (`TicketContext`) para la propagación de estado reactiva, abandonando la anterior arquitectura de eventos nativos (`CustomEvent`).
-- Existen tres grandes agrupaciones funcionales unidas por el mismo layout (DashboardLayout) y una vista independiente (Portal):
-  - `/` (Panel Principal)
-  - `/actividades` (Tabla y métricas avanzadas)
-  - `/gestion` (Vista Kanban y tabla de gestión)
+- Existen tres grandes agrupaciones funcionales unidas por el mismo layout (DashboardLayout), y dos vistas independientes (Portal y Database):
+  - `/dashboard` (Panel Principal — redirige desde `/`)
+  - `/dashboard/actividades` (Tabla y métricas avanzadas)
+  - `/dashboard/gestion` (Vista Kanban y tabla de gestión)
   - `/portal` (Portal de autogestión para colaboradores)
+  - `/database` (Herramienta CRUD de mantenimiento de datos)
 
 ## 2. Vista de Alto Nivel
 
@@ -52,9 +53,18 @@ Se utiliza React con Hooks funcionales (`useState`, `useEffect`, `useMemo`, `use
 Se preserva la capa de CSS modular, mapeando el DOM original a atributos `className` en JSX. Esto logra un diseño 1:1 sin depender de Tailwind u otras librerías externas.
 
 ### 3.3 Estado Reactivo Centralizado (Context API)
-El estado de la aplicación es distribuido globalmente mediante `TicketContext.jsx`.
-- Cualquier cambio realizado por un componente (ej. Crear Ticket, Actualizar Estado) dispara la recarga de datos en `TicketContext`.
-- La propagación es instantánea a todos los componentes que consumen el contexto (`useTickets()`).
+El estado de la aplicación es distribuido globalmente mediante dos Contexts:
+- **`TicketContext.jsx`**: Gestiona tickets, solicitantes y responsables. Incluye lógica de interceptación de estados para métricas automáticas de tiempos.
+- **`NotificationContext.jsx`**: Gestiona el ciclo de vida de notificaciones (crear, marcar leídas, limpiar), con sincronización multi-pestaña vía el evento `storage`.
+
+Cualquier cambio realizado por un componente dispara la recarga reactiva en todos los consumidores (`useTickets()`, `useNotifications()`).
+
+### 3.4 Métricas de Tiempo Automatizadas
+El `TicketContext` intercepta los cambios de estado de los tickets para registrar métricas de forma automática:
+- **`fechaInicio`** + **`fechaInicioTimestamp`**: Se captura al pasar a "En progreso" (solo la primera vez).
+- **`fechaFin`** + **`fechaFinTimestamp`**: Se captura al pasar a "Resuelto", "Finalizado" o "Cerrado".
+- **`tiempo`**: Cálculo matemático de la diferencia entre inicio y fin, en formato `HH:mm:ss` (compatible con Excel / herramientas de análisis).
+- **Registros retrospectivos**: Si se crea un ticket directamente como resuelto con fechas manuales (`YYYY-MM-DD`), el Context parsea las fechas y calcula el `tiempo` igualmente.
 
 ## 4. Componentes Principales
 
@@ -75,19 +85,40 @@ Responsabilidades:
 Responsabilidades:
 - Renderizar un toggle entre vistas Tabla / Kanban.
 - Modal complejo reactivo para edición total de tickets.
+- Campos de `fechaProgramada` y `accion` (notas técnicas del resolutor) integrados en el modal.
 
-### 4.4 Portal del Colaborador (`Portal.jsx`)
+### 4.4 Actividades (`Actividades.jsx`)
+Responsabilidades:
+- Tabla principal con sistema de filtrado avanzado.
+- Visualización de métricas y resumen de actividades.
+
+### 4.5 Portal del Colaborador (`Portal.jsx`)
 Responsabilidades:
 - Formulario avanzado (condicionales para firmas y subida de archivos).
 - Visualización de historial mediante filtrado reactivo del `TicketContext`.
+- Subcomponentes: `TicketForm.jsx`, `TicketHistory.jsx`, `StaffStatus.jsx`, `SystemStatus.jsx`.
 - Visualización del estado del personal y servidores en vivo (localStorage event listener persistido para sincronización multi-pestaña).
+
+### 4.6 Database (`Database.jsx`)
+Responsabilidades:
+- Herramienta CRUD independiente para mantenimiento de `localStorage`.
+- Visualización y edición de Actividades, Solicitantes y Responsables.
+- Ruta: `/database` (fuera del DashboardLayout).
+
+### 4.7 Notificaciones (`NotificationCenter.jsx` + `NotificationHelper.js`)
+Responsabilidades:
+- Panel desplegable de notificaciones integrado en el `Topbar`.
+- `NotificationHelper.js`: Utilidad de servicio que encapsula alertas sonoras (`AudioContext`) y notificaciones del navegador (Browser Notifications API).
 
 ## 5. Mapeo de Archivos Clave
 
 - `src/App.jsx`: Root y declaración de `react-router-dom`.
-- `src/contexts/TicketContext.jsx`: Orquestador de estado global.
+- `src/contexts/TicketContext.jsx`: Orquestador de estado global de tickets + métricas de tiempo.
+- `src/contexts/NotificationContext.jsx`: Orquestador de notificaciones y sincronización multi-pestaña.
 - `src/services/DbService.js`: Interfaz asíncrona hacia `localStorage`.
+- `src/services/NotificationHelper.js`: Alertas sonoras y notificaciones del navegador.
 - `src/data/tramitesData.js`: Fuente de la verdad de catálogos (Estructurales, Operativos).
+- `src/pages/Database.jsx`: Herramienta CRUD independiente.
 
 ## 6. CSS Modular (Heredado de Vanilla)
 
@@ -125,7 +156,8 @@ Límites actuales:
 
 ## 8. Recomendaciones para IAs Futuras
 
-- La lógica de estado global vive en `TicketContext.jsx`.
+- La lógica de estado global vive en `TicketContext.jsx` y `NotificationContext.jsx`.
 - Nunca inyectar estilos inline (`style={{...}}`) a menos que sean animaciones dinámicas estrictamente necesarias. Mantenerse usando `className`.
 - Los datos de trámites están en `src/data/tramitesData.js`.
 - La capa de BD asíncrona sigue en `src/services/DbService.js`.
+- Las métricas de tiempo (`fechaInicio`, `fechaFin`, `tiempo`) se calculan automáticamente en `TicketContext` — no duplicar esta lógica en componentes.

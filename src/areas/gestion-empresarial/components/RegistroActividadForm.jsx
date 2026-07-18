@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useTickets } from '../../contexts/TicketContext';
-import { DbService } from '../../services/DbService';
-import { tramitesArea1, tramitesArea2 } from '../../data/tramitesData';
+import { useTickets } from '../../../contexts/TicketContext';
+import { DbService } from '../../../shared/services/DbService';
+import { tramitesArea1, tramitesArea2 } from '../../../data/tramitesData';
 
 export const RegistroActividadForm = () => {
   const { addTicket, getSolicitanteCargo } = useTickets();

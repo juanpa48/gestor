@@ -1,9 +1,9 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import './styles/main.css'
+import './shared/styles/main.css'
 import App from './App.jsx'
 import { TicketProvider } from './contexts/TicketContext'
-import { NotificationProvider } from './contexts/NotificationContext'
+import { NotificationProvider } from './shared/contexts/NotificationContext'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

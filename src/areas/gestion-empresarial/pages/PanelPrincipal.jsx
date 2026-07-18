@@ -1,8 +1,8 @@
 import React from 'react';
-import { StatCards } from '../../components/dashboard/StatCards';
-import { RegistroActividadForm } from '../../components/dashboard/RegistroActividadForm';
-import { WidgetMiEstado } from '../../components/dashboard/WidgetMiEstado';
-import { WidgetSistemas } from '../../components/dashboard/WidgetSistemas';
+import { StatCards } from '../components/StatCards';
+import { RegistroActividadForm } from '../components/RegistroActividadForm';
+import { WidgetMiEstado } from '../components/WidgetMiEstado';
+import { WidgetSistemas } from '../components/WidgetSistemas';
 
 export const PanelPrincipal = () => {
   return (

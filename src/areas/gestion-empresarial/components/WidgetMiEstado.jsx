@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { DbService } from '../../services/DbService';
+import { DbService } from '../../../shared/services/DbService';
 
 export const WidgetMiEstado = () => {
   const [responsables, setResponsables] = useState([]);

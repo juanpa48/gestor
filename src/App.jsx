@@ -1,8 +1,8 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
-import { DashboardLayout } from './components/layout/DashboardLayout'
-import { PanelPrincipal } from './pages/dashboard/PanelPrincipal'
-import { Actividades } from './pages/dashboard/Actividades'
-import { Gestion } from './pages/dashboard/Gestion'
+import { DashboardLayout } from './shared/components/layout/DashboardLayout'
+import { PanelPrincipal } from './areas/gestion-empresarial/pages/PanelPrincipal'
+import { Actividades } from './areas/gestion-empresarial/pages/Actividades'
+import { Gestion } from './areas/gestion-empresarial/pages/Gestion'
 import { Portal } from './pages/Portal'
 
 import { Database } from './pages/Database'

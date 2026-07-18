@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { useTickets } from '../../contexts/TicketContext';
-import { tramitesArea1, tramitesArea2 } from '../../data/tramitesData';
+import { useTickets } from '../../../contexts/TicketContext';
+import { tramitesArea1, tramitesArea2 } from '../../../data/tramitesData';
 
 export const Gestion = () => {
   const { actividades, responsables, updateTicket } = useTickets();
