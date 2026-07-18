@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate, Navigate } from 'react-router-dom';
 import Logo from '../assets/img/Logo.png';
 import { useAreaTickets as useGEContext } from '../areas/gestion-empresarial/context/GEContext';
 import { useGHContext } from '../areas/gestion-humana/context/GHContext';
@@ -12,7 +13,8 @@ import { FormGH } from '../components/portal/forms/FormGH';
 import { FormTI } from '../components/portal/forms/FormTI';
 
 export const Portal = () => {
-  const [selectedArea, setSelectedArea] = useState(null);
+  const { area } = useParams();
+  const navigate = useNavigate();
   const [nombre, setNombre] = useState('');
 
   useEffect(() => {
@@ -20,7 +22,7 @@ export const Portal = () => {
     return () => { document.body.className = ''; };
   }, []);
 
-  if (!selectedArea) {
+  if (!area) {
     return (
       <div className="portal-container">
         <header className="portal-header">
@@ -40,7 +42,7 @@ export const Portal = () => {
             
             <div 
               className="area-card"
-              onClick={() => setSelectedArea('ge')} 
+              onClick={() => navigate('/portal/ge')} 
             >
               <div className="area-icon-circle" style={{ background: `${GE_CONFIG.color}20` }}>
                 <i className={`fa-solid ${GE_CONFIG.icono}`} style={{ fontSize: '35px', color: GE_CONFIG.color }}></i>
@@ -51,7 +53,7 @@ export const Portal = () => {
 
             <div 
               className="area-card"
-              onClick={() => setSelectedArea('gh')} 
+              onClick={() => navigate('/portal/gh')} 
             >
               <div className="area-icon-circle" style={{ background: `${GH_CONFIG.color}20` }}>
                 <i className={`fa-solid ${GH_CONFIG.icono}`} style={{ fontSize: '35px', color: GH_CONFIG.color }}></i>
@@ -62,7 +64,7 @@ export const Portal = () => {
 
             <div 
               className="area-card"
-              onClick={() => setSelectedArea('ti')} 
+              onClick={() => navigate('/portal/ti')} 
             >
               <div className="area-icon-circle" style={{ background: `${TI_CONFIG.color}20` }}>
                 <i className={`fa-solid ${TI_CONFIG.icono}`} style={{ fontSize: '35px', color: TI_CONFIG.color }}></i>
@@ -77,27 +79,29 @@ export const Portal = () => {
     );
   }
 
-  if (selectedArea === 'ge') {
+  if (area === 'ge') {
     return (
-      <PortalLayout areaConfig={GE_CONFIG} areaContext={useGEContext} onBack={() => setSelectedArea(null)} nombre={nombre} setNombre={setNombre}>
+      <PortalLayout areaConfig={GE_CONFIG} areaContext={useGEContext} onBack={() => navigate('/portal')} nombre={nombre} setNombre={setNombre}>
         <FormGE nombre={nombre} setNombre={setNombre} />
       </PortalLayout>
     );
   }
 
-  if (selectedArea === 'gh') {
+  if (area === 'gh') {
     return (
-      <PortalLayout areaConfig={GH_CONFIG} areaContext={useGHContext} onBack={() => setSelectedArea(null)} nombre={nombre} setNombre={setNombre}>
+      <PortalLayout areaConfig={GH_CONFIG} areaContext={useGHContext} onBack={() => navigate('/portal')} nombre={nombre} setNombre={setNombre}>
         <FormGH nombre={nombre} setNombre={setNombre} />
       </PortalLayout>
     );
   }
 
-  if (selectedArea === 'ti') {
+  if (area === 'ti') {
     return (
-      <PortalLayout areaConfig={TI_CONFIG} areaContext={useTIContext} onBack={() => setSelectedArea(null)} nombre={nombre} setNombre={setNombre}>
+      <PortalLayout areaConfig={TI_CONFIG} areaContext={useTIContext} onBack={() => navigate('/portal')} nombre={nombre} setNombre={setNombre}>
         <FormTI nombre={nombre} setNombre={setNombre} />
       </PortalLayout>
     );
   }
+
+  return <Navigate to="/portal" replace />;
 };

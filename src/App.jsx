@@ -20,6 +20,7 @@ function App() {
         </Route>
         
         <Route path="/portal" element={<Portal />} />
+        <Route path="/portal/:area" element={<Portal />} />
         <Route path="/database" element={<Database />} />
       </Routes>
     </Router>

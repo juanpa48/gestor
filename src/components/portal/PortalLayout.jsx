@@ -7,11 +7,6 @@ export const PortalLayout = ({ areaConfig, areaContext, onBack, children, nombre
   const [personalTI, setPersonalTI] = useState({});
   const [rawResponsables, setRawResponsables] = useState([]);
 
-  useEffect(() => {
-    document.body.className = 'portal';
-    return () => { document.body.className = ''; };
-  }, []);
-
   // Sync systems & IT staff from localStorage
   useEffect(() => {
     const handleStorage = () => {
@@ -103,7 +98,7 @@ export const PortalLayout = ({ areaConfig, areaContext, onBack, children, nombre
         <div className="header-title">
           Portal - {areaConfig.nombre}
         </div>
-        <button onClick={onBack} style={{background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', padding: '8px 16px', borderRadius: '20px', cursor: 'pointer', marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px'}}>
+        <button className="btn-volver-area" onClick={onBack} title="Volver a seleccionar área">
           <i className="fa-solid fa-arrow-left"></i> Cambiar Área
         </button>
       </header>
