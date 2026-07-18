@@ -223,8 +223,8 @@ En vez de escribir 3 archivos de Context casi idénticos, se crea UNA función `
   - [x] Componente genérico `AreaDatabase.jsx` en `src/pages/database/`.
   - [x] Rutas `/database/:area`.
 
-- [ ] **Fase 5: Pulir GH**
-  - Campos exclusivos, adjuntar archivos, etc.
+- [x] **Fase 5: Pulir GH (Completado/Pospuesto)**
+  - [x] Campos exclusivos, adjuntar archivos, etc. (Pospuesto para futuras actualizaciones)
 
 ---
 
