@@ -207,7 +207,7 @@ En vez de escribir 3 archivos de Context casi idénticos, se crea UNA función `
   6. Verificar que GE funciona exactamente igual.
   7. Eliminar el viejo `TicketContext.jsx` cuando todo esté estable.
 
-- [ ] **Fase 2: Portal con selector de área**
+- [x] **Fase 2: Portal con selector de área (COMPLETADA)**
   - Añadir 3 tarjetas/botones al Portal debajo del logo (GE, GH, TI).
   - Renderizar el formulario correspondiente al área elegida.
   - GE: formulario actual. GH: con los 6 trámites definidos. TI: con "Soporte" (placeholder).

@@ -206,3 +206,80 @@ textarea.glass-input { resize: vertical; min-height: 120px; }
 @media (max-width: 600px) {
   .portal .top-stats { grid-template-columns: 1fr; }
 }
+
+/* Área Selector Classes */
+.portal .area-selector-container {
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.portal .area-selector-title {
+  color: #fff;
+  margin-bottom: 40px;
+  font-weight: 300;
+  font-size: 28px;
+}
+
+.portal .area-cards-grid {
+  display: flex;
+  gap: 30px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.portal .area-card {
+  background: rgba(255,255,255,0.03);
+  padding: 40px 30px;
+  border-radius: 20px;
+  cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.1);
+  width: 280px;
+  transition: all 0.3s;
+  backdrop-filter: blur(10px);
+}
+
+.portal .area-card:hover {
+  background: rgba(255,255,255,0.08);
+  transform: translateY(-5px);
+}
+
+.portal .area-icon-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px auto;
+}
+
+.portal .area-card h3 {
+  color: #fff;
+  margin: 0 0 10px 0;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.portal .area-card p {
+  color: #94a3b8;
+  font-size: 13px;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.portal .btn-volver-area {
+  background: rgba(255,255,255,0.1);
+  border: none;
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.portal .btn-volver-area:hover {
+  background: rgba(255,255,255,0.2);
+}
