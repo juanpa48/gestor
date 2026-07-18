@@ -6,13 +6,13 @@ import { Gestion } from './pages/dashboard/Gestion'
 import { Portal } from './pages/Portal'
 
 import { ActiveAreaProvider } from './shared/contexts/ActiveAreaContext'
-import { Database } from './pages/Database'
+import { AreaDatabase } from './pages/database/AreaDatabase'
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/" element={<Navigate to="/portal" replace />} />
         
         <Route path="/dashboard/:area" element={
           <ActiveAreaProvider>
@@ -26,7 +26,13 @@ function App() {
         
         <Route path="/portal" element={<Portal />} />
         <Route path="/portal/:area" element={<Portal />} />
-        <Route path="/database" element={<Database />} />
+        
+        <Route path="/database" element={<Navigate to="/database/ge" replace />} />
+        <Route path="/database/:area" element={
+          <ActiveAreaProvider>
+            <AreaDatabase />
+          </ActiveAreaProvider>
+        } />
       </Routes>
     </Router>
   )

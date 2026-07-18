@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useAreaTickets as useTickets } from '../areas/gestion-empresarial/context/GEContext';
-import '../shared/styles/themes/database-theme.css'; // Import directly here
+import { useActiveArea } from '../../shared/contexts/ActiveAreaContext';
+import '../../shared/styles/themes/database-theme.css'; // Import directly here
 
-export const Database = () => {
-  const { actividades, solicitantes, responsables, addSolicitante, removeSolicitante, addResponsable, removeResponsable, refreshTickets } = useTickets();
+export const AreaDatabase = () => {
+  const { ctx, config } = useActiveArea();
+  const { actividades, solicitantes, responsables, addSolicitante, removeSolicitante, addResponsable, removeResponsable, refreshTickets } = ctx;
   
   const [activeTab, setActiveTab] = useState('actividades');
 
@@ -87,9 +88,9 @@ export const Database = () => {
   const [rawSolicitantes, setRawSolicitantes] = useState([]);
   
   useEffect(() => {
-    const raw = JSON.parse(localStorage.getItem('db_responsables')) || [];
+    const raw = JSON.parse(localStorage.getItem(config.responsablesKey)) || [];
     setRawResponsables(raw);
-  }, [responsables]);
+  }, [responsables, config.responsablesKey]);
 
   useEffect(() => {
     const raw = JSON.parse(localStorage.getItem('db_solicitantes')) || [];
@@ -98,7 +99,7 @@ export const Database = () => {
 
   return (
     <div className="database-container">
-      <h1>Base de Datos Local</h1>
+      <h1>Base de Datos Local - {config.nombre}</h1>
       <p>Vista de datos en <code>localStorage</code> (React Port).</p>
 
       <div className="db-tabs">

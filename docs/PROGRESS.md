@@ -219,9 +219,9 @@ En vez de escribir 3 archivos de Context casi idénticos, se crea UNA función `
   - [x] **Refactorización Genérica**: Actualizar las páginas para consumir `useActiveArea()` en lugar de `useGEContext()`, eliminando código hardcodeado (ej. reemplazar las listas estáticas de trámites por `config.grupos[].tramites`).
   - [x] **Sidebar Dinámico**: Actualizar los links y el color del Sidebar basado en el `ActiveAreaContext`.
 
-- [ ] **Fase 4: Database multi-área**
-  - Componente genérico `AreaDatabase.jsx` en `shared/common/`.
-  - Rutas `/database/:area`.
+- [x] **Fase 4: Database multi-área (Completado)**
+  - [x] Componente genérico `AreaDatabase.jsx` en `src/pages/database/`.
+  - [x] Rutas `/database/:area`.
 
 - [ ] **Fase 5: Pulir GH**
   - Campos exclusivos, adjuntar archivos, etc.
