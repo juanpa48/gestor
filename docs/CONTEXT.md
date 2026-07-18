@@ -31,6 +31,10 @@ Lee `docs/ARCHITECTURE.md` → Diagramas y visión sistémica real validada.
 
 Lee `docs/TECHNICAL_SPECS.md` → Patrones, riesgos, modelo de datos y reglas operativas.
 
+## Paso 8: Plan de Implementación Activo
+
+Lee `docs/IMPLEMENTATION_PLAN.md` → Plan detallado de la expansión multi-área (GE + GH + TI) con fases, decisiones confirmadas por el usuario, y la siguiente tarea pendiente.
+
 ---
 
 ## Orden de lectura rápido
@@ -44,13 +48,17 @@ Lee `docs/TECHNICAL_SPECS.md` → Patrones, riesgos, modelo de datos y reglas op
 | 5   | `docs/DECISIONS.md`    | Decisiones intencionales     |
 | 6   | `docs/ARCHITECTURE.md` | Mapa de Arquitectura real    |
 | 7   | `docs/TECHNICAL_SPECS.md`| Manual de Ingeniería / Riesgos|
+| 8   | `docs/IMPLEMENTATION_PLAN.md`| Plan activo de expansión multi-área |
 
 ---
 
 ## Estado actual del proyecto (Julio 2026)
 
 - ✅ **MIGRACIÓN A REACT COMPLETADA**: El proyecto ya no usa Vanilla JS. Todo se convirtió exitosamente a React (Vite).
-- ✅ **React Router Integrado**: Múltiples páginas mapeadas a componentes específicos (`/`, `/actividades`, `/gestion`, `/portal`).
-- ✅ **Context API Implementada**: Toda la orquestación de datos usa `TicketContext` y Hooks nativos en reemplazo del anterior bus de eventos JS manual.
-- ✅ **Componentización Total**: Todo el markup anterior en los HTML se ha descompuesto en componentes funcionales reutilizables, manteniendo 100% de la estética CSS Vanilla.
-- 🔲 Migración a backend real (Node.js/Express + PostgreSQL). Próximo paso a evaluar, ya que actualmente sigue usando `localStorage` encapsulado en `DbService`.
+- ✅ **React Router Integrado**: Múltiples páginas mapeadas a componentes específicos.
+- ✅ **Context API Implementada**: Toda la orquestación de datos usa `TicketContext` y Hooks nativos.
+- ✅ **Componentización Total**: Markup descompuesto en componentes funcionales reutilizables.
+- ✅ **Métricas de Tiempo**: Cálculo automático de duración de tickets en formato `HH:mm:ss`.
+- ✅ **Fase 0 Multi-Área Completada**: Estructura de carpetas reorganizada en `shared/` y `areas/`.
+- 🟨 **EN CURSO: Fase 1** — Crear la Factory `createAreaContext.js`. Ver `docs/IMPLEMENTATION_PLAN.md`.
+- 🔲 Migración a backend real (futuro). Actualmente sigue usando `localStorage` encapsulado en `DbService`.
