@@ -31,10 +31,6 @@ Lee `docs/ARCHITECTURE.md` → Diagramas y visión sistémica real validada.
 
 Lee `docs/TECHNICAL_SPECS.md` → Patrones, riesgos, modelo de datos y reglas operativas.
 
-## Paso 8: Plan de Implementación Activo
-
-Lee `docs/IMPLEMENTATION_PLAN.md` → Plan detallado de la expansión multi-área (GE + GH + TI) con fases, decisiones confirmadas por el usuario, y la siguiente tarea pendiente.
-
 ---
 
 ## Orden de lectura rápido
@@ -48,7 +44,6 @@ Lee `docs/IMPLEMENTATION_PLAN.md` → Plan detallado de la expansión multi-áre
 | 5   | `docs/DECISIONS.md`    | Decisiones intencionales     |
 | 6   | `docs/ARCHITECTURE.md` | Mapa de Arquitectura real    |
 | 7   | `docs/TECHNICAL_SPECS.md`| Manual de Ingeniería / Riesgos|
-| 8   | `docs/IMPLEMENTATION_PLAN.md`| Plan activo de expansión multi-área |
 
 ---
 
@@ -60,5 +55,5 @@ Lee `docs/IMPLEMENTATION_PLAN.md` → Plan detallado de la expansión multi-áre
 - ✅ **Componentización Total**: Markup descompuesto en componentes funcionales reutilizables.
 - ✅ **Métricas de Tiempo**: Cálculo automático de duración de tickets en formato `HH:mm:ss`.
 - ✅ **Fase 0 Multi-Área Completada**: Estructura de carpetas reorganizada en `shared/` y `areas/`.
-- 🟨 **EN CURSO: Fase 1** — Crear la Factory `createAreaContext.js`. Ver `docs/IMPLEMENTATION_PLAN.md`.
+- 🟨 **EN CURSO: Fase 1** — Crear la Factory `createAreaContext.js`. Ver `docs/PROGRESS.md`.
 - 🔲 Migración a backend real (futuro). Actualmente sigue usando `localStorage` encapsulado en `DbService`.
