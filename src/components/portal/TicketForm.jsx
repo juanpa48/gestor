@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useTickets } from '../../contexts/TicketContext';
+import { useAreaTickets as useTickets } from '../../areas/gestion-empresarial/context/GEContext';
 import { tramitesArea1, tramitesArea2 } from '../../data/tramitesData';
 
 export const TicketForm = () => {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTickets } from '../../contexts/TicketContext';
+import { useAreaTickets as useTickets } from '../../areas/gestion-empresarial/context/GEContext';
 
 export const TicketHistory = () => {
   const { actividades } = useTickets();

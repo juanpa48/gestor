@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useTickets } from '../../contexts/TicketContext';
+import { useAreaTickets as useTickets } from '../../areas/gestion-empresarial/context/GEContext';
 import { NotificationHelper } from '../services/NotificationHelper';
 
 export const useStorageSync = () => {

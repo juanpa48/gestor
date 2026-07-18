@@ -198,7 +198,7 @@ En vez de escribir 3 archivos de Context casi idénticos, se crea UNA función `
   - Archivos movidos a `shared/` y `areas/gestion-empresarial/`.
   - `areasConfig.js` creado y todos los imports actualizados. Build exitoso verificado.
 
-- [ ] **Fase 1: Crear la Factory + GEContext**
+- [x] **Fase 1: Crear la Factory + GEContext (COMPLETADA)**
   1. Crear `shared/contexts/createAreaContext.js` — extraer TODA la lógica de `src/contexts/TicketContext.jsx` (CRUD, métricas de tiempo `formatDuration`, interceptación de estados, solicitantes, responsables) en una función factory que recibe un `config` con `storageKey`, `responsablesKey`, `prefijo`, etc.
   2. Crear `areas/gestion-empresarial/config.js` con la configuración de GE (usar los valores de `areasConfig.js` + los trámites de `tramitesData.js`).
   3. Crear `areas/gestion-empresarial/context/GEContext.jsx` — solo 3 líneas que invoquen la Factory con el config de GE.

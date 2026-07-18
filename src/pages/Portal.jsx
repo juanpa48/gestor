@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useTickets } from '../contexts/TicketContext';
+import { useAreaTickets as useTickets } from '../areas/gestion-empresarial/context/GEContext';
 import { tramitesArea1, tramitesArea2 } from '../data/tramitesData';
 import { DbService } from '../shared/services/DbService';
 import Logo from '../assets/img/Logo.png';

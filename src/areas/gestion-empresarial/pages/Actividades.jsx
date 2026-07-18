@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useTickets } from '../../../contexts/TicketContext';
+import { useAreaTickets as useTickets } from '../context/GEContext';
 import { DbService } from '../../../shared/services/DbService';
 
 // Parsea fecha según la lógica original de JS

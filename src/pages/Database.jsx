@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useTickets } from '../contexts/TicketContext';
+import { useAreaTickets as useTickets } from '../areas/gestion-empresarial/context/GEContext';
 import '../shared/styles/themes/database-theme.css'; // Import directly here
 
 export const Database = () => {

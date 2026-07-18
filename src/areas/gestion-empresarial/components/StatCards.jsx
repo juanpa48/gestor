@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { useTickets } from '../../../contexts/TicketContext';
+import { useAreaTickets as useTickets } from '../context/GEContext';
 import {
   Chart as ChartJS,
   CategoryScale,

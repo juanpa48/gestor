@@ -30,13 +30,13 @@ export const DbService = {
   },
 
   
-  getResponsables: async () => {
+  getResponsables: async (key = 'db_responsables') => {
     return new Promise(resolve => {
       setTimeout(() => {
-        const rawList = JSON.parse(localStorage.getItem('db_responsables'));
+        const rawList = JSON.parse(localStorage.getItem(key));
         const defaultList = ['Admin TI 1', 'Admin TI 2'];
         if (!rawList) {
-          localStorage.setItem('db_responsables', JSON.stringify(defaultList));
+          localStorage.setItem(key, JSON.stringify(defaultList));
           resolve(defaultList);
         } else {
           const parsedList = rawList.map(r => typeof r === 'object' ? r.nombre : r);
@@ -46,19 +46,19 @@ export const DbService = {
     });
   },
 
-  saveResponsables: async (resps) => {
+  saveResponsables: async (resps, key = 'db_responsables') => {
     return new Promise(resolve => {
       setTimeout(() => {
-        localStorage.setItem('db_responsables', JSON.stringify(resps));
+        localStorage.setItem(key, JSON.stringify(resps));
         resolve({ success: true });
       }, 300);
     });
   },
   
-  getDashboardStats: async () => {
+  getDashboardStats: async (key = 'db_actividades') => {
     return new Promise(resolve => {
       setTimeout(() => {
-        const acts = JSON.parse(localStorage.getItem('db_actividades')) || [];
+        const acts = JSON.parse(localStorage.getItem(key)) || [];
         const open = acts.filter(a => a.estado === 'Pendiente').length;
         const inProg = acts.filter(a => a.estado === 'En progreso').length;
         const urgent = acts.filter(a => a.prioridad === 'Urgente').length;
@@ -68,10 +68,10 @@ export const DbService = {
     });
   },
   
-  getRecentTickets: async () => {
+  getRecentTickets: async (key = 'db_actividades') => {
     return new Promise(resolve => {
       setTimeout(() => {
-        const acts = JSON.parse(localStorage.getItem('db_actividades')) || [];
+        const acts = JSON.parse(localStorage.getItem(key)) || [];
         const tickets = acts.slice(-5).reverse().map(a => ({
           titulo: a.solicitud || a.nombre,
           timeAgo: a.fechaCreacion,
@@ -88,18 +88,18 @@ export const DbService = {
     });
   },
   
-  guardarActividad: async (formObj) => {
+  guardarActividad: async (formObj, key = 'db_actividades', prefix = 'TKT') => {
     return new Promise(resolve => {
       setTimeout(() => {
-        const acts = JSON.parse(localStorage.getItem('db_actividades')) || [];
-        const newId = 'TKT-' + String(acts.length + 1).padStart(3, '0');
+        const acts = JSON.parse(localStorage.getItem(key)) || [];
+        const newId = `${prefix}-` + String(acts.length + 1).padStart(3, '0');
         formObj.id = newId;
         formObj.fechaISO = new Date().toISOString();
         formObj.fechaCreacion = new Date().toLocaleString();
         formObj.nombre = formObj.solicitante;
         formObj.area = formObj.grupo || formObj.clasificacion || 'General';
         acts.push(formObj);
-        localStorage.setItem('db_actividades', JSON.stringify(acts));
+        localStorage.setItem(key, JSON.stringify(acts));
         
         // Emite un evento global para sincronización local
         window.dispatchEvent(new Event('actividadGuardada'));
@@ -109,10 +109,10 @@ export const DbService = {
     });
   },
   
-  buscarActividades: async (q) => {
+  buscarActividades: async (q, key = 'db_actividades') => {
     return new Promise(resolve => {
       setTimeout(() => {
-        const acts = JSON.parse(localStorage.getItem('db_actividades')) || [];
+        const acts = JSON.parse(localStorage.getItem(key)) || [];
         const term = (q || '').toLowerCase();
         const results = acts.filter(a => !term || (a.id || '').toLowerCase().includes(term) || (a.solicitud || '').toLowerCase().includes(term));
         resolve({success: true, resultados: results.reverse()});
@@ -120,19 +120,19 @@ export const DbService = {
     });
   },
   
-  getActividades: async () => {
+  getActividades: async (key = 'db_actividades') => {
     return new Promise(resolve => {
       setTimeout(() => {
-        const acts = JSON.parse(localStorage.getItem('db_actividades')) || [];
+        const acts = JSON.parse(localStorage.getItem(key)) || [];
         resolve(acts);
       }, 300);
     });
   },
   
-  saveActividades: async (acts) => {
+  saveActividades: async (acts, key = 'db_actividades') => {
     return new Promise(resolve => {
       setTimeout(() => {
-        localStorage.setItem('db_actividades', JSON.stringify(acts));
+        localStorage.setItem(key, JSON.stringify(acts));
         window.dispatchEvent(new Event('ticketActualizado'));
         resolve({ success: true });
       }, 300);
