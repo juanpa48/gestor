@@ -102,7 +102,9 @@ export const DbService = {
         localStorage.setItem(key, JSON.stringify(acts));
         
         // Emite un evento global para sincronización local
-        window.dispatchEvent(new Event('actividadGuardada'));
+        window.dispatchEvent(new CustomEvent('actividadGuardada', { 
+          detail: { ticket: formObj, key: key } 
+        }));
         
         resolve({success: true, message: `Actividad ${newId} guardada.`});
       }, 800);

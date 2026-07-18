@@ -79,18 +79,14 @@ export const NotificationProvider = ({ children }) => {
 
   // Listeners for global events to add notifications
   useEffect(() => {
-    const handleNuevoTicket = () => {
-      // Small delay to allow DbService to finish saving before we read
+    const handleNuevoTicket = (e) => {
+      const ticket = e.detail?.ticket;
+      
+      // Small delay to allow visual updates first if needed
       setTimeout(() => {
-        try {
-          const acts = JSON.parse(localStorage.getItem('db_actividades')) || [];
-          const ultimo = acts.length ? acts[acts.length - 1] : null;
-          if (ultimo) {
-            addNotification(`Nuevo ticket: ${ultimo.id || ''}`, `${ultimo.solicitante || ultimo.nombre || 'Un colaborador'} registró una solicitud.`);
-          } else {
-            addNotification('Nuevo ticket', 'Se registró una nueva actividad.');
-          }
-        } catch (e) {
+        if (ticket) {
+          addNotification(`Nuevo ticket: ${ticket.id || ''}`, `${ticket.solicitante || ticket.nombre || 'Un colaborador'} registró una solicitud.`);
+        } else {
           addNotification('Nuevo ticket', 'Se registró una nueva actividad.');
         }
       }, 100);

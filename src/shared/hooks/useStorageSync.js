@@ -1,9 +1,10 @@
 import { useEffect } from 'react';
-import { useAreaTickets as useTickets } from '../../areas/gestion-empresarial/context/GEContext';
+import { useActiveArea } from '../contexts/ActiveAreaContext';
 import { NotificationHelper } from '../services/NotificationHelper';
 
 export const useStorageSync = () => {
-  const { refreshTickets, actividades } = useTickets();
+  const { ctx, config } = useActiveArea();
+  const { refreshTickets, actividades } = ctx;
 
   useEffect(() => {
     // Pedimos permiso para notificaciones nativas al montar
@@ -14,8 +15,8 @@ export const useStorageSync = () => {
 
   useEffect(() => {
     const handleStorageChange = (e) => {
-      // Si el cambio viene de db_actividades y no fuimos nosotros en la misma pestaña
-      if (e.key === 'db_actividades') {
+      // Si el cambio viene de la BD del área activa y no fuimos nosotros en la misma pestaña
+      if (e.key === config.storageKey) {
         const newValue = JSON.parse(e.newValue || '[]');
         const oldValue = JSON.parse(e.oldValue || '[]');
 
@@ -43,5 +44,5 @@ export const useStorageSync = () => {
 
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
-  }, [refreshTickets, actividades.length]);
+  }, [refreshTickets, actividades.length, config.storageKey]);
 };
