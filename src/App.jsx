@@ -1,10 +1,11 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { DashboardLayout } from './shared/components/layout/DashboardLayout'
-import { PanelPrincipal } from './areas/gestion-empresarial/pages/PanelPrincipal'
-import { Actividades } from './areas/gestion-empresarial/pages/Actividades'
-import { Gestion } from './areas/gestion-empresarial/pages/Gestion'
+import { PanelPrincipal } from './pages/dashboard/PanelPrincipal'
+import { Actividades } from './pages/dashboard/Actividades'
+import { Gestion } from './pages/dashboard/Gestion'
 import { Portal } from './pages/Portal'
 
+import { ActiveAreaProvider } from './shared/contexts/ActiveAreaContext'
 import { Database } from './pages/Database'
 
 function App() {
@@ -13,7 +14,11 @@ function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         
-        <Route path="/dashboard" element={<DashboardLayout />}>
+        <Route path="/dashboard/:area" element={
+          <ActiveAreaProvider>
+            <DashboardLayout />
+          </ActiveAreaProvider>
+        }>
           <Route index element={<PanelPrincipal />} />
           <Route path="actividades" element={<Actividades />} />
           <Route path="gestion" element={<Gestion />} />

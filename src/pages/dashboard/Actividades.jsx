@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useAreaTickets as useTickets } from '../context/GEContext';
-import { DbService } from '../../../shared/services/DbService';
+import { useActiveArea } from '../../shared/contexts/ActiveAreaContext';
 
 // Parsea fecha según la lógica original de JS
 const parseFechaCreacion = (ticket) => {
@@ -35,8 +34,8 @@ const parseFechaCreacion = (ticket) => {
 };
 
 export const Actividades = () => {
-  const { actividades } = useTickets();
-  const [responsables, setResponsables] = useState([]);
+  const { ctx } = useActiveArea();
+  const { actividades, responsables } = ctx;
   const [searchQuery, setSearchQuery] = useState('');
   
   const [filters, setFilters] = useState({
@@ -45,14 +44,6 @@ export const Actividades = () => {
     responsable: '',
     periodo: ''
   });
-
-  useEffect(() => {
-    const loadResp = async () => {
-      const resps = await DbService.getResponsables();
-      setResponsables(resps || []);
-    };
-    loadResp();
-  }, []);
 
   useEffect(() => {
     const handleSearch = (e) => {

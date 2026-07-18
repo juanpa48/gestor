@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useAreaTickets as useTickets } from '../context/GEContext';
+import { useActiveArea } from '../../../shared/contexts/ActiveAreaContext';
 import { DbService } from '../../../shared/services/DbService';
-import { tramitesArea1, tramitesArea2 } from '../../../data/tramitesData';
 
 export const RegistroActividadForm = () => {
-  const { addTicket, getSolicitanteCargo } = useTickets();
+  const { ctx, config } = useActiveArea();
+  const { addTicket, getSolicitanteCargo, responsables } = ctx;
   const [solicitantes, setSolicitantes] = useState([]);
-  const [responsables, setResponsables] = useState([]);
   const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -37,14 +36,10 @@ export const RegistroActividadForm = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [sols, resps] = await Promise.all([
-          DbService.getSolicitantes(),
-          DbService.getResponsables()
-        ]);
+        const sols = await DbService.getSolicitantes();
         setSolicitantes(sols || []);
-        setResponsables(resps || []);
       } catch (err) {
-        console.error("Error loading form data", err);
+        console.error("Error loading solicitantes", err);
       }
     };
     loadData();
@@ -180,10 +175,9 @@ export const RegistroActividadForm = () => {
   };
 
   const renderTramites = () => {
-    if (formData.grupo === 'Área 1 (Estructurales)') {
-      return tramitesArea1.map(t => <option key={t} value={t}>{t}</option>);
-    } else if (formData.grupo === 'Área 2 (Operativos)') {
-      return tramitesArea2.map(t => <option key={t} value={t}>{t}</option>);
+    const grupoEncontrado = config.grupos.find(g => formData.grupo === g.nombre);
+    if (grupoEncontrado) {
+      return grupoEncontrado.tramites.map(t => <option key={t} value={t}>{t}</option>);
     }
     return <option value="" disabled>Primero seleccione un Área...</option>;
   };
@@ -267,8 +261,9 @@ export const RegistroActividadForm = () => {
               <i className="fa-solid fa-users-gear select-icon-left"></i>
               <select id="grupo" name="grupo" className="form-select padded-left" required value={formData.grupo} onChange={handleInputChange}>
                 <option value="" disabled>Seleccione el Área...</option>
-                <option value="Área 1 (Estructurales)">Área 1 (Estructurales / Legales)</option>
-                <option value="Área 2 (Operativos)">Área 2 (Operativos / Documentales)</option>
+                {config.grupos.map((g, idx) => (
+                  <option key={idx} value={g.nombre}>{g.nombre}</option>
+                ))}
               </select>
               <i className="fa-solid fa-chevron-down select-arrow"></i>
             </div>

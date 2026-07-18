@@ -1,19 +1,25 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-
-const NAV_ITEMS = [
-  { path: '/dashboard', icon: 'fa-border-all', label: 'Panel Principal', exact: true },
-  { path: '/dashboard/actividades', icon: 'fa-clipboard-list', label: 'Actividades' },
-  { path: '/dashboard/gestion', icon: 'fa-tasks', label: 'Gestión' },
-];
+import { useActiveArea } from '../../contexts/ActiveAreaContext';
 
 export const Sidebar = () => {
+  const { area, config } = useActiveArea();
+
+  const NAV_ITEMS = [
+    { path: `/dashboard/${area}`, icon: 'fa-border-all', label: 'Panel Principal', exact: true },
+    { path: `/dashboard/${area}/actividades`, icon: 'fa-clipboard-list', label: 'Actividades' },
+    { path: `/dashboard/${area}/gestion`, icon: 'fa-tasks', label: 'Gestión' },
+  ];
+
   return (
     <aside className="sidebar">
       <div className="sidebar-logo">
         <img src="/img/Logo.png" alt="Logo de Empresa" />
       </div>
-      <div className="sidebar-section-title">Estado del Sistema</div>
+      <div className="sidebar-section-title" style={{ color: config.color }}>
+        <i className={`fa-solid ${config.icono}`} style={{ marginRight: '8px' }}></i>
+        {config.nombre}
+      </div>
       <nav className="sidebar-nav">
         {NAV_ITEMS.map((item) => (
           <NavLink

@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { useAreaTickets as useTickets } from '../context/GEContext';
+import { useActiveArea } from '../../../shared/contexts/ActiveAreaContext';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement } from 'chart.js';
 import { Pie, Bar, Doughnut } from 'react-chartjs-2';
 
@@ -8,7 +8,8 @@ ChartJS.defaults.color = '#94a3b8';
 ChartJS.defaults.font.family = "'DM Sans', sans-serif";
 
 export const DashboardCharts = () => {
-  const { actividades } = useTickets();
+  const { ctx, config } = useActiveArea();
+  const { actividades } = ctx;
 
   const chartData = useMemo(() => {
     const acts = actividades || [];
@@ -30,10 +31,13 @@ export const DashboardCharts = () => {
     const uResueltas = urgentes.filter(a => a.estado === 'Resuelto' || a.estado === 'Cerrado').length;
     const uPendientes = urgentes.filter(a => a.estado === 'Pendiente' || a.estado === 'En progreso').length;
 
-    // 4. Volumen por Área
+    // 4. Volumen por Área dinámica
     const strArea = (grupo) => (grupo || '').toLowerCase();
-    const aArea1 = acts.filter(a => strArea(a.grupo).includes('área 1') || strArea(a.grupo).includes('area 1')).length;
-    const aArea2 = acts.filter(a => strArea(a.grupo).includes('área 2') || strArea(a.grupo).includes('area 2')).length;
+    const labels = config.grupos.map(g => g.nombre.substring(0, 10)); // nombre corto
+    const data = config.grupos.map(g => {
+      const gName = g.nombre.toLowerCase();
+      return acts.filter(a => strArea(a.grupo).includes(gName) || strArea(a.grupoExtra).includes(gName)).length;
+    });
 
     return {
       pie: {
@@ -53,9 +57,9 @@ export const DashboardCharts = () => {
         }]
       },
       barVert: {
-        labels: ['Área 1', 'Área 2'],
+        labels: labels,
         datasets: [{
-          data: [aArea1, aArea2],
+          data: data,
           backgroundColor: '#10b981',
           borderRadius: 4
         }]

@@ -1,9 +1,9 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { useAreaTickets as useTickets } from '../context/GEContext';
-import { tramitesArea1, tramitesArea2 } from '../../../data/tramitesData';
+import { useActiveArea } from '../../shared/contexts/ActiveAreaContext';
 
 export const Gestion = () => {
-  const { actividades, responsables, updateTicket } = useTickets();
+  const { ctx, config } = useActiveArea();
+  const { actividades, responsables, updateTicket } = ctx;
   const [view, setView] = useState('tabla'); // 'tabla' o 'kanban'
   const [filtroEstado, setFiltroEstado] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -103,13 +103,11 @@ export const Gestion = () => {
   };
 
   const renderTramites = () => {
-    let lista = [];
-    if (ticketEdit.grupo.includes('Área 1') || ticketEdit.grupo.includes('Estructural')) {
-      lista = tramitesArea1;
-    } else if (ticketEdit.grupo.includes('Área 2') || ticketEdit.grupo.includes('Operativo')) {
-      lista = tramitesArea2;
+    const grupoEncontrado = config.grupos.find(g => ticketEdit.grupo.includes(g.nombre) || g.nombre.includes(ticketEdit.grupo));
+    if (grupoEncontrado) {
+      return grupoEncontrado.tramites.map(t => <option key={t} value={t}>{t}</option>);
     }
-    return lista.map(t => <option key={t} value={t}>{t}</option>);
+    return [];
   };
 
   const saveEdits = async () => {
@@ -328,8 +326,9 @@ export const Gestion = () => {
                   <i className="fa-solid fa-users-gear select-icon-left"></i>
                   <select id="m_grupo" className="form-select padded-left" value={ticketEdit.grupo} onChange={handleModalChange}>
                     <option value="" disabled>Seleccione el Área...</option>
-                    <option value="Área 1 (Estructurales)">Área 1 (Estructurales / Legales)</option>
-                    <option value="Área 2 (Operativos)">Área 2 (Operativos / Documentales)</option>
+                    {config.grupos.map((g, idx) => (
+                      <option key={idx} value={g.nombre}>{g.nombre}</option>
+                    ))}
                   </select>
                   <i className="fa-solid fa-chevron-down select-arrow"></i>
                 </div>

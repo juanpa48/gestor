@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { useAreaTickets as useTickets } from '../context/GEContext';
+import { useActiveArea } from '../../../shared/contexts/ActiveAreaContext';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -17,7 +17,8 @@ ChartJS.defaults.color = '#94a3b8';
 ChartJS.defaults.font.family = "'DM Sans', sans-serif";
 
 export const StatCards = () => {
-  const { actividades } = useTickets();
+  const { ctx, config } = useActiveArea();
+  const { actividades } = ctx;
 
   // Mapear los datos reales para las estadísticas principales
   const stats = useMemo(() => {
@@ -87,21 +88,26 @@ export const StatCards = () => {
     }
   };
 
-  // Chart 3: Resolución (Barra Vertical)
+  // Chart 3: Resolución por Área (Barra Vertical) dinámica según grupos
   const chart3Data = useMemo(() => {
     const strArea = (grupo) => (grupo || '').toLowerCase();
-    const aArea1 = actividades.filter(a => strArea(a.grupo).includes('área 1') || strArea(a.grupo).includes('area 1')).length;
-    const aArea2 = actividades.filter(a => strArea(a.grupo).includes('área 2') || strArea(a.grupo).includes('area 2')).length;
+    
+    // Tomar los primeros 2 o 3 grupos de config.grupos
+    const labels = config.grupos.map(g => g.nombre.substring(0, 10)); // nombre corto
+    const data = config.grupos.map(g => {
+      const gName = g.nombre.toLowerCase();
+      return actividades.filter(a => strArea(a.grupo).includes(gName) || strArea(a.grupoExtra).includes(gName)).length;
+    });
 
     return {
-      labels: ['Área 1', 'Área 2'],
+      labels: labels,
       datasets: [{
-        data: [aArea1, aArea2],
+        data: data,
         backgroundColor: '#10b981',
         borderRadius: 4
       }]
     };
-  }, [actividades]);
+  }, [actividades, config.grupos]);
 
   const chart3Options = {
     responsive: true,

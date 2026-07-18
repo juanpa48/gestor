@@ -212,11 +212,12 @@ En vez de escribir 3 archivos de Context casi idénticos, se crea UNA función `
   - Renderizar el formulario correspondiente al área elegida.
   - GE: formulario actual. GH: con los 6 trámites definidos. TI: con "Soporte" (placeholder).
 
-- [ ] **Fase 3: Dashboards + Rutas dinámicas**
-  - Crear componentes genéricos en `shared/common/` (AreaDashboard, AreaGestion, AreaActividades).
-  - Cada área crea páginas wrapper que consumen los genéricos con su config.
-  - Implementar rutas `/dashboard/:area/...` en `App.jsx`.
-  - Sidebar muestra nombre y color del área activa.
+- [x] **Fase 3: Dashboards y Rutas dinámicas (Completado)**
+  - [x] **Enrutamiento Dashboard**: Modificar `App.jsx` para usar `<Route path="/dashboard/:area">`.
+  - [x] **Componentes Compartidos**: Mover las páginas del dashboard de GE (`PanelPrincipal.jsx`, `Actividades.jsx`, `Gestion.jsx` y sus componentes) a `src/pages/dashboard/`.
+  - [x] **ActiveAreaContext**: Crear un contexto "puente" que consuma el ID del área en la URL y pase el proveedor correcto (`GEProvider`, `GHProvider`, `TIProvider`) a las vistas genéricas.
+  - [x] **Refactorización Genérica**: Actualizar las páginas para consumir `useActiveArea()` en lugar de `useGEContext()`, eliminando código hardcodeado (ej. reemplazar las listas estáticas de trámites por `config.grupos[].tramites`).
+  - [x] **Sidebar Dinámico**: Actualizar los links y el color del Sidebar basado en el `ActiveAreaContext`.
 
 - [ ] **Fase 4: Database multi-área**
   - Componente genérico `AreaDatabase.jsx` en `shared/common/`.

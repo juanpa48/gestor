@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { DbService } from '../../../shared/services/DbService';
+import { useActiveArea } from '../../../shared/contexts/ActiveAreaContext';
 
 export const WidgetMiEstado = () => {
-  const [responsables, setResponsables] = useState([]);
+  const { ctx, config } = useActiveArea();
+  const { responsables } = ctx;
   const [miNombre, setMiNombre] = useState('');
   const [miEstado, setMiEstado] = useState('disponible');
 
   useEffect(() => {
-    const loadNombres = async () => {
-      const resps = await DbService.getResponsables();
-      setResponsables(resps || []);
-      
-      const savedSelection = localStorage.getItem('db_mi_seleccion');
+    const loadSelection = () => {
+      const savedSelection = localStorage.getItem(`db_mi_seleccion_${config.id}`);
       if (savedSelection) {
         try {
           const parsed = JSON.parse(savedSelection);
@@ -19,8 +17,8 @@ export const WidgetMiEstado = () => {
         } catch (e) {}
       }
     };
-    loadNombres();
-  }, []);
+    loadSelection();
+  }, [config.id]);
 
   const handleSetEstadoRapido = (estado) => {
     setMiEstado(estado);
@@ -38,7 +36,7 @@ export const WidgetMiEstado = () => {
       timestamp: Date.now()
     };
 
-    localStorage.setItem('db_mi_seleccion', JSON.stringify(estadoObj));
+    localStorage.setItem(`db_mi_seleccion_${config.id}`, JSON.stringify(estadoObj));
 
     const allStates = JSON.parse(localStorage.getItem('db_estado_personal') || '{}');
     allStates[miNombre] = estadoObj;
