@@ -7,25 +7,25 @@ Este documento describe la arquitectura real del proyecto a fecha de julio de 20
 - El proyecto es una Single Page Application (SPA) en **React 18** servida localmente mediante **Vite**.
 - La persistencia sigue sin usar un backend real y se apoya en `localStorage` (encapsulado en `DbService`).
 - La aplicación usa **React Router** para enrutamiento cliente, y **Context API** (`TicketContext`) para la propagación de estado reactiva, abandonando la anterior arquitectura de eventos nativos (`CustomEvent`).
-- Existen tres grandes agrupaciones funcionales unidas por el mismo layout (DashboardLayout), y dos vistas independientes (Portal y Database):
-  - `/dashboard` (Panel Principal — redirige desde `/`)
-  - `/dashboard/actividades` (Tabla y métricas avanzadas)
-  - `/dashboard/gestion` (Vista Kanban y tabla de gestión)
-  - `/portal` (Portal de autogestión para colaboradores)
-  - `/database` (Herramienta CRUD de mantenimiento de datos)
+- Existen múltiples áreas de gestión unidas bajo los mismos layouts mediante rutas dinámicas:
+  - `/dashboard/:area` (Panel Principal dinámico)
+  - `/dashboard/:area/actividades` (Tabla y métricas avanzadas)
+  - `/dashboard/:area/gestion` (Vista Kanban y tabla de gestión)
+  - `/portal/:area` (Portal de autogestión para colaboradores)
+  - `/database/:area` (Herramienta CRUD de mantenimiento de datos aislada por área)
 
 ## 2. Vista de Alto Nivel
 
 ```mermaid
 flowchart LR
-    U1["Colaborador"] --> P["/portal"]
-    U2["Gestora / Administradora"] --> D["/ (Dashboard)"]
+    U1["Colaborador"] --> P["/portal/:area"]
+    U2["Gestora / Administradora"] --> D["/dashboard/:area"]
 
     subgraph Frontend["React (Vite)"]
         P
         D
         R["React Router"]
-        CTX["TicketContext"]
+        CTX["ActiveAreaContext\n(factory: createAreaContext)"]
     end
 
     subgraph Services["Capa de Servicios"]
@@ -53,11 +53,12 @@ Se utiliza React con Hooks funcionales (`useState`, `useEffect`, `useMemo`, `use
 Se preserva la capa de CSS modular, mapeando el DOM original a atributos `className` en JSX. Esto logra un diseño 1:1 sin depender de Tailwind u otras librerías externas.
 
 ### 3.3 Estado Reactivo Centralizado (Context API)
-El estado de la aplicación es distribuido globalmente mediante dos Contexts:
-- **`TicketContext.jsx`**: Gestiona tickets, solicitantes y responsables. Incluye lógica de interceptación de estados para métricas automáticas de tiempos.
-- **`NotificationContext.jsx`**: Gestiona el ciclo de vida de notificaciones (crear, marcar leídas, limpiar), con sincronización multi-pestaña vía el evento `storage`.
+El estado de la aplicación es distribuido globalmente mediante Contexts altamente dinámicos:
+- **`createAreaContext.jsx`**: Un factory que genera contextos aislados (GE, GH, TI) inyectando la configuración específica de cada área.
+- **`ActiveAreaContext.jsx`**: Actúa como un puente dinámico. Lee el parámetro `:area` de la URL, selecciona el contexto adecuado (ej. `GEContext`) y expone `useActiveArea()`.
+- **`NotificationContext.jsx`**: Gestiona el ciclo de vida de notificaciones visuales, mientras que `useStorageSync.js` maneja la alerta sonora basada en cambios de `localStorage` de acuerdo al `storageKey` del área activa.
 
-Cualquier cambio realizado por un componente dispara la recarga reactiva en todos los consumidores (`useTickets()`, `useNotifications()`).
+Cualquier cambio realizado por un componente dispara la recarga reactiva en todos los consumidores (`useActiveArea()`, `useNotifications()`).
 
 ### 3.4 Métricas de Tiempo Automatizadas
 El `TicketContext` intercepta los cambios de estado de los tickets para registrar métricas de forma automática:
@@ -99,11 +100,11 @@ Responsabilidades:
 - Subcomponentes: `TicketForm.jsx`, `TicketHistory.jsx`, `StaffStatus.jsx`, `SystemStatus.jsx`.
 - Visualización del estado del personal y servidores en vivo (localStorage event listener persistido para sincronización multi-pestaña).
 
-### 4.6 Database (`Database.jsx`)
+### 4.6 Database (`AreaDatabase.jsx`)
 Responsabilidades:
 - Herramienta CRUD independiente para mantenimiento de `localStorage`.
-- Visualización y edición de Actividades, Solicitantes y Responsables.
-- Ruta: `/database` (fuera del DashboardLayout).
+- Consumo dinámico de `useActiveArea` para aislar `responsables` y `actividades` por área.
+- Ruta: `/database/:area` (fuera del DashboardLayout).
 
 ### 4.7 Notificaciones (`NotificationCenter.jsx` + `NotificationHelper.js`)
 Responsabilidades:
@@ -113,7 +114,8 @@ Responsabilidades:
 ## 5. Mapeo de Archivos Clave
 
 - `src/App.jsx`: Root y declaración de `react-router-dom`.
-- `src/contexts/TicketContext.jsx`: Orquestador de estado global de tickets + métricas de tiempo.
+- `src/shared/contexts/createAreaContext.jsx`: Factory para crear contextos de área.
+- `src/shared/contexts/ActiveAreaContext.jsx`: Orquestador dinámico que provee la información del área según la URL.
 - `src/contexts/NotificationContext.jsx`: Orquestador de notificaciones y sincronización multi-pestaña.
 - `src/services/DbService.js`: Interfaz asíncrona hacia `localStorage`.
 - `src/services/NotificationHelper.js`: Alertas sonoras y notificaciones del navegador.
@@ -156,7 +158,7 @@ Límites actuales:
 
 ## 8. Recomendaciones para IAs Futuras
 
-- La lógica de estado global vive en `TicketContext.jsx` y `NotificationContext.jsx`.
+- La lógica de estado global vive en `ActiveAreaContext.jsx` que funciona como proxy hacia `GEContext`, `GHContext` o `TIContext`.
 - Nunca inyectar estilos inline (`style={{...}}`) a menos que sean animaciones dinámicas estrictamente necesarias. Mantenerse usando `className`.
 - Los datos de trámites están en `src/data/tramitesData.js`.
 - La capa de BD asíncrona sigue en `src/services/DbService.js`.

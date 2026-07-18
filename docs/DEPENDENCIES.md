@@ -19,7 +19,8 @@ flowchart TD
     end
 
     subgraph Estado Global
-        CTX["TicketContext.jsx\n(Proveedor)"]
+        CTX["ActiveAreaContext.jsx\n(Enrutador de Contextos)"]
+        GE["GEContext / GHContext / TIContext"]
     end
 
     subgraph Capa de Datos
@@ -31,7 +32,8 @@ flowchart TD
     U2 --> D
     P <--> CTX
     D <--> CTX
-    CTX <--> DB
+    CTX <--> GE
+    GE <--> DB
     P -.-> TR
     D -.-> TR
 ```
@@ -40,16 +42,16 @@ flowchart TD
 
 ## Componentes y sus Conexiones
 
-### 📄 Contexto Global (`src/contexts/TicketContext.jsx`)
-- **Propósito:** Orquesta el estado global de tickets y catálogos, reemplazando el bus de `CustomEvent` que existía en Vanilla JS.
-- **Expone:** `actividades`, `solicitantes`, `responsables`, `addTicket()`, `updateTicket()`, `refreshTickets()`.
-- **Depende de:** `DbService.js` (para leer/escribir en localStorage).
-- **Consumido por:** Prácticamente todas las páginas y componentes del proyecto vía el hook `useTickets()`.
+### 📄 Contexto Dinámico (`src/shared/contexts/ActiveAreaContext.jsx`)
+- **Propósito:** Actúa como proxy que lee la URL y devuelve el contexto correcto (`GEContext`, `GHContext` o `TIContext`).
+- **Expone:** `ctx` (con `actividades`, `solicitantes`, `responsables`, `addTicket()`, etc) y `config` (datos de área).
+- **Depende de:** `createAreaContext.jsx` que a su vez consume `DbService.js`.
+- **Consumido por:** Prácticamente todas las páginas y componentes del proyecto vía el hook `useActiveArea()`.
 
 ---
 
 ### 📄 Portal del Colaborador (`src/pages/Portal.jsx`)
-- **Ruta:** `/portal`
+- **Rutas:** `/portal` y `/portal/:area`
 - **Propósito:** Formulario autónomo donde los colaboradores envían solicitudes.
 - **Dependencias Directas:**
   - `useTickets()` → Lee solicitantes, lee actividades (para filtrar el historial personal del usuario).
@@ -62,23 +64,23 @@ flowchart TD
 ### 📄 Dashboard Administrativo (Multi-página reactiva)
 
 #### 📄 `src/App.jsx`
-- Raíz del árbol de React. Implementa `BrowserRouter` y envuelve la app en `TicketContext.Provider`.
-- Rutea `/portal` independiente, y `/`, `/actividades`, `/gestion` bajo el `DashboardLayout`.
+- Raíz del árbol de React. Implementa `BrowserRouter`.
+- Rutea `/portal/:area` independiente, y `/dashboard/:area`, `/dashboard/:area/actividades`, `/dashboard/:area/gestion` bajo el `DashboardLayout` provisto por `ActiveAreaProvider`.
 
 #### 📄 `src/components/layout/DashboardLayout.jsx`
 - **Propósito:** Shell principal de la app administrativa. Contiene Sidebar y Topbar.
 - Emite un evento document-level (`searchTriggered`) desde la barra de búsqueda del Topbar, que es interceptado por las páginas hijas.
 
-#### 📄 `src/pages/dashboard/PanelPrincipal.jsx` (Ruta `/`)
+#### 📄 `src/pages/dashboard/PanelPrincipal.jsx` (Ruta `/dashboard/:area`)
 - Renderiza métricas (`StatCards` usando `react-chartjs-2`).
 - Contiene el formulario rápido `RegistroActividadForm`.
 - Renderiza los widgets `WidgetMiEstado` y `WidgetSistemas`.
 
-#### 📄 `src/pages/dashboard/Actividades.jsx` (Ruta `/actividades`)
+#### 📄 `src/pages/dashboard/Actividades.jsx` (Ruta `/dashboard/:area/actividades`)
 - Tabla detallada con múltiples filtros combinados.
 - Recrea las tarjetas `.quick-stats` mediante `useMemo` iterando sobre los tickets activos extraídos de `useTickets()`.
 
-#### 📄 `src/pages/dashboard/Gestion.jsx` (Ruta `/gestion`)
+#### 📄 `src/pages/dashboard/Gestion.jsx` (Ruta `/dashboard/:area/gestion`)
 - Toggle de vistas Tabla y Kanban.
 - **Modal de edición complejo:** Inyecta un `<div className="modal-overlay">` controlado por estado de React.
 - Muta los tickets llamando a `updateTicket()` del context.

@@ -54,6 +54,7 @@ Lee `docs/TECHNICAL_SPECS.md` → Patrones, riesgos, modelo de datos y reglas op
 - ✅ **Context API Implementada**: Toda la orquestación de datos usa `TicketContext` y Hooks nativos.
 - ✅ **Componentización Total**: Markup descompuesto en componentes funcionales reutilizables.
 - ✅ **Métricas de Tiempo**: Cálculo automático de duración de tickets en formato `HH:mm:ss`.
-- ✅ **Fase 0 Multi-Área Completada**: Estructura de carpetas reorganizada en `shared/` y `areas/`.
-- 🟨 **EN CURSO: Fase 1** — Crear la Factory `createAreaContext.js`. Ver `docs/PROGRESS.md`.
+- ✅ **Fase 0 y 1 Completadas**: Reestructuración multi-área y creación de `createAreaContext.jsx`.
+- ✅ **Fase 2, 3 y 4 Completadas**: Portales dinámicos, Dashboards adaptables por área y Base de Datos Multi-Área.
+- 🟨 **EN CURSO**: Puliendo detalles específicos por área (ej. Fase 5 Pospuesta) y optimizaciones de UI.
 - 🔲 Migración a backend real (futuro). Actualmente sigue usando `localStorage` encapsulado en `DbService`.
