@@ -65,6 +65,6 @@ export const NotificationHelper = {
   // Método principal que agrupa sonido y notificación visual
   notify(title, body) {
     this.playNotificationSound();
-    this.showNativeNotification(title, { body });
+    this.showNativeNotification(title, { body, requireInteraction: true });
   }
 };
