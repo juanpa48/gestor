@@ -67,7 +67,24 @@ export const AuthProvider = ({ children }) => {
     const user = users[userIndex];
 
     if (user.bloqueado) {
-      return { success: false, message: 'Cuenta bloqueada por múltiples intentos fallidos. Contacte al Admin de TI.' };
+      if (user.bloqueadoHasta) {
+        const ahora = Date.now();
+        if (ahora < user.bloqueadoHasta) {
+          const minRestantes = Math.ceil((user.bloqueadoHasta - ahora) / 60000);
+          return { success: false, message: `Cuenta bloqueada. Intente de nuevo en ${minRestantes} minuto(s).` };
+        } else {
+          // El tiempo expiró, desbloquear
+          user.bloqueado = false;
+          user.bloqueadoHasta = null;
+          user.intentosFallidos = 0;
+          // Guardamos temporalmente el reset, aunque si falla de nuevo se sumará 1
+          users[userIndex] = user;
+          localStorage.setItem('db_usuarios', JSON.stringify(users));
+        }
+      } else {
+        // Bloqueo manual/permanente (legacy o forzado)
+        return { success: false, message: 'Cuenta bloqueada permanente. Contacte al Admin de TI.' };
+      }
     }
 
     const providedHash = await hashPassword(password);
@@ -78,7 +95,8 @@ export const AuthProvider = ({ children }) => {
       
       if (user.intentosFallidos >= 4) {
         user.bloqueado = true;
-        msg = 'Cuenta bloqueada por superar el límite de 4 intentos fallidos.';
+        user.bloqueadoHasta = Date.now() + (15 * 60 * 1000); // 15 minutos
+        msg = 'Cuenta bloqueada por superar intentos. Intente en 15 minutos.';
       } else {
         msg += ` Te quedan ${4 - user.intentosFallidos} intento(s).`;
       }
@@ -114,11 +132,35 @@ export const AuthProvider = ({ children }) => {
     setCurrentUser(null);
   }, []);
 
+  const changePassword = async (oldPassword, newPassword) => {
+    if (!currentUser) return { success: false, message: 'No hay sesión activa.' };
+
+    const users = JSON.parse(localStorage.getItem('db_usuarios')) || [];
+    const userIndex = users.findIndex(u => u.username === currentUser.username);
+
+    if (userIndex === -1) return { success: false, message: 'Usuario no encontrado.' };
+
+    const user = users[userIndex];
+    const oldHash = await hashPassword(oldPassword);
+
+    if (oldHash !== user.passwordHash) {
+      return { success: false, message: 'La contraseña actual es incorrecta.' };
+    }
+
+    const newHash = await hashPassword(newPassword);
+    user.passwordHash = newHash;
+    users[userIndex] = user;
+    localStorage.setItem('db_usuarios', JSON.stringify(users));
+
+    return { success: true, message: 'Contraseña actualizada con éxito.' };
+  };
+
   const value = {
     currentUser,
     loading,
     login,
-    logout
+    logout,
+    changePassword
   };
 
   return (
