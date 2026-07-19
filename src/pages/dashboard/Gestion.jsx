@@ -346,11 +346,6 @@ export const Gestion = () => {
                 </div>
               </div>
 
-              <div className="form-group form-group-full">
-                <label className="form-label">Ruta T / Anexos</label>
-                <input type="text" id="m_detalles" className="form-input form-input-full" placeholder="Ej: T:\Contabilidad\..." value={ticketEdit.detalles} onChange={handleModalChange} />
-              </div>
-
               <div className="form-group">
                 <label className="form-label">Fecha Programada</label>
                 <input type="date" id="m_fechaProgramada" className="form-input form-input-full" value={ticketEdit.fechaProgramada} onChange={handleModalChange} />

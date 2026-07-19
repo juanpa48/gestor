@@ -7,12 +7,8 @@ export const FormGE = ({ nombre, setNombre }) => {
   const [areaGestion, setAreaGestion] = useState('');
   const [tipoTramite, setTipoTramite] = useState('');
   const [solicitud, setSolicitud] = useState('');
-  const [rutaT, setRutaT] = useState('');
-  const [checkPdf, setCheckPdf] = useState(false);
   const [prioridad, setPrioridad] = useState('Media');
   const [loadingSubmit, setLoadingSubmit] = useState(false);
-
-  const isFirmas = tipoTramite === 'Firmas de documentos';
 
   const showToast = (message, type = 'success', icon = 'check') => {
     const toast = document.getElementById('toast');
@@ -34,14 +30,6 @@ export const FormGE = ({ nombre, setNombre }) => {
     e.preventDefault();
     if (!nombre || !areaGestion || !tipoTramite || !solicitud) {
       showToast('Por favor, complete todos los campos obligatorios.', 'error', 'triangle-exclamation');
-      return;
-    }
-    if (isFirmas && !rutaT) {
-      showToast('Para Firmas de documentos es obligatorio proporcionar la Ruta T.', 'error', 'triangle-exclamation');
-      return;
-    }
-    if (isFirmas && !checkPdf) {
-      showToast('Debe confirmar que los documentos están en formato PDF.', 'error', 'triangle-exclamation');
       return;
     }
 
@@ -66,14 +54,12 @@ export const FormGE = ({ nombre, setNombre }) => {
         grupo: areaGestion,
         grupoExtra: tipoTramite,
         clasificacion: '',
-        detalles: rutaT
+        detalles: ''
       };
 
       await addTicket(nuevoTicket);
       
       setSolicitud('');
-      setRutaT('');
-      setCheckPdf(false);
       setAreaGestion('');
       setTipoTramite('');
       setPrioridad('Media');
@@ -126,11 +112,6 @@ export const FormGE = ({ nombre, setNombre }) => {
             )}
           </select>
         </div>
-        {isFirmas && (
-          <div className="alerta-presencial" style={{ display: 'block' }}>
-            <i className="fa-solid fa-triangle-exclamation"></i> Nota: Este trámite requiere presencialidad. Será atendido por la gestora que se encuentre en oficina hoy.
-          </div>
-        )}
       </div>
 
       <div className="form-group">
@@ -143,34 +124,6 @@ export const FormGE = ({ nombre, setNombre }) => {
           onChange={(e) => setSolicitud(e.target.value)}
         ></textarea>
       </div>
-
-      {isFirmas && (
-        <>
-          <div className="form-group" style={{ display: 'block' }}>
-            <label className="form-label">RUTA T / ANEXOS <span className="required-star">*</span></label>
-            <input 
-              type="text" 
-              className="glass-input ruta-input" 
-              placeholder="Ej: T:\\Contabilidad\\Firmas\\2024\\..." 
-              required={isFirmas}
-              value={rutaT} 
-              onChange={(e) => setRutaT(e.target.value)}
-            />
-          </div>
-
-          <div className="form-group check-pdf-group" style={{ display: 'flex' }}>
-            <input 
-              type="checkbox" 
-              id="checkPdf" 
-              checked={checkPdf} 
-              onChange={(e) => setCheckPdf(e.target.checked)} 
-            />
-            <label htmlFor="checkPdf">
-              Confirmo que los documentos adjuntos o en la ruta especificada están en <span className="pdf-highlight">formato PDF</span>.
-            </label>
-          </div>
-        </>
-      )}
 
       <div className="form-group">
         <label className="form-label">PRIORIDAD</label>

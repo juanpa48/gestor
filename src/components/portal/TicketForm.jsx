@@ -9,11 +9,6 @@ export const TicketForm = () => {
     empresa: '',
     area: '',
     tramite: '',
-    requiereFirma: false,
-    firma1: '',
-    firma2: '',
-    firma3: '',
-    firma4: '',
     asunto: ''
   });
 
@@ -21,10 +16,9 @@ export const TicketForm = () => {
   const [success, setSuccess] = useState('');
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: value
     }));
   };
 
@@ -54,9 +48,7 @@ export const TicketForm = () => {
       prioridad: 'Media', // Default for portal
       responsable: '',
       detalles: formData.asunto,
-      empresa: formData.empresa,
-      requiereFirma: formData.requiereFirma,
-      firmas: formData.requiereFirma ? [formData.firma1, formData.firma2, formData.firma3, formData.firma4].filter(Boolean) : []
+      empresa: formData.empresa
     };
 
     const res = await addTicket(ticketData);
@@ -65,8 +57,7 @@ export const TicketForm = () => {
     if (res.success) {
       setSuccess('Tu solicitud ha sido radicada correctamente.');
       setFormData({
-        nombre: '', empresa: '', area: '', tramite: '', requiereFirma: false,
-        firma1: '', firma2: '', firma3: '', firma4: '', asunto: ''
+        nombre: '', empresa: '', area: '', tramite: '', asunto: ''
       });
       setTimeout(() => setSuccess(''), 5000);
     }
@@ -122,38 +113,6 @@ export const TicketForm = () => {
           </div>
         )}
 
-        <div className="form-group checkbox-group" style={{ marginTop: '24px' }}>
-          <label className="checkbox-container">
-            <input type="checkbox" name="requiereFirma" checked={formData.requiereFirma} onChange={handleChange} />
-            <span className="checkmark"></span>
-            ¿Este trámite requiere firmas digitales o físicas?
-          </label>
-        </div>
-
-        {formData.requiereFirma && (
-          <div className="signatures-section fade-in" style={{ padding: '16px', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', marginTop: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
-            <h4 style={{ marginBottom: '16px', fontSize: '14px', color: 'var(--primary-color)' }}>Firmantes requeridos</h4>
-            <div className="form-row">
-              <div className="form-group">
-                <label>Firma 1</label>
-                <input type="text" name="firma1" className="glass-input" value={formData.firma1} onChange={handleChange} placeholder="Nombre del firmante" />
-              </div>
-              <div className="form-group">
-                <label>Firma 2</label>
-                <input type="text" name="firma2" className="glass-input" value={formData.firma2} onChange={handleChange} placeholder="Nombre del firmante" />
-              </div>
-            </div>
-            <div className="form-row">
-              <div className="form-group">
-                <label>Firma 3</label>
-                <input type="text" name="firma3" className="glass-input" value={formData.firma3} onChange={handleChange} placeholder="Nombre del firmante" />
-              </div>
-              <div className="form-group">
-                <label>Firma 4</label>
-                <input type="text" name="firma4" className="glass-input" value={formData.firma4} onChange={handleChange} placeholder="Nombre del firmante" />
-              </div>
-            </div>
-          </div>
         )}
 
         <div className="form-group" style={{ marginTop: '24px' }}>

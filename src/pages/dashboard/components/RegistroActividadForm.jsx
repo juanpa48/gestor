@@ -320,12 +320,6 @@ export const RegistroActividadForm = () => {
               <input type="date" id="fechaProgramada" name="fechaProgramada" className="form-input" title="Fecha Programada" value={formData.fechaProgramada} onChange={handleInputChange} />
             </div>
           </div>
-
-          {/* Fila 7 - Detalle técnico - full width */}
-          <div className="form-group full-width">
-            <label className="form-label" htmlFor="detalles">Ruta T / Anexos (Obligatorio para Firmas)</label>
-            <input type="text" id="detalles" name="detalles" className="form-input form-input-full" placeholder="Ej: T:\\Contabilidad\\Firmas\\2024\\..." value={formData.detalles} onChange={handleInputChange} />
-          </div>
         </div>
 
         {/* FORM ACTIONS */}
