@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useActiveArea } from '../../shared/contexts/ActiveAreaContext';
-import '../../shared/styles/themes/database-theme.css'; // Import directly here
+import { useAuth } from '../../shared/contexts/AuthContext';
+import '../../shared/styles/themes/database-theme.css';
 
 export const AreaDatabase = () => {
+  const navigate = useNavigate();
+  const { currentUser } = useAuth();
   const { ctx, config } = useActiveArea();
   const { actividades, solicitantes, responsables, addSolicitante, removeSolicitante, addResponsable, removeResponsable, refreshTickets } = ctx;
   
@@ -99,8 +103,19 @@ export const AreaDatabase = () => {
 
   return (
     <div className="database-container">
-      <h1>Base de Datos Local - {config.nombre}</h1>
-      <p>Vista de datos en <code>localStorage</code> (React Port).</p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <div>
+          <h1 style={{ margin: 0 }}>Base de Datos Local - {config.nombre}</h1>
+          <p style={{ margin: 0 }}>Vista de datos en <code>localStorage</code> (Modo SuperAdmin).</p>
+        </div>
+        <button 
+          className="btn-secondary" 
+          onClick={() => navigate(`/dashboard/${currentUser?.area || 'ti'}`)}
+          style={{ padding: '8px 16px', borderRadius: '8px', cursor: 'pointer' }}
+        >
+          <i className="fa-solid fa-arrow-left"></i> Volver a mi Dashboard
+        </button>
+      </div>
 
       <div className="db-tabs">
         <button className={`db-tab-btn ${activeTab === 'actividades' ? 'active' : ''}`} onClick={() => setActiveTab('actividades')}>Actividades</button>

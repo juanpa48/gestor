@@ -38,7 +38,7 @@ function App() {
         
         <Route path="/database" element={<Navigate to="/database/ge" replace />} />
         <Route path="/database/:area" element={
-          <ProtectedRoute>
+          <ProtectedRoute adminOnly={true}>
             <ActiveAreaProvider>
               <AreaDatabase />
             </ActiveAreaProvider>
