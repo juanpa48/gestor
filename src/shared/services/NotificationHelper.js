@@ -48,14 +48,14 @@ export const NotificationHelper = {
     
     if (Notification.permission === "granted") {
       new Notification(title, {
-        icon: '/img/Logo.png',
+        icon: '/img/acyt.png',
         ...options
       });
     } else if (Notification.permission !== "denied") {
       const permission = await Notification.requestPermission();
       if (permission === "granted") {
         new Notification(title, {
-          icon: '/img/Logo.png',
+          icon: '/img/acyt.png',
           ...options
         });
       }

@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import Logo from '../../assets/img/Logo.png';
 
 export const PortalLayout = ({ areaConfig, areaContext, onBack, children, nombre, setNombre }) => {
   const { actividades, solicitantes, responsables } = areaContext();
@@ -93,7 +92,7 @@ export const PortalLayout = ({ areaConfig, areaContext, onBack, children, nombre
     <div className="portal-container">
       <header className="portal-header">
         <div className="logo-placeholder" onClick={onBack} style={{cursor: 'pointer'}} title="Volver al inicio">
-          <img src={Logo} alt="Logo" />
+          <img src="/img/acyt.png" alt="Logo" />
         </div>
         <div className="header-title">
           Portal - {areaConfig.nombre}

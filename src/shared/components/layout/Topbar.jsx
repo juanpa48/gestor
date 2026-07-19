@@ -1,9 +1,16 @@
-import React from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { NotificationCenter } from '../notifications/NotificationCenter';
+import { useAuth } from '../../contexts/AuthContext';
+import { useActiveArea } from '../../contexts/ActiveAreaContext';
 
 export const Topbar = () => {
+  const { logout, currentUser } = useAuth();
+  const { area } = useActiveArea();
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const profileRef = useRef(null);
   const location = useLocation();
+  const navigate = useNavigate();
   const showSearch = location.pathname.includes('/actividades') || location.pathname.includes('/gestion');
 
   const handleSearch = (e) => {
@@ -11,6 +18,17 @@ export const Topbar = () => {
     // Disparamos el evento para mantener compatibilidad con cualquier listener actual/futuro
     document.dispatchEvent(new CustomEvent('searchTriggered', { detail: { query: value } }));
   };
+
+  // Cerrar el dropdown si se hace clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setIsProfileOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
     <header className="topbar">
@@ -25,15 +43,35 @@ export const Topbar = () => {
         />
       </div>
       <div className="topbar-actions">
-        <button className="icon-btn" title="Configuración">
+        <button className="icon-btn" title="Configuración" onClick={() => navigate(`/dashboard/${area}/settings`)}>
           <i className="fa-solid fa-gear"></i>
         </button>
         
         <NotificationCenter />
         
-        <button className="icon-btn" title="Perfil">
-          <i className="fa-solid fa-user"></i>
-        </button>
+        <div className="profile-dropdown-wrapper" ref={profileRef}>
+          <button 
+            className={`icon-btn ${isProfileOpen ? 'active' : ''}`} 
+            title="Perfil" 
+            onClick={() => setIsProfileOpen(!isProfileOpen)}
+          >
+            <i className="fa-solid fa-user"></i>
+          </button>
+          
+          {isProfileOpen && (
+            <div className="profile-dropdown-menu">
+              <div className="profile-dropdown-header">
+                <span className="profile-name">{currentUser?.username || 'Usuario'}</span>
+                <span className="profile-role">{currentUser?.role === 'admin_ti' ? 'Admin TI' : 'Gestora'}</span>
+              </div>
+              <div className="profile-dropdown-divider"></div>
+              <button className="profile-dropdown-item text-danger" onClick={logout}>
+                <i className="fa-solid fa-arrow-right-from-bracket"></i>
+                Cerrar Sesión
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );

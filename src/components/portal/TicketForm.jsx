@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAreaTickets as useTickets } from '../../areas/gestion-empresarial/context/GEContext';
-import { tramitesArea1, tramitesArea2 } from '../../data/tramitesData';
+import { GE_CONFIG } from '../../areas/gestion-empresarial/config';
 
 export const TicketForm = () => {
   const { addTicket } = useTickets();
@@ -36,8 +36,8 @@ export const TicketForm = () => {
     }));
   };
 
-  const currentTramites = formData.area === 'area1' ? tramitesArea1 
-                        : formData.area === 'area2' ? tramitesArea2 
+  const currentTramites = formData.area === 'area1' ? (GE_CONFIG.grupos[0]?.tramites || [])
+                        : formData.area === 'area2' ? (GE_CONFIG.grupos[1]?.tramites || [])
                         : [];
 
   const handleSubmit = async (e) => {

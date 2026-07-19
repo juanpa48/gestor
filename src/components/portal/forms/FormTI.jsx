@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTIContext as useTickets } from '../../../areas/soporte-ti/context/TIContext';
-import { tramitesTI } from '../../../areas/soporte-ti/config';
+import { TI_CONFIG } from '../../../areas/soporte-ti/config';
 
 export const FormTI = ({ nombre, setNombre }) => {
   const { solicitantes, getSolicitanteCargo, addTicket } = useTickets();
@@ -77,7 +77,7 @@ export const FormTI = ({ nombre, setNombre }) => {
         <label className="form-label">TIPO DE TRÁMITE (TI)</label>
         <div className="select-wrapper">
           <select className="glass-input" required value={tipoTramite} onChange={(e) => setTipoTramite(e.target.value)}>
-            {tramitesTI.map(t => <option key={t} value={t}>{t}</option>)}
+            {(TI_CONFIG.grupos[0]?.tramites || []).map(t => <option key={t} value={t}>{t}</option>)}
           </select>
         </div>
       </div>

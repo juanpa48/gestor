@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useGHContext as useTickets } from '../../../areas/gestion-humana/context/GHContext';
-import { tramitesGH } from '../../../areas/gestion-humana/config';
+import { GH_CONFIG } from '../../../areas/gestion-humana/config';
 
 export const FormGH = ({ nombre, setNombre }) => {
   const { solicitantes, getSolicitanteCargo, addTicket } = useTickets();
@@ -79,7 +79,7 @@ export const FormGH = ({ nombre, setNombre }) => {
         <div className="select-wrapper">
           <select className="glass-input" required value={tipoTramite} onChange={(e) => setTipoTramite(e.target.value)}>
             <option value="" disabled>Seleccione el Trámite...</option>
-            {tramitesGH.map(t => <option key={t} value={t}>{t}</option>)}
+            {(GH_CONFIG.grupos[0]?.tramites || []).map(t => <option key={t} value={t}>{t}</option>)}
           </select>
         </div>
       </div>

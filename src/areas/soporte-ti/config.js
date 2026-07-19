@@ -1,12 +1,9 @@
 import { AREAS } from '../../data/areasConfig';
-
-export const tramitesTI = [
-  "Soporte"
-];
+import { getAreaSettings } from '../../shared/services/SettingsManager';
 
 export const TI_CONFIG = {
   ...AREAS.ti,
-  grupos: [
-    { nombre: 'Soporte Técnico', tramites: tramitesTI }
-  ]
+  get grupos() {
+    return getAreaSettings('ti').grupos;
+  }
 };

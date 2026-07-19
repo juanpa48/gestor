@@ -258,3 +258,38 @@ En vez de escribir 3 archivos de Context casi idénticos, se crea UNA función `
 
 Campo "Cargo" en Solicitantes implementado. Los solicitantes se almacenan como objetos `{nombre, cargo}`, los tickets inyectan el cargo automáticamente, y la tabla de actividades en `/database` lo refleja correctamente.
 
+---
+
+## Nuevo Objetivo: Sistema de Autenticación Local
+
+**Contexto:** Se requiere proteger las rutas administrativas (`/dashboard` y `/database`) mediante un sistema de login local. Los colaboradores podrán acceder al `/portal` sin necesidad de autenticación.
+
+### Fases de Implementación:
+- [x] **Fase 1: Capa de Seguridad (AuthContext)**
+  - Implementar encriptación SHA-256 usando Web Crypto API.
+  - Crear `AuthContext.jsx` para manejo de sesión simulada con token temporal y control de intentos (máximo 4).
+  - Población inicial de cuentas fundacionales (admin_ti, gestoras).
+
+- [x] **Fase 2: Protección de Rutas (ProtectedRoute)**
+  - Crear componente wrapper que bloquee el acceso a usuarios no autenticados.
+  - Implementar cierre de sesión (Logout) atado a la silueta en el Topbar.
+
+- [x] **Fase 3: UI de Inicio de Sesión (Login)**
+  - Desarrollar la vista `/login` con diseño moderno (Glassmorphism).
+
+---
+
+## Nuevo Objetivo: Panel de Ajustes y Autogestión
+
+**Contexto:** Permitir a las gestoras configurar sus propios trámites dinámicamente y al administrador TI gestionar las cuentas de usuario sin necesidad de tocar el código, guardando la configuración en el `localStorage`.
+
+### Fases de Implementación:
+- [x] **Fase 1: Capa de Datos (Configuración)**
+  - Mover la configuración de trámites y áreas (`tramitesData.js`) al `localStorage`.
+  
+- [x] **Fase 2: Panel de Ajustes (Settings.jsx)**
+  - Interfaz accesible desde el icono de tuerca para configuraciones por área.
+
+- [x] **Fase 3: Módulo de Administración de TI**
+  - Panel exclusivo dentro de Ajustes para que TI pueda visualizar, desbloquear y resetear contraseñas de las gestoras.
+

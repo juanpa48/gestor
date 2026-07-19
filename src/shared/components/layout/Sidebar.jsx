@@ -14,7 +14,7 @@ export const Sidebar = () => {
   return (
     <aside className="sidebar">
       <div className="sidebar-logo">
-        <img src="/img/Logo.png" alt="Logo de Empresa" />
+        <img src="/img/acyt.png" alt="Logo de Empresa" />
       </div>
       <div className="sidebar-section-title" style={{ color: config.color }}>
         <i className={`fa-solid ${config.icono}`} style={{ marginRight: '8px' }}></i>

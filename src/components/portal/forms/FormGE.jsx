@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAreaTickets as useTickets } from '../../../areas/gestion-empresarial/context/GEContext';
-import { tramitesArea1, tramitesArea2 } from '../../../data/tramitesData';
+import { GE_CONFIG } from '../../../areas/gestion-empresarial/config';
 
 export const FormGE = ({ nombre, setNombre }) => {
   const { solicitantes, getSolicitanteCargo, addTicket } = useTickets();
@@ -25,8 +25,8 @@ export const FormGE = ({ nombre, setNombre }) => {
 
   const renderTramites = () => {
     let list = [];
-    if (areaGestion.includes('Área 1') || areaGestion.includes('Estructural')) list = tramitesArea1;
-    else if (areaGestion.includes('Área 2') || areaGestion.includes('Operativo')) list = tramitesArea2;
+    if (areaGestion.includes('Área 1') || areaGestion.includes('Estructural')) list = GE_CONFIG.grupos[0]?.tramites || [];
+    else if (areaGestion.includes('Área 2') || areaGestion.includes('Operativo')) list = GE_CONFIG.grupos[1]?.tramites || [];
     return list.map(t => <option key={t} value={t}>{t}</option>);
   };
 

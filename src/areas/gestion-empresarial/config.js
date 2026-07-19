@@ -1,10 +1,9 @@
 import { AREAS } from '../../data/areasConfig';
-import { tramitesArea1, tramitesArea2 } from '../../data/tramitesData';
+import { getAreaSettings } from '../../shared/services/SettingsManager';
 
 export const GE_CONFIG = {
   ...AREAS.ge,
-  grupos: [
-    { nombre: 'Estructurales y Legales', tramites: tramitesArea1 },
-    { nombre: 'Operativos y Documentales', tramites: tramitesArea2 }
-  ]
+  get grupos() {
+    return getAreaSettings('ge').grupos;
+  }
 };

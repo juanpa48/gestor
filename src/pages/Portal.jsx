@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Navigate } from 'react-router-dom';
-import Logo from '../assets/img/Logo.png';
 import { useAreaTickets as useGEContext } from '../areas/gestion-empresarial/context/GEContext';
 import { useGHContext } from '../areas/gestion-humana/context/GHContext';
 import { useTIContext } from '../areas/soporte-ti/context/TIContext';
@@ -27,7 +26,7 @@ export const Portal = () => {
       <div className="portal-container">
         <header className="portal-header">
           <div className="logo-placeholder">
-            <img src={Logo} alt="Logo de Empresa" />
+            <img src="/img/acyt.png" alt="Logo de Empresa" />
           </div>
           <div className="header-title">
             Portal de Autogestión
