@@ -7,7 +7,8 @@
 - **Frontend:** React 18 (Vite) + Context API + react-router-dom
 - **UI:** CSS (Glassmorphism) mediante `className` (sin Tailwind)
 - **Gráficos:** react-chartjs-2
-- **Backend actual:** localStorage (mock de backend vía `DbService`) — Ver DEC-001
+- **Seguridad:** Autenticación local con hashing SHA-256 (`AuthContext.jsx`)
+- **Backend actual:** localStorage (mock de backend vía `DbService` y `SettingsManager`)
 - **Backend futuro:** Node.js/Express + PostgreSQL
 - **Servidor local dev:** `npm run dev` (Vite, puerto 5173 por defecto)
 - **Diseño:** Dashboard oscuro (`/`) | Portal claro (`/portal`)
@@ -24,10 +25,9 @@
 │   └── PROGRESS.md                  ← Bitácora de seguimiento
 ├── src/
 │   ├── components/                  ← Componentes React reutilizables (layout, dashboard)
-│   ├── contexts/                    ← TicketContext (Estado Global)
-│   ├── data/                        ← tramitesData.js (Fuente única de trámites)
-│   ├── pages/                       ← Vistas enrutadas (Portal, PanelPrincipal, Actividades, Gestion)
-│   ├── services/                    ← DbService.js (Persistencia async local)
+│   ├── contexts/                    ← ActiveAreaContext, AuthContext, TicketContext
+│   ├── pages/                       ← Vistas enrutadas (Portal, PanelPrincipal, Actividades, Gestion, Settings, Login)
+│   ├── services/                    ← DbService.js, SettingsManager.js (Persistencia async local)
 │   └── styles/                      ← Arquitectura CSS Modular (main.css)
 ├── package.json
 └── vite.config.js
@@ -37,7 +37,7 @@
 1. **Leer** `docs/DEPENDENCIES.md` → Saber qué archivos se afectan.
 2. **Leer** `docs/DECISIONS.md` → Verificar si algo "raro" es intencional.
 3. **Verificar** si el cambio afecta más de 1 componente.
-4. **Actualizar** `docs/CHANGELOG.md` después de cada cambio importante.
+4. **Regla de ORO Documental:** Al finalizar CUALQUIER fase u objetivo importante, es **OBLIGATORIO** actualizar todos los archivos `.md` de la carpeta `docs/` para que reflejen la nueva realidad del código, evitando confundir a futuras IAs.
 
 ## 🤖 Metodología de Trabajo AI-Friendly (Baby Steps)
 Para garantizar el éxito en desarrollos complejos y EVITAR errores por límite de tokens (cortes a medio camino), TODO objetivo debe seguir esta metodología:
@@ -84,10 +84,11 @@ La arquitectura CSS Vanilla se portó intacta a React. Identifica la superficie:
 - El Portal (`/portal`) muta la clase del body en su `useEffect` (`document.body.className = 'portal'`).
 - Mantener compatibilidad visual 1:1 con el diseño aprobado.
 
-### Datos (⚙️)
-- El Contexto `TicketContext.jsx` es el motor central de estado. Cualquier modificación debe pasar por él (ej. `updateTicket`).
-- localStorage es el backend actual (DEC-001) vía `DbService`.
-- Catálogo: `src/data/tramitesData.js` es la fuente única.
+### Datos y Seguridad (⚙️)
+- El Contexto `TicketContext.jsx` es el motor central de estado de tickets.
+- La Seguridad recae en `AuthContext.jsx` y `ProtectedRoute.jsx`.
+- localStorage es el backend actual vía `DbService.js` (Tickets) y `SettingsManager.js` (Ajustes).
+- Catálogo: Los trámites ya NO están quemados en código. Viven en `db_settings` gestionados por el `SettingsManager.js`.
 
 ### Calidad (🐛)
 - Probar cambios corriendo `npm run dev`.

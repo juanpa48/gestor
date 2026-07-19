@@ -13,6 +13,7 @@ Este documento describe la arquitectura real del proyecto a fecha de julio de 20
   - `/dashboard/:area/gestion` (Vista Kanban y tabla de gestión)
   - `/portal/:area` (Portal de autogestión para colaboradores)
   - `/database/:area` (Herramienta CRUD de mantenimiento de datos aislada por área)
+  - `/login` (Autenticación con SHA-256 y control de acceso por área)
 
 ## 2. Vista de Alto Nivel
 
@@ -56,6 +57,7 @@ Se preserva la capa de CSS modular, mapeando el DOM original a atributos `classN
 El estado de la aplicación es distribuido globalmente mediante Contexts altamente dinámicos:
 - **`createAreaContext.jsx`**: Un factory que genera contextos aislados (GE, GH, TI) inyectando la configuración específica de cada área.
 - **`ActiveAreaContext.jsx`**: Actúa como un puente dinámico. Lee el parámetro `:area` de la URL, selecciona el contexto adecuado (ej. `GEContext`) y expone `useActiveArea()`.
+- **`AuthContext.jsx`**: Maneja el estado de sesión, validación criptográfica (SHA-256), y bloqueo de cuentas a nivel local (`db_usuarios`).
 - **`NotificationContext.jsx`**: Gestiona el ciclo de vida de notificaciones visuales, mientras que `useStorageSync.js` maneja la alerta sonora basada en cambios de `localStorage` de acuerdo al `storageKey` del área activa.
 
 Cualquier cambio realizado por un componente dispara la recarga reactiva en todos los consumidores (`useActiveArea()`, `useNotifications()`).
@@ -104,7 +106,13 @@ Responsabilidades:
 Responsabilidades:
 - Herramienta CRUD independiente para mantenimiento de `localStorage`.
 - Consumo dinámico de `useActiveArea` para aislar `responsables` y `actividades` por área.
-- Ruta: `/database/:area` (fuera del DashboardLayout).
+- Ruta: `/database/:area` (fuera del DashboardLayout y restringida solo para admin_ti).
+
+### 4.7 Configuración Global (`Settings.jsx` y `SettingsManager.js`)
+Responsabilidades:
+- Reemplaza la antigua configuración en código duro (`tramitesData.js`).
+- Permite a las áreas agregar/quitar grupos y trámites dinámicamente (`db_settings`).
+- Incluye el **Módulo de Administración de Cuentas** exclusivo para TI (desbloqueos y reseteo de contraseñas).
 
 ### 4.7 Notificaciones (`NotificationCenter.jsx` + `NotificationHelper.js`)
 Responsabilidades:
@@ -116,11 +124,11 @@ Responsabilidades:
 - `src/App.jsx`: Root y declaración de `react-router-dom`.
 - `src/shared/contexts/createAreaContext.jsx`: Factory para crear contextos de área.
 - `src/shared/contexts/ActiveAreaContext.jsx`: Orquestador dinámico que provee la información del área según la URL.
+- `src/shared/contexts/AuthContext.jsx`: Orquestador de inicio de sesión, bloqueo de seguridad y sesiones.
 - `src/contexts/NotificationContext.jsx`: Orquestador de notificaciones y sincronización multi-pestaña.
-- `src/services/DbService.js`: Interfaz asíncrona hacia `localStorage`.
+- `src/shared/services/SettingsManager.js`: Interfaz asíncrona hacia `localStorage` para la configuración de trámites.
+- `src/services/DbService.js`: Interfaz asíncrona hacia `localStorage` para las Actividades (Tickets).
 - `src/services/NotificationHelper.js`: Alertas sonoras y notificaciones del navegador.
-- `src/data/tramitesData.js`: Fuente de la verdad de catálogos (Estructurales, Operativos).
-- `src/pages/Database.jsx`: Herramienta CRUD independiente.
 
 ## 6. CSS Modular (Heredado de Vanilla)
 
@@ -154,12 +162,12 @@ Beneficios de la adopción de React:
 
 Límites actuales:
 - Sigue existiendo la dependencia de `localStorage`, limitando la colaboración concurrente real.
-- Falta de autenticación y sesiones.
+- Falta migrar definitivamente la persistencia a una base de datos real en un backend (Node.js/SQL) para multiusuario global.
 
 ## 8. Recomendaciones para IAs Futuras
 
 - La lógica de estado global vive en `ActiveAreaContext.jsx` que funciona como proxy hacia `GEContext`, `GHContext` o `TIContext`.
+- La seguridad y protección de rutas recae en `AuthContext.jsx` y el wrapper `ProtectedRoute.jsx`.
 - Nunca inyectar estilos inline (`style={{...}}`) a menos que sean animaciones dinámicas estrictamente necesarias. Mantenerse usando `className`.
-- Los datos de trámites están en `src/data/tramitesData.js`.
-- La capa de BD asíncrona sigue en `src/services/DbService.js`.
+- Los datos de trámites ahora son 100% dinámicos en el navegador mediante `SettingsManager.js` (`db_settings`). Ya NO EXISTE el archivo de configuraciones duras estáticas.
 - Las métricas de tiempo (`fechaInicio`, `fechaFin`, `tiempo`) se calculan automáticamente en `TicketContext` — no duplicar esta lógica en componentes.

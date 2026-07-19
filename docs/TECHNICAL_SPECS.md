@@ -1,74 +1,69 @@
-# Especificaciones Técnicas (Versión Maestra)
+# Especificaciones Técnicas (React / Julio 2026)
 
 Este documento desglosa la implementación actual del proyecto desde una perspectiva operativa: módulos, patrones, flujo de datos, acoplamiento, convenciones, escalabilidad y riesgos. Su objetivo es servir como manual de ingeniería definitivo para desarrolladores humanos e IAs.
 
 ## 1. Stack Tecnológico Actual
 
-- **Frontend:** HTML5, CSS3 modular (Arquitectura por capas), JavaScript Vanilla (ES6+).
-- **Servidor:** Node.js + `http-server` (Puerto 3000).
+- **Frontend:** React 18, React Router v6.
+- **UI:** CSS3 modular (Arquitectura por capas Glassmorphism), preservado de la versión Vanilla.
+- **Servidor Local:** Vite (Puerto 5173/5174).
 - **Persistencia:** `localStorage` del navegador.
 - **Comunicación en Tiempo Real:** Evento nativo `storage` para sincronización inter-pestañas.
 - **Notificaciones:** API de Notificaciones del navegador + `AudioContext` para alertas sonoras.
-- **Gráficos:** API Canvas para sparklines decorativas.
+- **Seguridad:** SHA-256 (Web Crypto API) para hasheo de contraseñas local.
 
 ## 2. Patrones de Diseño Implementados
 
+### Context API (State Management)
+Uso de múltiples contextos para aislar responsabilidades y evitar el *prop drilling*:
+- `TicketContext.jsx`: Orquesta el CRUD de tickets (actividades).
+- `AuthContext.jsx`: Controla sesión actual, encriptación y acceso a rutas protegidas.
+- `ActiveAreaContext.jsx`: Factory dinámico que expone los datos del área actual basada en la URL.
+- `NotificationContext.jsx`: Maneja notificaciones visuales y sonoras (mediante `useStorageSync.js`).
+
 ### Service Layer / Facade
-`window.DbService` centraliza el acceso a datos. Todos los métodos son `async` y retornan promesas, simulando latencia de red (`setTimeout` de 300ms a 800ms). Esto aísla la UI del mecanismo de almacenamiento.
-
-### Observer / Pub-Sub (Event-Driven)
-Uso de `CustomEvent` para desacoplar módulos. Permite que el sistema sea resiliente y extensible.
-
-| Evento | Emisor | Receptores |
-|---|---|---|
-| `actividadGuardada` | `data-manager.js` | `dashboard.js`, `activity-table.js`, `tickets.js` |
-| `ticketActualizado` | `tickets.js` | `dashboard.js`, `activity-table.js` |
-| `sectionChanged` | `navigation.js` | `tickets.js` (init de carga de gestión) |
-| `nuevoTicketExterno` | `notifications.js` | `dashboard.js`, `activity-table.js`, `tickets.js` |
-| `ticketSeleccionado` | `utils.js` (búsqueda) | `tickets.js` (apertura de modal) |
-
-### Single Responsibility & Source of Truth
-- Cada módulo tiene un dominio funcional único.
-- `tramites-data.js` es la **Fuente Única de Verdad** para el catálogo de trámites.
+- `DbService.js` centraliza el acceso a datos asíncronos para Tickets y Usuarios.
+- `SettingsManager.js` gestiona la base de datos de configuraciones de cada área.
+Ambos aíslan a los componentes React del mecanismo de almacenamiento subyacente.
 
 ## 3. Estructura y Responsabilidad de Módulos
 
-### Dashboard Administrativo (`index.html`)
-- `app.js`: Punto de entrada y orquestación inicial.
-- `navigation.js`: Control de visibilidad de secciones y toggle Tabla/Kanban.
-- `dashboard.js`: Gestión de métricas, tickets recientes y animaciones.
-- `tickets.js`: Ciclo de vida de solicitudes: edición, KanBan y registro rápido.
-- `activity-table.js`: Tabla principal con sistema de filtrado avanzado.
-- `notifications.js`: Lote de alertas (Audio + Browser) y listener de `storage`.
+### Dashboard Administrativo (`/dashboard/:area`)
+- `DashboardLayout.jsx`: Shell principal de la app administrativa (Sidebar, Topbar).
+- `PanelPrincipal.jsx`: Gestión de métricas, tickets recientes y widgets rápidos.
+- `Actividades.jsx`: Tabla detallada con sistema de filtrado.
+- `Gestion.jsx`: Ciclo de vida de solicitudes: edición, vista KanBan y modal.
+- `Settings.jsx`: Panel de control dinámico para editar trámites, grupos y administrar cuentas (solo TI).
 
-### Portal de Colaboradores (`portal_avanzado.html`)
-- `portal/form-ui.js`: Lógica reactiva de la interfaz del formulario.
-- `portal/submit.js`: Validación y transmisión de solicitudes (`REQ-XXX`).
-- `portal/stats.js`: Sincronización de historial personal y estadísticas públicas.
+### Portal de Colaboradores (`/portal/:area`)
+- `Portal.jsx`: Lógica reactiva de la interfaz del formulario y renderizado dinámico de trámites (consumiendo `SettingsManager.js`).
+- `TicketForm.jsx` y Formularios específicos por área (`FormGE`, `FormGH`, `FormTI`).
 
-### Herramienta Independiente
-- `database.html`: Sandbox para mantenimiento manual CRUD de `localStorage`. No usa `DbService`.
+### Módulo de Seguridad y Autenticación
+- `Login.jsx`: Formulario de acceso protegido.
+- `ProtectedRoute.jsx`: Wrapper de componentes que valida si `currentUser` coincide con el área de la URL, rebotando usuarios no autorizados.
 
 ## 4. Convenciones y Flujo de Datos
 
 ### Prefijos de Identidad
 - **`REQ-XXX`**: Solicitudes originadas en el Portal.
-- **`TKT-XXX`**: Registros manuales creados en el Dashboard.
+- **`TKT-XXX`**: Registros manuales creados en el Dashboard (Panel Principal).
 
 ### Flujo de creación Portal -> Dashboard
-1. `submit.js` valida y guarda vía `DbService.saveActividades()`.
-2. Browser dispara evento `storage` en pestañas inactivas.
-3. `notifications.js` detecta el cambio de longitud y emite `nuevoTicketExterno`.
-4. El Dashboard refresca visuales y emite alerta sonora (Do-Mi-Sol).
+1. Colaborador envía form (`REQ-XXX`). `Portal.jsx` llama a `addTicket()`.
+2. `TicketContext` lo guarda vía `DbService.saveActividades()`.
+3. Navegador dispara evento `storage` en pestañas inactivas.
+4. `NotificationContext` detecta el cambio de longitud y muestra notificación visual.
+5. El Dashboard refresca las listas reactivamente y suena la alerta (Do-Mi-Sol).
 
 ## 5. Modelo de Datos del Ticket (16 Campos)
 
 | Variable | Origen | Obs. Desarrollo |
 |---|---|---|
-| `id` | Generado | Prefijo TKT/REQ + longitud array + 1. |
+| `id` | Generado | Prefijo TKT/REQ + contador. |
 | `fechaCreacion` | Generado | `toLocaleString()` (Dependiente de región). |
 | `nombre` | Formulario | Nombre del colaborador/solicitante. |
-| `solicitante` | Formulario | Redundante con `nombre` en portal. |
+| `cargo` | Backend | Lookup automático del cargo del solicitante. |
 | `solicitud` | Formulario | Descripción del trámite. |
 | `estado` | Fijo | "Pendiente" por defecto. |
 | `prioridad` | Formulario | Bajo, Media, Alta. |
@@ -76,31 +71,27 @@ Uso de `CustomEvent` para desacoplar módulos. Permite que el sistema sea resili
 | `grupo` | Formulario | Área de gestión (SSOT). |
 | `grupoExtra` | Formulario | Tipo de trámite específico (SSOT). |
 | `clasificacion`| Dashboard | Categorización técnica adicional. |
-| `fechaInicio` | Dashboard | Registro de inicio de labores. |
-| `fechaFin` | Dashboard | Registro de finalización. |
+| `fechaInicio` | Dashboard | Timestamp y fecha capturada automáticamente al pasar a "En progreso". |
+| `fechaFin` | Dashboard | Timestamp y fecha capturada automáticamente al resolver. |
+| `tiempo` | Dashboard | Duración calculada en `HH:mm:ss`. |
 | `fechaProgramada`| Dashboard | Deadline de atención. |
 | `accion` | Dashboard | Observaciones/Bitácora de la gestora. |
 | `detalles` | Formulario | Ruta T de carpetas físicas (PDFs). |
 
 ## 6. Auditoría de Riesgos Técnicos Críticos
 
-1. **Colisión de IDs:** Generar IDs basados en `.length + 1` es propenso a duplicados si se eliminan registros o hay concurrencia.
-2. **Parsing de Fechas:** `toLocaleString()` es inconsistente entre sistemas operativos, lo que puede causar `NaN` al intentar re-instanciar fechas.
-3. **Límite de Almacenamiento:** `localStorage` (∼5MB) limita el crecimiento exponencial de datos históricos.
-4. **Broadcast Aislado:** El evento `storage` NO funciona entre computadoras diferentes (necesita WebSockets para producción).
-5. **Código Muerto:** `dashboard.js` intenta renderizar sobre `#ticketsList` y `#networkMetrics`, nodos que ya no existen en `index.html`.
-6. **Sanitización Parcial:** Se requiere aplicar `escapeHtml` uniformemente en el portal y en `database.html`.
+1. **Límite de Almacenamiento:** `localStorage` (∼5MB) limita el crecimiento exponencial de datos históricos.
+2. **Colisión de IDs:** Generar IDs basados en contadores es propenso a duplicados si se eliminan registros en concurrencia masiva (aunque se simula un frontend aislado).
+3. **Broadcast Aislado:** El evento `storage` NO funciona entre computadoras diferentes.
 
 ## 7. Buenas Prácticas Recomendadas
 
-- **Normalizar Fechas:** Migrar a formato ISO-8601 (`toISOString()`).
-- **Desacoplamiento del Portal:** Migrar las llamadas directas a funciones hacia un sistema de eventos para mayor resiliencia.
-- **Limpieza de DOM:** Eliminar del JS los selectores hacia nodos inexistentes para evitar logs de error silentes.
-- **Seguridad:** Implementar capa de autenticación y autorización antes de cualquier despliegue web real.
+- **Componentes Atómicos:** Si un componente pasa de 300 líneas, considerar extraer lógica a hooks personalizados o subdividirlo en subcomponentes funcionales.
+- **No Mutar el Estado Directamente:** Siempre usar las funciones set (`setTickets`, `setGrupos`) expuestas por los Contexts.
+- **Limpieza de Hooks:** Todo `useEffect` que añada un event listener debe retornar una función de limpieza para evitar fugas de memoria.
 
 ## 8. Recomendaciones para IAs Futuras
 
 - **Orden de Lectura:** Seguir estrictamente el `CONTEXT.md` antes de proponer cambios.
-- **Validación DOM:** Antes de modificar lógica de UI, verificar si el ID del elemento persiste en el HTML.
-- **No duplicar catálogos:** Cualquier nuevo trámite debe ir en `tramites-data.js`.
 - **Baby Steps:** Mantener cambios atómicos para evitar cortes de tokens y facilitar la verificación.
+- **Regla Documental:** Acostumbrarse a actualizar `CHANGELOG.md` y `ARCHITECTURE.md` al finalizar cualquier hito mayor.

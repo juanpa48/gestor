@@ -21,43 +21,23 @@
 ---
 
 ## DEC-008: Arquitectura multi-página (separar el dashboard SPA en páginas)
-- **Estado:** ✅ Vigente
+- **Estado:** ❌ OBSOLETA (Reemplazada por DEC-009)
 - **Fecha:** Junio 2026
-- **Contexto:** `index.html` era una SPA: un solo archivo con las secciones Panel Principal, Actividades y Gestión que se mostraban/ocultaban con `navigation.js` (`showSection`). El archivo había crecido a ~753 líneas y cargaba TODOS los módulos JS aunque la mayoría no se usaran en cada vista, dificultando la lectura y el mantenimiento.
-- **Decisión:** Separar cada módulo en su propia página HTML real:
-  - `index.html` → Panel Principal (formulario, widgets, modal Registro Rápido).
-  - `actividades.html` → Actividades (filtros, quick-stats, tabla).
-  - `gestion.html` → Gestión (toggle Tabla/Kanban, modal de edición).
-  - **Chrome compartido vía JS:** `js/layout.js` inyecta el sidebar y la topbar (con el centro de notificaciones) en las 3 páginas, evitando duplicar ese HTML. El ítem de menú activo se determina por `<body data-page="dashboard|actividades|gestion">`. La navegación es por enlaces `<a href>` reales.
-  - **Init por página:** cada página carga solo los scripts que necesita + un init propio (`init-actividades.js`, `init-gestion.js`). `index.html` mantiene `app.js`.
-- **Consecuencias:**
-  - ✅ Código más legible y modular; `index.html` pasó de ~753 a ~390 líneas.
-  - ✅ Cada página carga solo su JS necesario (menor carga).
-  - ✅ Si se cambia el menú/topbar, se edita un solo archivo (`layout.js`).
-  - ❌ El chrome depende de que `layout.js` cargue (aceptable: la app ya es 100% JS).
-  - ❌ Navegar entre módulos recarga la página (no hay transición SPA), pero el estado vive en `localStorage`, así que no se pierde nada.
-- **Regla:** Para agregar una página nueva, incluir los placeholders `<div id="appSidebar"></div>` y `<div id="appTopbar"></div>`, marcar `<body data-page="...">`, cargar `layout.js` y un init propio. Para cambiar el menú, editar `js/layout.js`.
+- **Contexto:** En la era de Vanilla JS, se separó el `index.html` en múltiples páginas HTML.
+- **Resolución:** Con la migración a React (Julio 2026), volvimos a una SPA (Single Page Application) enrutada por `react-router-dom`. Ahora las páginas son componentes (`PanelPrincipal.jsx`, `Actividades.jsx`, etc.) orquestados bajo el `DashboardLayout.jsx`.
 
 ---
 
 ## DEC-002: CSS y JS inline en portal_avanzado.html
-- **Estado:** ✅ RESUELTA (Mayo 2026)
-- **Fecha:** Marzo 2026 (original) / Mayo 2026 (resolución)
-- **Contexto:** El portal de colaboradores se desarrolló como una página independiente con su propio diseño Glassmorphism (tema claro, fondos degradados rosa/azul), diferente al dashboard (tema oscuro).
-- **Decisión original:** Mantener todo el CSS (~430 líneas) y JS (~340 líneas) inline dentro de portal_avanzado.html.
-- **Resolución (Mayo 2026):**
-  - CSS extraído a `css/main.css` + `css/themes/portal-theme.css`.
-  - JS 100% modularizado en `js/portal/form-ui.js`, `js/portal/submit.js`, `js/portal/stats.js` + módulos compartidos `db-service.js` y `tramites-data.js`.
-  - El portal pasa de 958 líneas a ~204 líneas (solo HTML estructural).
+- **Estado:** ❌ OBSOLETA (Reemplazada por DEC-009)
+- **Resolución:** El portal fue refactorizado a `Portal.jsx` en React.
 
 ---
 
 ## DEC-003: Arrays de trámites duplicados
-- **Estado:** ✅ RESUELTA (Mayo 2026)
-- **Fecha:** Mayo 2026 (original) / Mayo 2026 (resolución)
-- **Contexto:** Tanto el dashboard (`data-manager.js`) como el portal (`portal_avanzado.html`) necesitaban la lista de trámites por área para sus dropdowns.
-- **Decisión original:** Duplicar los arrays en ambos archivos.
-- **Resolución:** Creado `js/tramites-data.js` como **fuente única de verdad**. Expone `window.tramitesArea1` (17 items) y `window.tramitesArea2` (7 items). Ambos archivos lo cargan como script externo. Para agregar/modificar un trámite: editar **solo** `js/tramites-data.js`.
+- **Estado:** ❌ OBSOLETA (Reemplazada por DEC-011)
+- **Contexto:** Se usaba `tramitesData.js` estático.
+- **Resolución:** Eliminado. Reemplazado por `SettingsManager.js` que guarda trámites dinámicamente.
 
 ---
 
@@ -122,86 +102,31 @@
 
 ---
 
-## Plan de Modularización Futuro (script.js)
+## DEC-009: Migración Completa a React (Vite)
+- **Estado:** ✅ Vigente
+- **Fecha:** Julio 2026
+- **Contexto:** El código Vanilla JS con listeners manuales y manipulación directa del DOM era insostenible para un sistema multi-área.
+- **Decisión:** Refactorizar el 100% del frontend a React 18 usando Vite.
+- **Consecuencias:**
+  - ✅ Componentización real y código ultra-limpio.
+  - ✅ Estado reactivo impecable gracias a `Context API`.
+  - ❌ El "Plan de Modularización Futuro" en Vanilla JS fue descartado permanentemente.
 
-> **Estado:** 🟢 Planificado, NO ejecutar aún.
-> Ejecutar cuando: El proyecto crezca con más funcionalidades o se migre a backend real.
-> Última verificación: 2026-05-11 (verificado línea por línea contra script.js 1326 líneas)
+---
 
-### Mapa completo de bloques (cada línea asignada una sola vez):
+## DEC-010: Autenticación Local con SHA-256
+- **Estado:** ✅ Vigente
+- **Fecha:** Julio 2026
+- **Contexto:** El sistema requería seguridad para que las gestoras de un área no pudieran ver ni modificar los datos de otras áreas.
+- **Decisión:** Al no tener backend real, se implementó `AuthContext.jsx` que almacena contraseñas en `localStorage` usando el API de Criptografía Web (SHA-256). Los usuarios se bloquean a los 4 intentos fallidos.
+- **Consecuencias:**
+  - ✅ Autenticación sorprendentemente segura y realista sin servidor.
+  - ✅ El `admin_ti` (Soporte TI) recibe herramientas para gestionar estos bloqueos en el UI.
 
-| Bloque de código | Líneas | Funciones principales |
-|---|---|---|
-| Mock google.script.run | 1-78 | Objeto `google` con métodos simulados |
-| Estado global + Init | 79-103 | Variables globales (`searchTimeout`, `currentSection`), DOMContentLoaded principal |
-| Dropdowns + Trámites | 108-211 | `cargarSolicitantes`, `cargarResponsables`, arrays `tramitesArea1/2`, `actualizarTramitesMain/Modal` |
-| Navegación | 213-272 | `showSection`, `switchView`, `loadGestion` |
-| Dashboard stats | 274-325 | `loadDashboardData`, `setDefaultStats`, `animateValue` |
-| Tickets recientes | 327-367 | `loadRecentTickets`, `renderTickets` |
-| Network pulse | 369-423 | `loadNetworkPulse`, `renderNetworkMetrics` |
-| Guardar actividad + formulario | 425-520 | `guardarMiActividad`, `setBtnLoading`, `resetForm`, `setDefaultDates`, `setHoy` |
-| Toast + Búsqueda | 522-591 | `showToast`, `handleSearch`, `showSearchResults`, `removeSearchResults`, `selectSearchResult` |
-| Tabla actividades (sección Recents) | 593-747 | `loadActivityTable`, `cargarFiltroResponsables`, `filtrarActividades`, `limpiarFiltrosActividades`, `actualizarEstadisticasRapidas`, `renderActivityTable` |
-| Sparklines | 749-804 | `drawSparklines` (Canvas) |
-| Utilidades | 806-817 | `escapeHtml` |
-| Control estado sistemas | 819-854 | `toggleMensajeControl`, `publicarEstadoSistema` |
-| Solicitudes activas (Gestión) | 856-906 | `ESTADOS_INACTIVOS`, `loadSolicitudes` |
-| Kanban | 908-959 | `KANBAN_COLS`, `loadKanban` |
-| Modal edición ticket | 961-1051 | `abrirModalEdicion`, `setSelectVal`, `cerrarModal`, `guardarEdicionTicket` |
-| Widget Mi Estado | 1053-1137 | `ESTADO_LABELS`, `cargarNombresEnWidget`, `setEstadoRapido`, `actualizarPreviewPanel`, `publicarMiEstado`, segundo DOMContentLoaded |
-| Registro rápido | 1139-1218 | `abrirModalRegistroRapido`, `cerrarModalRapido`, `guardarRegistroRapido` |
-| Notificaciones | 1220-1326 | `NotificationHelper` (init, notify, playPing), listener `storage` |
+---
 
-### Estructura propuesta de módulos:
-```
-entorno_local/
-├── js/
-│   ├── app.js             → Estado global + DOMContentLoaded init (L79-103)
-│   ├── db-service.js      → Servicio de Base de Datos (L1-78)
-│   ├── data-manager.js    → Dropdowns + trámites + guardar actividad + formulario (L108-211, L425-520)
-│   ├── navigation.js      → Secciones + vistas tabla/kanban (L213-272)
-│   ├── dashboard.js       → Stats + animaciones + tickets recientes + network pulse (L274-423)
-│   ├── sparklines.js      → Gráficas Canvas (L749-804)
-│   ├── activity-table.js  → Tabla de actividades con filtros (sección Recents) (L593-747)
-│   ├── tickets.js         → Solicitudes activas + kanban + modal edición + registro rápido (L856-1218)
-│   ├── notifications.js   → NotificationHelper + evento storage (L1220-1326)
-│   ├── widgets.js         → Mi Estado + Control sistemas (L819-854, L1053-1137)
-│   └── utils.js           → escapeHtml, showToast, búsqueda (L522-591, L806-817)
-├── index.html             → Solo estructura HTML, importa los JS modulares
-├── portal_avanzado.html   → Mantener independiente (por ahora)
-├── styles.css
-└── database.html
-```
-
-### Orden de carga requerido (por dependencias):
-```html
-<!-- 1. Utilidades (sin dependencias) -->
-<script src="js/utils.js"></script>
-<!-- 2. Backend simulado (sin dependencias) -->
-<script src="js/db-service.js"></script>
-<!-- 3. Módulos de funcionalidad (dependen de utils + mock) -->
-<script src="js/data-manager.js"></script>
-<script src="js/navigation.js"></script>
-<script src="js/dashboard.js"></script>
-<script src="js/sparklines.js"></script>
-<script src="js/activity-table.js"></script>
-<script src="js/tickets.js"></script>
-<script src="js/widgets.js"></script>
-<script src="js/notifications.js"></script>
-<!-- 4. Inicialización (depende de todos los anteriores) -->
-<script src="js/app.js"></script>
-```
-
-> **Resultado (2026-05-11):** El plan de modularización fue ejecutado con éxito. El archivo `script.js` original de 1326 líneas fue eliminado, y el proyecto ahora se ejecuta basándose en los 11 submódulos mencionados.
-
-## DEC-003: Arquitectura Orientada a Eventos y Limpieza de HTML (Mayo 2026)
-
-**Problema:** El HTML contenía cientos de atributos `onclick`, `onchange` y `oninput`, lo que dificultaba la separación de lógica y el mantenimiento modular. Además, el backend simulaba una API de Google Apps Script (`google.script.run`) que era lenta de procesar para las IAs.
-
-**Decisión:**
-1. **Extracción Total:** Eliminar todo rastro de JavaScript inline del archivo `index.html`.
-2. **Event Listeners:** Usar `addEventListener` exclusivamente dentro de los archivos JS.
-3. **Desacoplamiento vía CustomEvents:** En lugar de llamar funciones de otros archivos directamente (ej: `dashboard.js` llamando a `tickets.js`), los componentes emiten eventos (ej: `actividadGuardada`) que otros escuchan.
-4. **API de Promesas:** `DbService` reemplaza la simulación de Apps Script con una interfaz asíncrona estándar (`.then()` / `await`).
-
-**Razón:** Esto convierte al proyecto en una Web App Frontend moderna, permitiendo que las IAs trabajen en un archivo sin romper los demás y siguiendo estándares de la industria.
+## DEC-011: Configuración Dinámica de Trámites
+- **Estado:** ✅ Vigente
+- **Fecha:** Julio 2026
+- **Contexto:** Requerir intervención de un programador para cambiar los trámites (`tramitesData.js`) era ineficiente.
+- **Decisión:** Se creó el `SettingsManager.js` y el componente visual `Settings.jsx`. Los trámites y sus grupos ahora viven en `db_settings` (`localStorage`). Los menús del portal se nutren automáticamente de esta llave en tiempo real.

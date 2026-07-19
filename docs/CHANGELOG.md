@@ -16,6 +16,13 @@
 
 ## Julio 2026
 
+### [2026-07-19] — Autenticación Local, Seguridad y Ajustes Dinámicos 🔐
+- **Archivos:** `AuthContext.jsx`, `ProtectedRoute.jsx`, `SettingsManager.js`, `Login.jsx`, `Settings.jsx`, `App.jsx`.
+- **Autenticación (SHA-256):** Se implementó un sistema de login duro. Las contraseñas se almacenan hasheadas con SHA-256 en `db_usuarios` en localStorage.
+- **Protección de Rutas y Áreas:** `ProtectedRoute.jsx` bloquea accesos no autorizados. Si la gestora de `GE` intenta acceder a la base de datos de `TI`, el sistema la expulsa a su área correspondiente.
+- **Panel de Ajustes Dinámico:** Se eliminó el archivo rígido `tramitesData.js`. Ahora la configuración de trámites por área vive en `db_settings` y se gestiona mediante UI visual (`Settings.jsx`).
+- **Módulo TI:** Panel exclusivo para el `admin_ti` para ver los intentos fallidos, desbloquear usuarios bloqueados temporalmente (tras 4 intentos) y restablecer contraseñas de las gestoras.
+
 ### [2026-07-16] — Implementación de Métricas de Tiempo y Fechas (Dashboard & Context)
 - **Cálculo automático de duración (Columna K):**
   - El sistema ahora genera la propiedad `tiempo` en formato `HH:mm:ss` para facilitar el análisis en bases de datos y Excel.

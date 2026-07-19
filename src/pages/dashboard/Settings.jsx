@@ -118,7 +118,7 @@ export const Settings = () => {
   };
 
   return (
-    <div className="page-content fade-in">
+    <div className="page-content fade-in" style={{ flex: 1, overflowY: 'auto', paddingBottom: '20px' }}>
       <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <div>
           <h1 className="page-title"><i className="fa-solid fa-gear" style={{ color: config.color }}></i> Panel de Ajustes</h1>

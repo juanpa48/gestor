@@ -14,28 +14,33 @@ flowchart TD
     end
 
     subgraph Componentes React
+        L["Login.jsx\n(Ruta Segura)"]
         P["Portal.jsx"]
-        D["PanelPrincipal.jsx\nActividades.jsx\nGestion.jsx"]
+        D["PanelPrincipal.jsx\nActividades.jsx\nGestion.jsx\nSettings.jsx"]
     end
 
     subgraph Estado Global
+        AUTH["AuthContext.jsx\n(Seguridad/Bloqueos)"]
         CTX["ActiveAreaContext.jsx\n(Enrutador de Contextos)"]
         GE["GEContext / GHContext / TIContext"]
     end
 
     subgraph Capa de Datos
-        DB["DbService.js\n(Promesas)"]
-        TR["tramitesData.js\n(Catálogo)"]
+        DB["DbService.js\n(Tickets/Usuarios)"]
+        SM["SettingsManager.js\n(Catálogo)"]
     end
 
     U1 --> P
-    U2 --> D
+    U2 --> L
+    L --> AUTH
+    AUTH --> D
     P <--> CTX
     D <--> CTX
     CTX <--> GE
     GE <--> DB
-    P -.-> TR
-    D -.-> TR
+    GE -.-> SM
+    P -.-> SM
+    D -.-> SM
 ```
 
 ---
@@ -56,8 +61,8 @@ flowchart TD
 - **Dependencias Directas:**
   - `useTickets()` → Lee solicitantes, lee actividades (para filtrar el historial personal del usuario).
   - `addTicket()` → Genera tickets con prefijo **REQ-XXX** (DEC-005).
-  - `tramitesData.js` → Renderiza trámites dinámicamente según área seleccionada.
-- **Sincronización:** Escucha el evento `storage` nativo del navegador para enterarse en tiempo real de cambios en `db_estado_personal` (para el widget de staff IT) y `db_sistemas`.
+  - `SettingsManager.js` → Renderiza trámites dinámicamente según área seleccionada.
+- **Sincronización:** Escucha el evento `storage` nativo del navegador para enterarse en tiempo real de cambios en estado de personal y sistemas.
 
 ---
 
@@ -95,9 +100,11 @@ flowchart TD
 
 ---
 
-### 📄 Capa de Servicios (`src/services/DbService.js`)
-- Persistencia temporal. Promisifica operaciones sobre `localStorage`.
-- Las mismas claves siguen activas (`db_actividades`, `db_solicitantes`, `db_responsables`, `db_sistemas`, `db_estado_personal`).
+### 📄 Capa de Servicios (`src/services/DbService.js` y `SettingsManager.js`)
+- Persistencia temporal. Promisifican operaciones sobre `localStorage`.
+- `DbService.js` interactúa con las llaves de tickets (`db_actividades_ge`, etc.).
+- `SettingsManager.js` controla las llaves de configuración global (`db_settings`) para nutrir dinámicamente los menús de trámites.
+- `AuthContext.jsx` controla dinámicamente `db_usuarios` con soporte para validación criptográfica (SHA-256).
 
 ---
 
@@ -105,7 +112,7 @@ flowchart TD
 
 | Componente | Riesgo / Detalle |
 |---|---|
-| `tramitesData.js` | Única fuente de verdad para el catálogo de trámites. Si agregas uno nuevo, hazlo solo allí. |
+| `SettingsManager.js` | Única fuente de verdad para el catálogo de trámites (reemplazó al antiguo y estático `tramitesData.js`). |
 | Generación de IDs | `RegistroActividadForm` usa `TKT-XXX`, mientras que `Portal` usa `REQ-XXX`. Esto es **intencional** para diferenciar el origen de creación. |
-| Evento `searchTriggered` | Aunque el proyecto migró a React, el Topbar y las Tablas usan `document.addEventListener` para pasar el texto del buscador. |
+| Seguridad en Rutas | Todas las páginas dentro de `/dashboard` están envueltas en `<ProtectedRoute>` que comprueba que `currentUser.area` coincida con la `:area` de la URL. |
 | `body className` en Portal | `Portal.jsx` utiliza un `useEffect` para inyectar `document.body.className = 'portal'` al montarse, asegurando que los estilos de layout apliquen. Cuidado con removerlo. |
