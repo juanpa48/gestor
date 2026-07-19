@@ -56,6 +56,7 @@
 .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.55); backdrop-filter: blur(6px); z-index: 999; align-items: center; justify-content: center; animation: fadeIn .2s ease; }
 .modal-overlay.active { display: flex; }
 .modal-content { background: rgba(255,255,255,0.96); border-radius: 22px; padding: 28px 30px; width: 100%; max-width: 580px; max-height: 90vh; overflow-y: auto; box-shadow: 0 24px 60px rgba(30, 58, 95, 0.25); animation: slideUp .25s cubic-bezier(.22,.61,.36,1); }
+.modal-content .form-input, .modal-content .form-select, .modal-content .form-textarea { color: #1e293b; background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.1); }
 @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 .modal-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 16px; }
 .modal-close { background: #f1f5f9; border: none; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #64748b; font-size: 14px; transition: background .2s; }

@@ -150,7 +150,7 @@ export const FormGE = ({ nombre, setNombre }) => {
             multiple 
             onChange={(e) => setArchivos(e.target.files)}
           />
-          <small style={{ color: 'rgba(255,255,255,0.6)', marginTop: '4px', display: 'block' }}>
+          <small style={{ color: 'var(--text-muted)', marginTop: '4px', display: 'block' }}>
             Puede seleccionar varios archivos a la vez.
           </small>
         </div>

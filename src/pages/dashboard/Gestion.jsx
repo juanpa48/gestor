@@ -23,6 +23,7 @@ export const Gestion = () => {
     detalles: '',
     adjuntos: []
   });
+  const [archivosVistos, setArchivosVistos] = useState(new Set());
 
   // Escuchar el evento de busqueda global del Topbar
   useEffect(() => {
@@ -89,6 +90,7 @@ export const Gestion = () => {
       accion: t.accion || '',
       adjuntos: t.adjuntos || []
     });
+    setArchivosVistos(new Set()); // Resetear vistos al abrir nuevo ticket
     setModalOpen(true);
   };
 
@@ -133,6 +135,30 @@ export const Gestion = () => {
       showToast('Error al actualizar', 'error');
     } finally {
       setModalLoading(false);
+    }
+  };
+
+  const getOriginalFileName = (url) => {
+    try {
+      const parts = url.split('/');
+      const fullName = parts[parts.length - 1] || '';
+      const nameParts = fullName.split('-');
+      if (nameParts.length >= 3) {
+        return nameParts.slice(2).join('-').replace(/_/g, ' ');
+      }
+      return fullName;
+    } catch(e) {
+      return "Archivo Adjunto";
+    }
+  };
+
+  const isPreviewable = (url) => {
+    try {
+      const ext = url.split('.').pop().toLowerCase();
+      const viewableExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'pdf', 'txt', 'mp4'];
+      return viewableExts.includes(ext);
+    } catch(e) {
+      return false;
     }
   };
 
@@ -364,22 +390,36 @@ export const Gestion = () => {
                     <i className="fa-solid fa-paperclip"></i> Archivos Adjuntos ({ticketEdit.adjuntos.length})
                   </label>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-                    {ticketEdit.adjuntos.map((url, idx) => (
-                      <a 
-                        key={idx} 
-                        href={url} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        style={{
-                          display: 'inline-flex', alignItems: 'center', gap: '5px',
-                          padding: '6px 12px', background: 'var(--primary-color)', color: 'white',
-                          borderRadius: '6px', fontSize: '13px', textDecoration: 'none',
-                          boxShadow: '0 2px 4px rgba(0,0,0,0.1)', transition: 'background 0.2s'
-                        }}
-                      >
-                        <i className="fa-solid fa-download"></i> Archivo {idx + 1}
-                      </a>
-                    ))}
+                    {ticketEdit.adjuntos.map((url, idx) => {
+                      const isVisto = archivosVistos.has(url);
+                      const nombreLimpio = getOriginalFileName(url);
+                      const sePuedeVer = isPreviewable(url);
+                      return (
+                        <a 
+                          key={idx} 
+                          href={url} 
+                          target={sePuedeVer ? "_blank" : "_self"} 
+                          rel="noopener noreferrer"
+                          download={!sePuedeVer ? nombreLimpio : undefined}
+                          title={nombreLimpio}
+                          onClick={() => setArchivosVistos(prev => new Set(prev).add(url))}
+                          style={{
+                            display: 'inline-flex', alignItems: 'center', gap: '7px',
+                            padding: '9px 18px', 
+                            background: isVisto ? 'rgba(34, 197, 94, 0.1)' : 'rgba(255, 255, 255, 0.7)', 
+                            color: isVisto ? '#16a34a' : 'var(--text-muted)', 
+                            border: `1.5px solid ${isVisto ? 'rgba(34, 197, 94, 0.4)' : 'rgba(200, 215, 235, 0.6)'}`,
+                            borderRadius: '10px', fontSize: '13px', fontWeight: '500', textDecoration: 'none',
+                            transition: 'all 0.22s', maxWidth: '100%'
+                          }}
+                        >
+                          <i className={`fa-solid ${isVisto ? 'fa-check-double' : 'fa-download'}`} style={{ flexShrink: 0 }}></i> 
+                          <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '200px' }}>
+                            {nombreLimpio}
+                          </span>
+                        </a>
+                      );
+                    })}
                   </div>
                 </div>
               )}
