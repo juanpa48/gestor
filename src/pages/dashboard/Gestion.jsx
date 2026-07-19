@@ -162,6 +162,29 @@ export const Gestion = () => {
     }
   };
 
+  const handleDownload = async (e, url, nombreArchivo) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    setArchivosVistos(prev => new Set(prev).add(url));
+
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = nombreArchivo;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error("Error al forzar descarga", error);
+      window.open(url, '_blank');
+    }
+  };
+
   return (
     <section id="section-solicitudes" className="section active">
       <div className="section-header">
@@ -395,29 +418,52 @@ export const Gestion = () => {
                       const nombreLimpio = getOriginalFileName(url);
                       const sePuedeVer = isPreviewable(url);
                       return (
-                        <a 
-                          key={idx} 
-                          href={url} 
-                          target={sePuedeVer ? "_blank" : "_self"} 
-                          rel="noopener noreferrer"
-                          download={!sePuedeVer ? nombreLimpio : undefined}
-                          title={nombreLimpio}
-                          onClick={() => setArchivosVistos(prev => new Set(prev).add(url))}
+                        <div 
+                          key={idx}
                           style={{
-                            display: 'inline-flex', alignItems: 'center', gap: '7px',
-                            padding: '9px 18px', 
+                            display: 'inline-flex', alignItems: 'stretch',
                             background: isVisto ? 'rgba(34, 197, 94, 0.1)' : 'rgba(255, 255, 255, 0.7)', 
-                            color: isVisto ? '#16a34a' : 'var(--text-muted)', 
                             border: `1.5px solid ${isVisto ? 'rgba(34, 197, 94, 0.4)' : 'rgba(200, 215, 235, 0.6)'}`,
-                            borderRadius: '10px', fontSize: '13px', fontWeight: '500', textDecoration: 'none',
-                            transition: 'all 0.22s', maxWidth: '100%'
+                            borderRadius: '10px', transition: 'all 0.22s',
+                            overflow: 'hidden', maxWidth: '100%'
                           }}
                         >
-                          <i className={`fa-solid ${isVisto ? 'fa-check-double' : 'fa-download'}`} style={{ flexShrink: 0 }}></i> 
-                          <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '200px' }}>
-                            {nombreLimpio}
-                          </span>
-                        </a>
+                          <a 
+                            href={url} 
+                            target={sePuedeVer ? "_blank" : "_self"} 
+                            rel="noopener noreferrer"
+                            download={!sePuedeVer ? nombreLimpio : undefined}
+                            title={nombreLimpio}
+                            onClick={() => setArchivosVistos(prev => new Set(prev).add(url))}
+                            style={{
+                              display: 'inline-flex', alignItems: 'center', gap: '7px',
+                              padding: '9px 12px', color: isVisto ? '#16a34a' : 'var(--text-muted)', 
+                              fontSize: '13px', fontWeight: '500', textDecoration: 'none'
+                            }}
+                          >
+                            <i className={`fa-solid ${isVisto ? 'fa-check-double' : (sePuedeVer ? 'fa-image' : 'fa-download')}`} style={{ flexShrink: 0 }}></i> 
+                            <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '160px' }}>
+                              {nombreLimpio}
+                            </span>
+                          </a>
+                          {sePuedeVer && (
+                            <button
+                              type="button"
+                              title={`Descargar ${nombreLimpio}`}
+                              onClick={(e) => handleDownload(e, url, nombreLimpio)}
+                              style={{
+                                border: 'none', background: 'rgba(0,0,0,0.03)', padding: '0 12px',
+                                borderLeft: `1px solid ${isVisto ? 'rgba(34, 197, 94, 0.2)' : 'rgba(200, 215, 235, 0.6)'}`,
+                                cursor: 'pointer', color: isVisto ? '#16a34a' : 'var(--text-muted)',
+                                transition: 'background 0.2s', display: 'flex', alignItems: 'center'
+                              }}
+                              onMouseOver={(e) => e.currentTarget.style.background = 'rgba(0,0,0,0.08)'}
+                              onMouseOut={(e) => e.currentTarget.style.background = 'rgba(0,0,0,0.03)'}
+                            >
+                              <i className="fa-solid fa-cloud-arrow-down"></i>
+                            </button>
+                          )}
+                        </div>
                       );
                     })}
                   </div>
