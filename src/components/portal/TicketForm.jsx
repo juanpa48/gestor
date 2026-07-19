@@ -41,10 +41,16 @@ export const TicketForm = () => {
     setLoading(true);
     setSuccess('');
 
+    // 1. Generar ID
+    const rawActs = JSON.parse(localStorage.getItem('db_actividades_ge') || '[]');
+    const numReq = rawActs.filter(t => (t.id || '').startsWith('GE-')).length + 1;
+    const newId = `GE-${String(numReq).padStart(3, '0')}`;
+
+    // 2. Subir archivos
     let adjuntosUrls = [];
     try {
       if (archivos && archivos.length > 0) {
-        adjuntosUrls = await UploadService.uploadFiles(archivos);
+        adjuntosUrls = await UploadService.uploadFiles(archivos, newId, 'ge');
       }
     } catch (err) {
       setLoading(false);
@@ -54,6 +60,7 @@ export const TicketForm = () => {
 
     // Mapping fields to match dashboard structure
     const ticketData = {
+      id: newId,
       solicitante: formData.nombre,
       solicitud: formData.tramite || formData.asunto,
       grupo: formData.area === 'area1' ? 'Área 1' : 'Área 2',

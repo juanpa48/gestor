@@ -23,7 +23,14 @@ if (!fs.existsSync(uploadDir)) {
 // Configuración de Multer
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, uploadDir);
+    // Usar area y ticketId del body, o 'misc' si no viene
+    const area = req.body.area || 'misc';
+    const ticketId = req.body.ticketId || 'misc';
+    const dynamicDir = path.join(uploadDir, area, ticketId);
+    if (!fs.existsSync(dynamicDir)) {
+      fs.mkdirSync(dynamicDir, { recursive: true });
+    }
+    cb(null, dynamicDir);
   },
   filename: function (req, file, cb) {
     // Evitar colisiones de nombres: [timestamp]-[nombre original]
@@ -46,8 +53,10 @@ app.post('/api/upload', upload.array('adjuntos', 10), (req, res) => {
     }
 
     // Mapear los archivos a URLs públicas
+    const area = req.body.area || 'misc';
+    const ticketId = req.body.ticketId || 'misc';
     const urls = req.files.map(file => {
-      return `http://localhost:${PORT}/uploads/${file.filename}`;
+      return `http://localhost:${PORT}/uploads/${area}/${ticketId}/${file.filename}`;
     });
 
     res.json({

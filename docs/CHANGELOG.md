@@ -76,10 +76,12 @@
 ### Added
 - **Backend Propio:** Se creó el servicio Node.js + Express en `backend/server.js` para recibir y almacenar archivos subidos al puerto 3001 usando Multer.
 - **Frontend Uploads:** `UploadService.js` añadido para realizar las peticiones `multipart/form-data`.
-- **Formularios con Adjuntos:** `FormGE`, `TicketForm` y `RegistroActividadForm` ahora soportan la carga de múltiples archivos (`<input type="file" multiple />`).
+- **Formularios con Adjuntos:** `FormGE`, `FormGH`, `FormTI`, `TicketForm` y `RegistroActividadForm` ahora soportan la carga de múltiples archivos (`<input type="file" multiple />`).
 - **Mejoras UX Formularios:** Se estilizó el botón nativo de "Elegir archivos" con diseño Glassmorphism y se arregló la legibilidad del texto de ayuda.
 - **Modal de Gestión (Adjuntos):** `Gestion.jsx` actualizado para renderizar enlaces a los archivos.
-- **Smart Attachments UX:** El sistema extrae el nombre original del archivo, corta nombres largos de forma inteligente (truncado con tooltip), evita el pantallazo blanco al descargar Excel/ZIPs y marca en color verde los archivos ya visitados.
+- **Smart Attachments UX:** El sistema extrae el nombre original del archivo, corta nombres largos de forma inteligente (truncado con tooltip), evita el pantallazo blanco al descargar Excel/ZIPs y marca en color verde los archivos ya visitados. Además, se incluye un botón explícito de descarga directa para imágenes.
+- **Organización de Carpetas Dinámica:** El Backend ahora organiza automáticamente los archivos subidos en una estructura jerárquica basada en el Área y el Número de Ticket (ej. `uploads/ti/TI-001/`), previniendo colisiones y mejorando el mantenimiento.
+- **Prefijos Únicos de Tickets:** Se cambió el prefijo genérico `REQ-` por prefijos específicos por área (`TI-`, `GE-`, `GH-`) para mantener la unicidad y correcta trazabilidad en todo el sistema.
 - **Cambio de Contraseña:** Añadido método en `AuthContext.jsx` y UI en `Topbar.jsx` para que el resolutor cambie su propia contraseña.
 - **Seguridad (Bloqueo Temporal):** Agregada lógica en `AuthContext.jsx` para bloquear temporalmente a un usuario por 15 minutos al fallar la contraseña 4 veces.
 

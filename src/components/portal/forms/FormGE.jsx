@@ -37,10 +37,16 @@ export const FormGE = ({ nombre, setNombre }) => {
 
     setLoadingSubmit(true);
 
+    // 1. Generar el ID del ticket primero
+    const rawActs = JSON.parse(localStorage.getItem('db_actividades_ge') || '[]');
+    const numReq = rawActs.filter(t => (t.id || '').startsWith('GE-')).length + 1;
+    const newId = `GE-${String(numReq).padStart(3, '0')}`;
+
+    // 2. Subir archivos pasando el ID para la carpeta
     let adjuntosUrls = [];
     try {
       if (archivos && archivos.length > 0) {
-        adjuntosUrls = await UploadService.uploadFiles(archivos);
+        adjuntosUrls = await UploadService.uploadFiles(archivos, newId, 'ge');
       }
     } catch (err) {
       setLoadingSubmit(false);
@@ -48,12 +54,8 @@ export const FormGE = ({ nombre, setNombre }) => {
       return;
     }
 
+    // 3. Crear el ticket
     try {
-      // Fake getting the number to generate REQ-XXX (in real app, backend assigns ID)
-      const rawActs = JSON.parse(localStorage.getItem('db_actividades_ge') || '[]');
-      const numReq = rawActs.filter(t => (t.id || '').startsWith('REQ-')).length + 1;
-      const newId = `REQ-${String(numReq).padStart(3, '0')}`;
-
       const nuevoTicket = {
         id: newId,
         fechaISO: new Date().toISOString(),

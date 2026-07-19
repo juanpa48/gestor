@@ -85,10 +85,21 @@ export const RegistroActividadForm = () => {
     e.preventDefault();
     setLoading(true);
 
+    // 1. Generar ID
+    let newId = '';
+    try {
+      const tickets = await DbService.getActividades();
+      newId = `TKT-${String(tickets.length + 1).padStart(3, '0')}`;
+    } catch (e) {
+      console.error(e);
+      newId = `TKT-${Date.now()}`;
+    }
+
+    // 2. Subir archivos
     let adjuntosUrls = [];
     try {
       if (archivos && archivos.length > 0) {
-        adjuntosUrls = await UploadService.uploadFiles(archivos);
+        adjuntosUrls = await UploadService.uploadFiles(archivos, newId, 'actividades');
       }
     } catch (err) {
       setLoading(false);
@@ -97,9 +108,6 @@ export const RegistroActividadForm = () => {
     }
 
     try {
-      const tickets = await DbService.getActividades();
-      const newId = `TKT-${String(tickets.length + 1).padStart(3, '0')}`;
-      
       const newTicket = {
         id: newId,
         fechaCreacion: new Date().toLocaleString(),

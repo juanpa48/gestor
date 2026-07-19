@@ -29,10 +29,16 @@ export const FormTI = ({ nombre, setNombre }) => {
 
     setLoadingSubmit(true);
 
+    // 1. Generar el ID del ticket primero
+    const rawActs = JSON.parse(localStorage.getItem('db_actividades_ti') || '[]');
+    const numReq = rawActs.filter(t => (t.id || '').startsWith('TI-')).length + 1;
+    const newId = `TI-${String(numReq).padStart(3, '0')}`;
+
+    // 2. Subir archivos pasando el ID para la carpeta
     let adjuntosUrls = [];
     try {
       if (archivos && archivos.length > 0) {
-        adjuntosUrls = await UploadService.uploadFiles(archivos);
+        adjuntosUrls = await UploadService.uploadFiles(archivos, newId, 'ti');
       }
     } catch (err) {
       setLoadingSubmit(false);
@@ -40,11 +46,8 @@ export const FormTI = ({ nombre, setNombre }) => {
       return;
     }
 
+    // 3. Crear el ticket
     try {
-      const rawActs = JSON.parse(localStorage.getItem('db_actividades_ti') || '[]');
-      const numReq = rawActs.filter(t => (t.id || '').startsWith('REQ-')).length + 1;
-      const newId = `REQ-${String(numReq).padStart(3, '0')}`;
-
       const nuevoTicket = {
         id: newId,
         fechaISO: new Date().toISOString(),
