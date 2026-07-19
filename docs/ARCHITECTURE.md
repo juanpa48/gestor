@@ -34,7 +34,13 @@ flowchart LR
     end
 
     subgraph Storage["Persistencia"]
-        LS[("localStorage")]
+        LS[("localStorage (JSON)")]
+    end
+
+    subgraph Backend["Servidor Node.js (Puerto 3001)"]
+        EX["Express API"]
+        MU["Multer"]
+        FS[("Sistema de Archivos (uploads/)")]
     end
 
     P --> R
@@ -42,6 +48,9 @@ flowchart LR
     R --> CTX
     CTX --> S
     S --> LS
+    S -. "POST /api/upload" .-> EX
+    EX --> MU
+    MU --> FS
 ```
 
 ## 3. Estilo Arquitectónico
@@ -161,8 +170,9 @@ Beneficios de la adopción de React:
 - **Backend-Ready:** La persistencia pasa exclusivamente por promesas (`DbService`), haciendo que migrar a una API (Axios/fetch) tome minutos.
 
 Límites actuales:
-- Sigue existiendo la dependencia de `localStorage`, limitando la colaboración concurrente real.
-- Falta migrar definitivamente la persistencia a una base de datos real en un backend (Node.js/SQL) para multiusuario global.
+- Sigue existiendo la dependencia de `localStorage` para el JSON, limitando la colaboración concurrente real de la base de datos de tickets.
+- Los **Archivos Adjuntos** (imágenes, PDFs) ya se migraron exitosamente a un backend real en Node.js, superando el límite de 5MB del navegador y permitiendo carpetas organizadas dinámicamente (`uploads/ti/TI-001/`).
+- Falta migrar definitivamente la persistencia JSON a una base de datos real (Node.js/SQL) para multiusuario global.
 
 ## 8. Recomendaciones para IAs Futuras
 

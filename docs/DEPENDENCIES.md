@@ -60,7 +60,8 @@ flowchart TD
 - **Propósito:** Formulario autónomo donde los colaboradores envían solicitudes.
 - **Dependencias Directas:**
   - `useTickets()` → Lee solicitantes, lee actividades (para filtrar el historial personal del usuario).
-  - `addTicket()` → Genera tickets con prefijo **REQ-XXX** (DEC-005).
+  - `addTicket()` → Genera tickets con prefijo único por área (**TI-XXX**, **GE-XXX**, **GH-XXX**) (DEC-005).
+  - `UploadService.js` → Orquesta la subida física de archivos adjuntos enviando el área y el ID al servidor.
   - `SettingsManager.js` → Renderiza trámites dinámicamente según área seleccionada.
 - **Sincronización:** Escucha el evento `storage` nativo del navegador para enterarse en tiempo real de cambios en estado de personal y sistemas.
 
@@ -113,6 +114,6 @@ flowchart TD
 | Componente | Riesgo / Detalle |
 |---|---|
 | `SettingsManager.js` | Única fuente de verdad para el catálogo de trámites (reemplazó al antiguo y estático `tramitesData.js`). |
-| Generación de IDs | `RegistroActividadForm` usa `TKT-XXX`, mientras que `Portal` usa `REQ-XXX`. Esto es **intencional** para diferenciar el origen de creación. |
+| Generación de IDs | `RegistroActividadForm` usa `TKT-XXX`, mientras que los Portales usan prefijos de área (`TI-XXX`, `GE-XXX`, `GH-XXX`). Esto es **vital** para crear las carpetas físicas correctamente en el Backend Node.js de uploads. |
 | Seguridad en Rutas | Todas las páginas dentro de `/dashboard` están envueltas en `<ProtectedRoute>` que comprueba que `currentUser.area` coincida con la `:area` de la URL. |
 | `body className` en Portal | `Portal.jsx` utiliza un `useEffect` para inyectar `document.body.className = 'portal'` al montarse, asegurando que los estilos de layout apliquen. Cuidado con removerlo. |

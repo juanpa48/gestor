@@ -24,7 +24,8 @@ Este documento desglosa la implementación actual del proyecto desde una perspec
 2. **Capa de Persistencia (`DbService.js`, `SettingsManager.js`, `UploadService.js`):**
    - Aísla la lógica de almacenamiento (`localStorage` para JSON, y HTTP POST para archivos físicos).
    - *Ruta a futuro:* Si se reemplaza `localStorage` por PostgreSQL (o Firebase), solo se editarían estos archivos, manteniendo intacta la UI.
-   - *Backend Node.js:* El directorio `/backend` levanta un servidor Express + Multer en el puerto 3001, encargado exclusivamente de recibir archivos (adjuntos) y devolver URLs públicas estáticas, evitando saturar la memoria local del navegador.
+   - *Backend Node.js:* El directorio `/backend` levanta un servidor Express + Multer en el puerto 3001, encargado exclusivamente de recibir archivos (adjuntos) y devolver URLs públicas estáticas.
+   - *Organización Dinámica:* Los archivos se guardan automáticamente en subcarpetas separadas por Área y Número de Ticket (ej. `backend/uploads/ti/TI-001/`), evitando colapsos del sistema operativo por volumen.
 
 ## 3. Estructura y Responsabilidad de Módulos
 
@@ -46,8 +47,11 @@ Este documento desglosa la implementación actual del proyecto desde una perspec
 ## 4. Convenciones y Flujo de Datos
 
 ### Prefijos de Identidad
-- **`REQ-XXX`**: Solicitudes originadas en el Portal.
-- **`TKT-XXX`**: Registros manuales creados en el Dashboard (Panel Principal).
+- **Portal:** Las solicitudes originadas en el portal generan prefijos únicos por área para evitar colisiones:
+  - **`TI-XXX`**: Solicitudes a Soporte TI.
+  - **`GE-XXX`**: Solicitudes a Gestión Empresarial.
+  - **`GH-XXX`**: Solicitudes a Gestión Humana.
+- **Dashboard:** **`TKT-XXX`**: Registros de actividad manuales creados en el Dashboard (Panel Principal).
 
 ### Flujo de creación Portal -> Dashboard
 1. Colaborador envía form (`REQ-XXX`). `Portal.jsx` llama a `addTicket()`.
