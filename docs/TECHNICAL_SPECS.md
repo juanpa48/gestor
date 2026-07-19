@@ -14,17 +14,17 @@ Este documento desglosa la implementación actual del proyecto desde una perspec
 
 ## 2. Patrones de Diseño Implementados
 
-### Context API (State Management)
-Uso de múltiples contextos para aislar responsabilidades y evitar el *prop drilling*:
-- `TicketContext.jsx`: Orquesta el CRUD de tickets (actividades).
-- `AuthContext.jsx`: Controla sesión actual, encriptación y acceso a rutas protegidas.
-- `ActiveAreaContext.jsx`: Factory dinámico que expone los datos del área actual basada en la URL.
-- `NotificationContext.jsx`: Maneja notificaciones visuales y sonoras (mediante `useStorageSync.js`).
+## Componentes Core del Sistema
 
-### Service Layer / Facade
-- `DbService.js` centraliza el acceso a datos asíncronos para Tickets y Usuarios.
-- `SettingsManager.js` gestiona la base de datos de configuraciones de cada área.
-Ambos aíslan a los componentes React del mecanismo de almacenamiento subyacente.
+1. **Gestor de Estado (Context API):**
+   - `ActiveAreaContext`: Punto único de la verdad para inyectar colores, íconos y reglas del área actual.
+   - `TicketContext` (`GEContext`, `GHContext`, `TIContext`): Proveedores de datos que exponen la lógica CRUD (`addTicket`, `updateTicket`, etc.) hacia la UI de forma transparente.
+   - `AuthContext`: Proveedor de seguridad con encriptación SHA-256 local y control de bloqueos temporales (15 min) por intentos fallidos.
+
+2. **Capa de Persistencia (`DbService.js`, `SettingsManager.js`, `UploadService.js`):**
+   - Aísla la lógica de almacenamiento (`localStorage` para JSON, y HTTP POST para archivos físicos).
+   - *Ruta a futuro:* Si se reemplaza `localStorage` por PostgreSQL (o Firebase), solo se editarían estos archivos, manteniendo intacta la UI.
+   - *Backend Node.js:* El directorio `/backend` levanta un servidor Express + Multer en el puerto 3001, encargado exclusivamente de recibir archivos (adjuntos) y devolver URLs públicas estáticas, evitando saturar la memoria local del navegador.
 
 ## 3. Estructura y Responsabilidad de Módulos
 

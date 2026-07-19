@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAreaTickets as useTickets } from '../../../areas/gestion-empresarial/context/GEContext';
 import { GE_CONFIG } from '../../../areas/gestion-empresarial/config';
+import { UploadService } from '../../../shared/services/UploadService';
 
 export const FormGE = ({ nombre, setNombre }) => {
   const { solicitantes, getSolicitanteCargo, addTicket } = useTickets();
@@ -8,6 +9,7 @@ export const FormGE = ({ nombre, setNombre }) => {
   const [tipoTramite, setTipoTramite] = useState('');
   const [solicitud, setSolicitud] = useState('');
   const [prioridad, setPrioridad] = useState('Media');
+  const [archivos, setArchivos] = useState([]);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
 
   const showToast = (message, type = 'success', icon = 'check') => {
@@ -34,6 +36,18 @@ export const FormGE = ({ nombre, setNombre }) => {
     }
 
     setLoadingSubmit(true);
+
+    let adjuntosUrls = [];
+    try {
+      if (archivos && archivos.length > 0) {
+        adjuntosUrls = await UploadService.uploadFiles(archivos);
+      }
+    } catch (err) {
+      setLoadingSubmit(false);
+      showToast('Error al subir archivos: ' + err.message, 'error', 'triangle-exclamation');
+      return;
+    }
+
     try {
       // Fake getting the number to generate REQ-XXX (in real app, backend assigns ID)
       const rawActs = JSON.parse(localStorage.getItem('db_actividades_ge') || '[]');
@@ -54,7 +68,8 @@ export const FormGE = ({ nombre, setNombre }) => {
         grupo: areaGestion,
         grupoExtra: tipoTramite,
         clasificacion: '',
-        detalles: ''
+        detalles: '',
+        adjuntos: adjuntosUrls
       };
 
       await addTicket(nuevoTicket);
@@ -63,6 +78,7 @@ export const FormGE = ({ nombre, setNombre }) => {
       setAreaGestion('');
       setTipoTramite('');
       setPrioridad('Media');
+      setArchivos([]);
       
       showToast(`¡Solicitud <strong>${newId}</strong> enviada exitosamente!`, 'success', 'check');
     } catch (err) {
@@ -123,6 +139,21 @@ export const FormGE = ({ nombre, setNombre }) => {
           value={solicitud} 
           onChange={(e) => setSolicitud(e.target.value)}
         ></textarea>
+      </div>
+
+      <div className="form-group">
+        <label className="form-label">EVIDENCIAS / ARCHIVOS ADJUNTOS (Opcional)</label>
+        <div className="file-upload-wrapper">
+          <input 
+            type="file" 
+            className="glass-input" 
+            multiple 
+            onChange={(e) => setArchivos(e.target.files)}
+          />
+          <small style={{ color: 'rgba(255,255,255,0.6)', marginTop: '4px', display: 'block' }}>
+            Puede seleccionar varios archivos a la vez.
+          </small>
+        </div>
       </div>
 
       <div className="form-group">

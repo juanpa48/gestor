@@ -72,6 +72,17 @@
 
 ---
 
+## [Unreleased]
+### Added
+- **Backend Propio:** Se creó el servicio Node.js + Express en `backend/server.js` para recibir y almacenar archivos subidos al puerto 3001 usando Multer.
+- **Frontend Uploads:** `UploadService.js` añadido para realizar las peticiones `multipart/form-data`.
+- **Formularios con Adjuntos:** `FormGE`, `TicketForm` y `RegistroActividadForm` ahora soportan la carga de múltiples archivos (`<input type="file" multiple />`).
+- **Modal de Gestión (Adjuntos):** `Gestion.jsx` actualizado para renderizar enlaces directos a las fotos o PDFs adjuntos de cada ticket si este los posee.
+- **Cambio de Contraseña:** Añadido método en `AuthContext.jsx` y UI en `Topbar.jsx` para que el resolutor cambie su propia contraseña.
+- **Seguridad (Bloqueo Temporal):** Agregada lógica en `AuthContext.jsx` para bloquear temporalmente a un usuario por 15 minutos al fallar la contraseña 4 veces.
+
+---
+
 ## Junio 2026
 
 ### [2026-06-29] — Gráficas funcionales en el Dashboard con Chart.js

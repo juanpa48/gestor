@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useActiveArea } from '../../../shared/contexts/ActiveAreaContext';
 import { DbService } from '../../../shared/services/DbService';
+import { UploadService } from '../../../shared/services/UploadService';
 
 export const RegistroActividadForm = () => {
   const { ctx, config } = useActiveArea();
@@ -8,6 +9,7 @@ export const RegistroActividadForm = () => {
   const [solicitantes, setSolicitantes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
+  const [archivos, setArchivos] = useState([]);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -83,6 +85,17 @@ export const RegistroActividadForm = () => {
     e.preventDefault();
     setLoading(true);
 
+    let adjuntosUrls = [];
+    try {
+      if (archivos && archivos.length > 0) {
+        adjuntosUrls = await UploadService.uploadFiles(archivos);
+      }
+    } catch (err) {
+      setLoading(false);
+      showToast('Error al subir archivos: ' + err.message);
+      return;
+    }
+
     try {
       const tickets = await DbService.getActividades();
       const newId = `TKT-${String(tickets.length + 1).padStart(3, '0')}`;
@@ -104,7 +117,8 @@ export const RegistroActividadForm = () => {
         fechaFin: formData.fechaFin,
         fechaProgramada: formData.fechaProgramada,
         accion: '',
-        detalles: formData.detalles
+        detalles: formData.detalles,
+        adjuntos: adjuntosUrls
       };
 
       await addTicket(newTicket);
@@ -116,6 +130,7 @@ export const RegistroActividadForm = () => {
         prioridad: '', grupo: '', clasificacion: '', fechaInicio: '', 
         fechaFin: '', fechaProgramada: '', detalles: ''
       });
+      setArchivos([]);
     } catch (err) {
       console.error(err);
       showToast('Error al registrar actividad');
@@ -318,6 +333,23 @@ export const RegistroActividadForm = () => {
             <div className="input-wrapper">
               <i className="fa-regular fa-calendar-check input-icon"></i>
               <input type="date" id="fechaProgramada" name="fechaProgramada" className="form-input" title="Fecha Programada" value={formData.fechaProgramada} onChange={handleInputChange} />
+            </div>
+          </div>
+          
+          {/* Fila 7 - Archivos adjuntos */}
+          <div className="form-group full-width">
+            <label className="form-label">Archivos Adjuntos (Opcional)</label>
+            <div className="file-upload-wrapper">
+              <input 
+                type="file" 
+                className="form-input" 
+                multiple 
+                onChange={(e) => setArchivos(e.target.files)}
+                style={{ padding: '8px' }}
+              />
+              <small style={{ color: 'rgba(0,0,0,0.5)', marginTop: '4px', display: 'block' }}>
+                Puede seleccionar varios archivos a la vez.
+              </small>
             </div>
           </div>
         </div>

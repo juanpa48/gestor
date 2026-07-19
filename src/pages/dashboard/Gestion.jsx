@@ -20,7 +20,8 @@ export const Gestion = () => {
     prioridad: 'Baja',
     grupo: '',
     clasificacion: '',
-    detalles: ''
+    detalles: '',
+    adjuntos: []
   });
 
   // Escuchar el evento de busqueda global del Topbar
@@ -85,7 +86,8 @@ export const Gestion = () => {
       clasificacion: t.grupoExtra || t.clasificacion || '',
       detalles: t.detalles || '',
       fechaProgramada: t.fechaProgramada || '',
-      accion: t.accion || ''
+      accion: t.accion || '',
+      adjuntos: t.adjuntos || []
     });
     setModalOpen(true);
   };
@@ -355,6 +357,32 @@ export const Gestion = () => {
                 <label className="form-label">Acción Técnica / Notas</label>
                 <textarea id="m_accion" className="form-input form-input-full" rows="2" placeholder="Describe lo que hiciste para resolverlo..." value={ticketEdit.accion} onChange={handleModalChange}></textarea>
               </div>
+
+              {ticketEdit.adjuntos && ticketEdit.adjuntos.length > 0 && (
+                <div className="form-group form-group-full" style={{ background: 'rgba(255,255,255,0.05)', padding: '15px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                  <label className="form-label" style={{ marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <i className="fa-solid fa-paperclip"></i> Archivos Adjuntos ({ticketEdit.adjuntos.length})
+                  </label>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                    {ticketEdit.adjuntos.map((url, idx) => (
+                      <a 
+                        key={idx} 
+                        href={url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        style={{
+                          display: 'inline-flex', alignItems: 'center', gap: '5px',
+                          padding: '6px 12px', background: 'var(--primary-color)', color: 'white',
+                          borderRadius: '6px', fontSize: '13px', textDecoration: 'none',
+                          boxShadow: '0 2px 4px rgba(0,0,0,0.1)', transition: 'background 0.2s'
+                        }}
+                      >
+                        <i className="fa-solid fa-download"></i> Archivo {idx + 1}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="form-actions form-actions-mt">

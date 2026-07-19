@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAreaTickets as useTickets } from '../../areas/gestion-empresarial/context/GEContext';
 import { GE_CONFIG } from '../../areas/gestion-empresarial/config';
+import { UploadService } from '../../shared/services/UploadService';
 
 export const TicketForm = () => {
   const { addTicket } = useTickets();
@@ -14,6 +15,7 @@ export const TicketForm = () => {
 
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
+  const [archivos, setArchivos] = useState([]);
 
   const handleChange = (e) => {
     setFormData(prev => ({
@@ -39,6 +41,17 @@ export const TicketForm = () => {
     setLoading(true);
     setSuccess('');
 
+    let adjuntosUrls = [];
+    try {
+      if (archivos && archivos.length > 0) {
+        adjuntosUrls = await UploadService.uploadFiles(archivos);
+      }
+    } catch (err) {
+      setLoading(false);
+      alert('Error al subir archivos: ' + err.message);
+      return;
+    }
+
     // Mapping fields to match dashboard structure
     const ticketData = {
       solicitante: formData.nombre,
@@ -48,7 +61,8 @@ export const TicketForm = () => {
       prioridad: 'Media', // Default for portal
       responsable: '',
       detalles: formData.asunto,
-      empresa: formData.empresa
+      empresa: formData.empresa,
+      adjuntos: adjuntosUrls
     };
 
     const res = await addTicket(ticketData);
@@ -59,6 +73,7 @@ export const TicketForm = () => {
       setFormData({
         nombre: '', empresa: '', area: '', tramite: '', asunto: ''
       });
+      setArchivos([]);
       setTimeout(() => setSuccess(''), 5000);
     }
   };
@@ -120,6 +135,22 @@ export const TicketForm = () => {
           <textarea name="asunto" className="glass-input" rows="4" required 
                     value={formData.asunto} onChange={handleChange}
                     placeholder="Describa brevemente el requerimiento, enlaces o notas adicionales..."></textarea>
+        </div>
+
+        <div className="form-group" style={{ marginTop: '24px' }}>
+          <label>Evidencias / Archivos Adjuntos (Opcional)</label>
+          <div className="file-upload-wrapper" style={{ display: 'flex', flexDirection: 'column' }}>
+            <input 
+              type="file" 
+              className="glass-input" 
+              multiple 
+              onChange={(e) => setArchivos(e.target.files)}
+              style={{ width: '100%', padding: '10px' }}
+            />
+            <small style={{ color: 'rgba(255,255,255,0.6)', marginTop: '4px' }}>
+              Puede seleccionar varios archivos a la vez.
+            </small>
+          </div>
         </div>
 
         <div className="form-actions" style={{ marginTop: '32px', textAlign: 'right' }}>

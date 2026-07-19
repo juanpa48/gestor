@@ -96,14 +96,6 @@ Migración del Administrador de Datos completada. Ruta `/database` habilitada co
 
 - [x] **Fase 3: Renderizado de Gráficos**
   - [x] Reemplazar `LineChart` falsos.
-  - [x] Renderizar `Pie` para Total Abiertos.
-  - [x] Renderizar `Bar` horizontal para En Progreso.
-  - [x] Renderizar `Bar` vertical para Total Resueltos (Prom. Resolución).
-  - [x] Renderizar `Doughnut` para Tareas Urgentes.
-  - [x] Ajustar colores (`#e8192c`, `#f59e0b`, `#3b82f6`, `#10b981`).
-
----
-
 ## Último objetivo completado
 
 Integración del Centro de Notificaciones y gráficos de Dashboard con Chart.js finalizada.
@@ -118,15 +110,6 @@ Integración del Centro de Notificaciones y gráficos de Dashboard con Chart.js 
 
 ---
 
-## Nuevo Objetivo: Métricas de Tiempos y Fechas en Tickets
-
-**Objetivo:** Restaurar y automatizar el registro de fechas clave (`fechaInicio`, `fechaFin`) y el cálculo automático del `tiempo` transcurrido de los tickets, además de proveer campos para registrar la `fechaProgramada` y `accion` técnica por parte del resolutor.
-
-### Fases de Implementación:
-- [x] **Fase 1: Contexto de Tickets** (Interceptar "En progreso" y "Resuelto").
-- [x] **Fase 2: Modal de Gestión** (Añadir inputs de `fechaProgramada` y `accion`).
-
----
 
 ## Último objetivo completado
 
