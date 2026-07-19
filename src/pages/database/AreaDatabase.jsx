@@ -108,13 +108,20 @@ export const AreaDatabase = () => {
           <h1 style={{ margin: 0 }}>Base de Datos Local - {config.nombre}</h1>
           <p style={{ margin: 0 }}>Vista de datos en <code>localStorage</code> (Modo SuperAdmin).</p>
         </div>
-        <button 
-          className="btn-secondary" 
-          onClick={() => navigate(`/dashboard/${currentUser?.area || 'ti'}`)}
-          style={{ padding: '8px 16px', borderRadius: '8px', cursor: 'pointer' }}
-        >
-          <i className="fa-solid fa-arrow-left"></i> Volver a mi Dashboard
-        </button>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <div className="btn-group" style={{ display: 'flex', gap: '5px', background: 'rgba(255,255,255,0.05)', padding: '5px', borderRadius: '8px' }}>
+            <button className={`btn-secondary ${config.nombre.includes('TI') ? 'active' : ''}`} onClick={() => navigate('/database/ti')} style={{ padding: '6px 12px' }}>DB TI</button>
+            <button className={`btn-secondary ${config.nombre.includes('Empresarial') ? 'active' : ''}`} onClick={() => navigate('/database/ge')} style={{ padding: '6px 12px' }}>DB GE</button>
+            <button className={`btn-secondary ${config.nombre.includes('Humana') ? 'active' : ''}`} onClick={() => navigate('/database/gh')} style={{ padding: '6px 12px' }}>DB GH</button>
+          </div>
+          <button 
+            className="btn-primary" 
+            onClick={() => navigate(`/dashboard/${currentUser?.area || 'ti'}`)}
+            style={{ padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', marginLeft: '10px' }}
+          >
+            <i className="fa-solid fa-arrow-left"></i> Volver al Dashboard
+          </button>
+        </div>
       </div>
 
       <div className="db-tabs">
