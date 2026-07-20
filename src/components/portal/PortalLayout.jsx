@@ -6,8 +6,6 @@ export const PortalLayout = ({ areaConfig, areaContext, onBack, children, nombre
   const { logout } = useAuth();
   const [sistemas, setSistemas] = useState({});
   const [personalTI, setPersonalTI] = useState({});
-  const [rawResponsables, setRawResponsables] = useState([]);
-
   // Sync systems & IT staff from localStorage
   useEffect(() => {
     const handleStorage = () => {
@@ -16,17 +14,12 @@ export const PortalLayout = ({ areaConfig, areaContext, onBack, children, nombre
         setSistemas(sys);
         const stf = JSON.parse(localStorage.getItem('db_estado_personal') || '{}');
         setPersonalTI(stf);
-        const rawResp = JSON.parse(localStorage.getItem(areaConfig.responsablesKey) || '[]');
-        setRawResponsables(rawResp.length > 0 ? rawResp : [
-          { nombre: 'Personal por defecto 1', cargo: 'Admin Nivel 1', foto: 'https://i.pravatar.cc/150?u=1' },
-          { nombre: 'Personal por defecto 2', cargo: 'Especialista', foto: 'https://i.pravatar.cc/150?u=2' }
-        ]);
       } catch (e) { }
     };
     handleStorage();
     window.addEventListener('storage', handleStorage);
     return () => window.removeEventListener('storage', handleStorage);
-  }, [responsables, areaConfig.responsablesKey]);
+  }, []);
 
   const misTickets = useMemo(() => {
     if (!nombre) return [];
@@ -218,13 +211,13 @@ export const PortalLayout = ({ areaConfig, areaContext, onBack, children, nombre
           </div>
 
           <div id="itStaffContainer">
-            {rawResponsables.length === 0 ? (
+            {responsables.length === 0 ? (
               <div style={{ color: '#94a3b8', fontSize: '13px', textAlign: 'center', marginTop: '20px' }}>
                 <i className="fa-solid fa-user-slash" style={{ fontSize: '20px', marginBottom: '8px', display: 'block' }}></i>
                 Sin datos de personal
               </div>
             ) : (
-              rawResponsables.map((resp, idx) => {
+              responsables.map((resp, idx) => {
                 const n = typeof resp === 'object' ? resp.nombre : resp;
                 const cargo = typeof resp === 'object' ? resp.cargo : 'Personal TI';
                 const foto = (typeof resp === 'object' && resp.foto) ? resp.foto : `https://i.pravatar.cc/150?u=${n.replace(' ','')}`;

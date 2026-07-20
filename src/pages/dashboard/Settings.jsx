@@ -12,10 +12,12 @@ export const Settings = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [users, setUsers] = useState([]);
   
-  // Nuevo estado para Solicitantes
+  // Nuevo estado para Creación de Usuarios
   const [newEmpNombreReal, setNewEmpNombreReal] = useState('');
   const [newEmpUsername, setNewEmpUsername] = useState('');
   const [newEmpCargo, setNewEmpCargo] = useState('');
+  const [newEmpRole, setNewEmpRole] = useState('solicitante');
+  const [newEmpArea, setNewEmpArea] = useState('');
 
   useEffect(() => {
     const settings = getAreaSettings(area);
@@ -132,14 +134,20 @@ export const Settings = () => {
       window.alert('Este usuario ya existe.');
       return;
     }
+    if ((newEmpRole === 'gestor' || newEmpRole === 'admin_ti') && !newEmpArea) {
+      window.alert('Debes asignar un área obligatoriamente para los Gestores y Administradores.');
+      return;
+    }
+
     const empHash = await hashPassword('12345');
     const newUser = {
       id: `U-${String(db.length + 1).padStart(2, '0')}`,
       username: newEmpUsername.trim(),
       nombreReal: newEmpNombreReal.trim(),
       passwordHash: empHash,
-      role: 'solicitante',
-      cargo: newEmpCargo.trim() || 'Empleado',
+      role: newEmpRole,
+      area: (newEmpRole === 'solicitante') ? null : newEmpArea,
+      cargo: newEmpCargo.trim() || ((newEmpRole === 'solicitante') ? 'Empleado' : 'Gestor'),
       bloqueado: false,
       intentosFallidos: 0
     };
@@ -149,7 +157,9 @@ export const Settings = () => {
     setNewEmpNombreReal('');
     setNewEmpUsername('');
     setNewEmpCargo('');
-    showToast(`Empleado ${newUser.nombreReal} creado. Contraseña por defecto: 12345`);
+    setNewEmpRole('solicitante');
+    setNewEmpArea('');
+    showToast(`Usuario ${newUser.nombreReal} creado. Contraseña por defecto: 12345`);
   };
 
   return (
@@ -234,7 +244,7 @@ export const Settings = () => {
           <div className="settings-container glass-panel" style={{ padding: '24px', marginTop: '32px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(30,58,95,0.1)', paddingBottom: '16px', marginBottom: '24px' }}>
               <h2 style={{ fontSize: '18px', color: 'var(--navy)' }}>
-                <i className="fa-solid fa-users-gear"></i> Gestión de Resolutores (Admin TI)
+                <i className="fa-solid fa-users-gear"></i> Gestión de Resolutores (Gestores y Admin)
               </h2>
             </div>
             
@@ -292,15 +302,28 @@ export const Settings = () => {
           <div className="settings-container glass-panel" style={{ padding: '24px', marginTop: '32px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(30,58,95,0.1)', paddingBottom: '16px', marginBottom: '24px' }}>
               <h2 style={{ fontSize: '18px', color: 'var(--navy)' }}>
-                <i className="fa-solid fa-id-card-clip"></i> Cuentas de Empleados (Portal)
+                <i className="fa-solid fa-id-card-clip"></i> Cuentas de Empleados (Portal) / Crear Usuario
               </h2>
             </div>
 
-            <div style={{ display: 'flex', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: '12px', marginBottom: '24px', flexWrap: 'wrap', alignItems: 'center' }}>
               <input type="text" className="glass-input" placeholder="Nombre Completo" value={newEmpNombreReal} onChange={e => setNewEmpNombreReal(e.target.value)} />
               <input type="text" className="glass-input" placeholder="Nombre de Usuario (Login)" value={newEmpUsername} onChange={e => setNewEmpUsername(e.target.value)} />
               <input type="text" className="glass-input" placeholder="Cargo (ej: Contador)" value={newEmpCargo} onChange={e => setNewEmpCargo(e.target.value)} />
-              <button className="btn-secondary" onClick={handleAddSolicitante}><i className="fa-solid fa-plus"></i> Crear Empleado</button>
+              <select className="glass-input" value={newEmpRole} onChange={e => setNewEmpRole(e.target.value)} style={{ padding: '8px 12px' }}>
+                <option value="solicitante">Rol: Solicitante (Portal)</option>
+                <option value="gestor">Rol: Gestor de Área (Dashboard)</option>
+                <option value="admin_ti">Rol: Admin TI</option>
+              </select>
+              {(newEmpRole === 'gestor' || newEmpRole === 'admin_ti') && (
+                <select className="glass-input" value={newEmpArea} onChange={e => setNewEmpArea(e.target.value)} style={{ padding: '8px 12px' }}>
+                  <option value="">-- Asignar Área --</option>
+                  <option value="ti">Soporte TI</option>
+                  <option value="ge">Gestión Empresarial</option>
+                  <option value="gh">Gestión Humana</option>
+                </select>
+              )}
+              <button className="btn-secondary" onClick={handleAddSolicitante}><i className="fa-solid fa-plus"></i> Añadir Usuario</button>
             </div>
             
             <div style={{ overflowX: 'auto' }}>

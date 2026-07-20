@@ -158,8 +158,8 @@ export const createAreaContext = (config) => {
     };
 
     const getSolicitanteCargo = (nombre) => {
-      const rawList = JSON.parse(localStorage.getItem('db_solicitantes')) || [];
-      const found = rawList.find(s => typeof s === 'object' && s.nombre === nombre);
+      const rawList = JSON.parse(localStorage.getItem('db_usuarios')) || [];
+      const found = rawList.find(u => u.role === 'solicitante' && (u.nombreReal === nombre || u.username === nombre));
       return found ? found.cargo || '' : '';
     };
 

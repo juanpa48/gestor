@@ -276,3 +276,218 @@ Campo "Cargo" en Solicitantes implementado. Los solicitantes se almacenan como o
 - [x] **Fase 3: Módulo de Administración de TI**
   - Panel exclusivo dentro de Ajustes para que TI pueda visualizar, desbloquear y resetear contraseñas de las gestoras.
 
+---
+### Fases de Implementación:
+
+- [x] **Fase 1: Configuración de Chart.js**
+  - [x] Importar los componentes necesarios en `StatCards.jsx` (`ArcElement`, `BarElement`, `Pie`, `Bar`, `Doughnut`).
+
+- [x] **Fase 2: Transcripción de Algoritmos**
+  - [x] Calcular distribución por prioridad (Abiertos).
+  - [x] Calcular distribución por estado (En Progreso).
+  - [x] Calcular volumen por área (Resolución).
+  - [x] Calcular urgencias (Pendientes vs Resueltas).
+
+- [x] **Fase 3: Renderizado de Gráficos**
+  - [x] Reemplazar `LineChart` falsos.
+## Último objetivo completado
+
+Integración del Centro de Notificaciones y gráficos de Dashboard con Chart.js finalizada.
+
+---
+
+## Último objetivo completado
+
+- **Database:** Corrección del scroll vertical/horizontal y override de variables globales para recuperar la fidelidad 1:1 al Vanilla JS.
+- **Portal:** Solución de la compresión del ancho del formulario.
+- **Notificaciones:** Eliminación definitiva de notificaciones duplicadas y sincronización cruzada entre ventanas.
+
+---
+
+
+## Último objetivo completado
+
+Métricas de Tiempos y Fechas: Cálculo automático de `tiempo` de resolución implementado en el Context y adición de inputs `fechaProgramada` y `accion` al modal de Gestión.
+
+---
+
+## Nuevo Objetivo: Expansión Multi-Área (GE + GH + TI)
+
+**Objetivo:** Expandir el sistema de 1 área (Gestión Empresarial) a 3 áreas independientes usando un **patrón Factory** para evitar duplicar código.
+
+| Área | Código | Color | Prefijo | Trámites |
+|------|--------|-------|---------|----------|
+| Gestión Empresarial | `ge` | `#6366f1` | `GE-001` | Los de `tramitesData.js` |
+| Gestión Humana | `gh` | `#10b981` | `GH-001` | Vinculación, Desvinculación, Permiso ausentismo, Solicitud cesantías, Solicitud carta laboral, Solicitud vacaciones |
+| Soporte TI | `ti` | `#3b82f6` | `TI-001` | Soporte (placeholder — el usuario lo definirá después) |
+
+---
+
+### Decisiones del Usuario (CONFIRMADAS)
+
+1. **Sin migración de datos** — El usuario regenerará datos de prueba. Se empieza limpio con las nuevas claves de localStorage.
+2. **Acceso por link directo** — Cada resolutor recibe su propia URL (`/dashboard/ge`, `/dashboard/gh`, `/dashboard/ti`). NO hay selector de área en el dashboard. El Sidebar solo muestra las opciones internas de ESA área.
+3. **El Portal SÍ tiene selector** — Los colaboradores eligen entre las 3 áreas antes de ver el formulario.
+4. **Solicitantes compartidos** — `db_solicitantes` es la misma lista para las 3 áreas (un colaborador puede solicitar a cualquier área).
+5. **Responsables separados** — Cada área tiene su propio equipo resolutor (`db_responsables_ge`, `db_responsables_gh`, `db_responsables_ti`).
+
+---
+
+### Arquitectura: Factory Pattern
+
+#### Concepto clave
+En vez de escribir 3 archivos de Context casi idénticos, se crea UNA función `createAreaContext(config)` en `shared/contexts/` que genera un Context + Provider + hook por cada área. Cada área la invoca con su configuración en 3 líneas.
+
+#### Personalización por niveles
+- **Global** (Factory): Lógica compartida — CRUD, métricas de tiempo `HH:mm:ss`, interceptación de estados.
+- **Config** (por área): Trámites, estados, prefijos, claves de localStorage, hooks opcionales (`onBeforeSave`, etc.).
+- **Exclusivo** (componentes del área): Funcionalidad única como adjuntar archivos en GH.
+
+---
+
+### Datos (localStorage)
+
+| Clave | Área |
+|-------|------|
+| `db_actividades_ge` | GE |
+| `db_actividades_gh` | GH |
+| `db_actividades_ti` | TI |
+| `db_solicitantes` | Compartida |
+| `db_responsables_ge` | GE |
+| `db_responsables_gh` | GH |
+| `db_responsables_ti` | TI |
+
+---
+
+### Rutas
+
+- `/portal` → Selector de 3 áreas + formulario dinámico
+- `/dashboard/ge`, `/dashboard/ge/actividades`, `/dashboard/ge/gestion` → Vistas directas GE
+- `/dashboard/gh`, `/dashboard/gh/actividades`, `/dashboard/gh/gestion` → Vistas directas GH
+- `/dashboard/ti`, `/dashboard/ti/actividades`, `/dashboard/ti/gestion` → Vistas directas TI
+- `/database/ge`, `/database/gh`, `/database/ti` → CRUD separado por área
+
+---
+
+### Fases de Implementación
+
+- [x] **Fase 0: Reorganizar carpetas (COMPLETADA)**
+  - Archivos movidos a `shared/` y `areas/gestion-empresarial/`.
+  - `areasConfig.js` creado y todos los imports actualizados. Build exitoso verificado.
+
+- [x] **Fase 1: Crear la Factory + GEContext (COMPLETADA)**
+  1. Crear `shared/contexts/createAreaContext.js` — extraer TODA la lógica de `src/contexts/TicketContext.jsx` (CRUD, métricas de tiempo `formatDuration`, interceptación de estados, solicitantes, responsables) en una función factory que recibe un `config` con `storageKey`, `responsablesKey`, `prefijo`, etc.
+  2. Crear `areas/gestion-empresarial/config.js` con la configuración de GE (usar los valores de `areasConfig.js` + los trámites de `tramitesData.js`).
+  3. Crear `areas/gestion-empresarial/context/GEContext.jsx` — solo 3 líneas que invoquen la Factory con el config de GE.
+  4. Reemplazar TODOS los `import { useTickets } from '.../contexts/TicketContext'` en los componentes de GE por `import { useAreaTickets } from '.../GEContext'`.
+  5. Actualizar `main.jsx` para usar `GEProvider` en vez de `TicketProvider`.
+  6. Verificar que GE funciona exactamente igual.
+  7. Eliminar el viejo `TicketContext.jsx` cuando todo esté estable.
+
+- [x] **Fase 2: Portal con selector de área (COMPLETADA)**
+  - Añadir 3 tarjetas/botones al Portal debajo del logo (GE, GH, TI).
+  - Renderizar el formulario correspondiente al área elegida.
+  - GE: formulario actual. GH: con los 6 trámites definidos. TI: con "Soporte" (placeholder).
+
+- [x] **Fase 3: Dashboards y Rutas dinámicas (Completado)**
+  - [x] **Enrutamiento Dashboard**: Modificar `App.jsx` para usar `<Route path="/dashboard/:area">`.
+  - [x] **Componentes Compartidos**: Mover las páginas del dashboard de GE (`PanelPrincipal.jsx`, `Actividades.jsx`, `Gestion.jsx` y sus componentes) a `src/pages/dashboard/`.
+  - [x] **ActiveAreaContext**: Crear un contexto "puente" que consuma el ID del área en la URL y pase el proveedor correcto (`GEProvider`, `GHProvider`, `TIProvider`) a las vistas genéricas.
+  - [x] **Refactorización Genérica**: Actualizar las páginas para consumir `useActiveArea()` en lugar de `useGEContext()`, eliminando código hardcodeado (ej. reemplazar las listas estáticas de trámites por `config.grupos[].tramites`).
+  - [x] **Sidebar Dinámico**: Actualizar los links y el color del Sidebar basado en el `ActiveAreaContext`.
+
+- [x] **Fase 4: Database multi-área (Completado)**
+  - [x] Componente genérico `AreaDatabase.jsx` en `src/pages/database/`.
+  - [x] Rutas `/database/:area`.
+
+- [x] **Fase 5: Pulir GH (Completado/Pospuesto)**
+  - [x] Campos exclusivos, adjuntar archivos, etc. (Pospuesto para futuras actualizaciones)
+
+---
+
+## Nuevo Objetivo: Campo "Cargo" en Solicitantes
+
+**Contexto:** Los solicitantes se almacenan como strings simples. Se necesita agregar un campo `cargo` para que al crear un ticket se refleje en la tabla de actividades del Database. Sin imagen (a diferencia de responsables).
+
+### Fases de Implementación:
+
+- [x] **Fase 1: Capa de Datos (`DbService.js` + `TicketContext.jsx`)**
+  - [x] `DbService.getSolicitantes` normaliza objetos `{nombre, cargo}` → extrae `.nombre` para dropdowns.
+  - [x] `TicketContext.addSolicitante` recibe `{nombre, cargo}` y guarda el objeto completo en localStorage.
+  - [x] Exponer función `getSolicitanteCargo(nombre)` en el Context para lookup de cargo al crear tickets.
+
+- [x] **Fase 2: UI de Database (`Database.jsx`)**
+  - [x] Agregar input de cargo en el formulario de solicitantes.
+  - [x] Agregar columna "Cargo" en la tabla de solicitantes.
+  - [x] Leer `rawSolicitantes` de localStorage para mostrar objetos completos.
+
+- [x] **Fase 3: Inyección de cargo al crear tickets**
+  - [x] `RegistroActividadForm.jsx`: al crear ticket, buscar cargo del solicitante e inyectarlo.
+  - [x] `Portal.jsx`: al crear ticket, buscar cargo del solicitante e inyectarlo.
+
+- [x] **Fase 4: Verificación**
+  - [x] Crear solicitante con cargo desde `/database`.
+  - [x] Crear ticket desde Dashboard y Portal, verificar que cargo aparezca en la tabla de actividades.
+
+---
+
+## Último objetivo completado
+
+Campo "Cargo" en Solicitantes implementado. Los solicitantes se almacenan como objetos `{nombre, cargo}`, los tickets inyectan el cargo automáticamente, y la tabla de actividades en `/database` lo refleja correctamente.
+
+---
+
+## Nuevo Objetivo: Sistema de Autenticación Local
+
+**Contexto:** Se requiere proteger las rutas administrativas (`/dashboard` y `/database`) mediante un sistema de login local. Los colaboradores podrán acceder al `/portal` sin necesidad de autenticación.
+
+### Fases de Implementación:
+- [x] **Fase 1: Capa de Seguridad (AuthContext)**
+  - Implementar encriptación SHA-256 usando Web Crypto API.
+  - Crear `AuthContext.jsx` para manejo de sesión simulada con token temporal y control de intentos (máximo 4).
+  - Población inicial de cuentas fundacionales (admin_ti, gestoras).
+
+- [x] **Fase 2: Protección de Rutas (ProtectedRoute)**
+  - Crear componente wrapper que bloquee el acceso a usuarios no autenticados.
+  - Implementar cierre de sesión (Logout) atado a la silueta en el Topbar.
+
+- [x] **Fase 3: UI de Inicio de Sesión (Login)**
+  - Desarrollar la vista `/login` con diseño moderno (Glassmorphism).
+
+---
+
+## Nuevo Objetivo: Panel de Ajustes y Autogestión
+
+**Contexto:** Permitir a las gestoras configurar sus propios trámites dinámicamente y al administrador TI gestionar las cuentas de usuario sin necesidad de tocar el código, guardando la configuración en el `localStorage`.
+
+### Fases de Implementación:
+- [x] **Fase 1: Capa de Datos (Configuración)**
+  - Mover la configuración de trámites y áreas (`tramitesData.js`) al `localStorage`.
+  
+- [x] **Fase 2: Panel de Ajustes (Settings.jsx)**
+  - Interfaz accesible desde el icono de tuerca para configuraciones por área.
+
+- [x] **Fase 3: Módulo de Administración de TI**
+  - Panel exclusivo dentro de Ajustes para que TI pueda visualizar, desbloquear y resetear contraseñas de las gestoras.
+
+---
+
+## Nuevo Objetivo: Unificación de Gestión de Roles y Responsables
+
+**Contexto:** Los responsables de área se manejaban manualmente desde `AreaDatabase.jsx` creando duplicidad de datos en `localStorage`. Se debe centralizar la asignación de Roles y Áreas desde el formulario principal en `Settings.jsx` y hacer que el sistema obtenga la lista dinámicamente de `db_usuarios`.
+
+### Fases de Implementación:
+- [x] **Fase 1: Consolidación de Creación de Usuarios (`Settings.jsx`)**
+  - Añadir selección de Rol (Solicitante, Gestor, Admin TI) y Área (GE, GH, TI).
+- [x] **Fase 2: Extracción Dinámica de Datos (`DbService.js` y `createAreaContext.jsx`)**
+  - Modificar `getResponsables` para filtrar `db_usuarios` en lugar de las listas `db_responsables_*`.
+  - Retornar objetos con `{nombreReal, cargo}`.
+- [x] **Fase 3: Limpieza y Adaptación de Interfaces**
+  - Remover la pestaña "Responsables" de `AreaDatabase.jsx`.
+  - Conectar el panel lateral del Portal (`PortalLayout.jsx`) para renderizar el cargo dinámico del nuevo sistema.
+
+---
+
+## Último objetivo completado
+
+Refactorización de Roles y Responsables completada exitosamente. Se eliminó la redundancia de datos y ahora el sistema centraliza la creación de perfiles (Solicitantes, Gestores, Admins) en la base `db_usuarios`, alimentando automáticamente los selectores de los Dashboards y los Portales dinámicamente por área.

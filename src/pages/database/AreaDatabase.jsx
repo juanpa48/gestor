@@ -8,7 +8,7 @@ export const AreaDatabase = () => {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
   const { ctx, config } = useActiveArea();
-  const { actividades, solicitantes, responsables, addSolicitante, removeSolicitante, addResponsable, removeResponsable, refreshTickets } = ctx;
+  const { actividades, solicitantes, refreshTickets } = ctx;
   
   const [activeTab, setActiveTab] = useState('actividades');
 
@@ -16,9 +16,6 @@ export const AreaDatabase = () => {
   const [newSoliNombreReal, setNewSoliNombreReal] = useState('');
   const [newSoliUsername, setNewSoliUsername] = useState('');
   const [newSoliCargo, setNewSoliCargo] = useState('');
-  const [newRespNombre, setNewRespNombre] = useState('');
-  const [newRespCargo, setNewRespCargo] = useState('');
-  const [newRespFoto, setNewRespFoto] = useState('');
 
   // The database page should override global body classes from portal or dashboard
   useEffect(() => {
@@ -60,24 +57,7 @@ export const AreaDatabase = () => {
     window.alert(`Empleado creado. Contraseña por defecto: 12345`);
   };
 
-  const handleAddResp = async () => {
-    if (!newRespNombre.trim()) return;
-    const respObj = {
-      nombre: newRespNombre.trim(),
-      cargo: newRespCargo.trim() || 'Personal TI',
-      foto: newRespFoto.trim()
-    };
-    await addResponsable(respObj);
-    setNewRespNombre('');
-    setNewRespCargo('');
-    setNewRespFoto('');
-  };
 
-  const handleDeleteResp = async (index) => {
-    if (window.confirm('¿Eliminar este registro?')) {
-      await removeResponsable(index);
-    }
-  };
 
   const handleDeleteSoli = async (username) => {
     if (window.confirm('¿Eliminar este registro de usuario permanentemente?')) {
@@ -109,15 +89,7 @@ export const AreaDatabase = () => {
 
   const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P'];
 
-  // Leer estado "crudo" de localStorage para responsables porque useTickets normaliza a nombres string.
-  // Pero necesitamos renderizar foto y cargo.
-  const [rawResponsables, setRawResponsables] = useState([]);
   const [rawSolicitantes, setRawSolicitantes] = useState([]);
-  
-  useEffect(() => {
-    const raw = JSON.parse(localStorage.getItem(config.responsablesKey)) || [];
-    setRawResponsables(raw);
-  }, [responsables, config.responsablesKey]);
 
   useEffect(() => {
     const users = JSON.parse(localStorage.getItem('db_usuarios')) || [];
@@ -150,7 +122,6 @@ export const AreaDatabase = () => {
       <div className="db-tabs">
         <button className={`db-tab-btn ${activeTab === 'actividades' ? 'active' : ''}`} onClick={() => setActiveTab('actividades')}>Actividades</button>
         <button className={`db-tab-btn ${activeTab === 'solicitantes' ? 'active' : ''}`} onClick={() => setActiveTab('solicitantes')}>Solicitantes</button>
-        <button className={`db-tab-btn ${activeTab === 'responsables' ? 'active' : ''}`} onClick={() => setActiveTab('responsables')}>Responsables</button>
       </div>
 
       {activeTab === 'actividades' && (
@@ -244,70 +215,7 @@ export const AreaDatabase = () => {
         </div>
       )}
 
-      {activeTab === 'responsables' && (
-        <div className="db-table-container">
-          <div className="add-wrapper" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
-            <input 
-              type="text" 
-              className="add-input" 
-              style={{ maxWidth: '100%' }} 
-              placeholder="Nombre completo" 
-              value={newRespNombre}
-              onChange={e => setNewRespNombre(e.target.value)}
-            />
-            <div style={{ display: 'flex', gap: '10px', width: '100%', maxWidth: '600px' }}>
-              <input 
-                type="text" 
-                className="add-input" 
-                placeholder="Cargo (ej: Soporte Nivel 1)" 
-                value={newRespCargo}
-                onChange={e => setNewRespCargo(e.target.value)}
-              />
-              <input 
-                type="text" 
-                className="add-input" 
-                placeholder="URL de Foto (opcional)" 
-                value={newRespFoto}
-                onChange={e => setNewRespFoto(e.target.value)}
-              />
-            </div>
-            <button className="btn-add" onClick={handleAddResp}>Añadir Responsable TI</button>
-          </div>
 
-          <table className="db-table list-table" style={{ maxWidth: '100%' }}>
-            <thead>
-              <tr>
-                <th style={{ width: '60px' }}>Foto</th>
-                <th>Nombre</th>
-                <th>Cargo</th>
-                <th style={{ width: '80px' }}>Acción</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rawResponsables.length === 0 ? (
-                <tr><td colSpan={4} className="empty-msg">No hay responsables registrados.</td></tr>
-              ) : (
-                rawResponsables.map((r, idx) => {
-                  const nombre = typeof r === 'object' ? r.nombre : r;
-                  const cargo = typeof r === 'object' ? r.cargo : 'Personal TI';
-                  const foto = (typeof r === 'object' && r.foto) ? r.foto : `https://i.pravatar.cc/150?u=${idx}`;
-                  
-                  return (
-                    <tr key={idx}>
-                      <td style={{ textAlign: 'center' }}>
-                        <img src={foto} alt={nombre} className="database-avatar" />
-                      </td>
-                      <td><strong>{nombre}</strong></td>
-                      <td>{cargo}</td>
-                      <td><button className="btn-action" onClick={() => handleDeleteResp(idx)}>Borrar</button></td>
-                    </tr>
-                  )
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
     </div>
   );
 };

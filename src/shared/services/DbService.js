@@ -7,15 +7,11 @@ export const DbService = {
   getSolicitantes: async () => {
     return new Promise(resolve => {
       setTimeout(() => {
-        const rawList = JSON.parse(localStorage.getItem('db_solicitantes'));
-        const defaultList = ['Juan Perez (Local)', 'Maria Lopez (Local)'];
-        if (!rawList) {
-          localStorage.setItem('db_solicitantes', JSON.stringify(defaultList));
-          resolve(defaultList);
-        } else {
-          const parsedList = rawList.map(s => typeof s === 'object' ? s.nombre : s);
-          resolve(parsedList);
-        }
+        const rawList = JSON.parse(localStorage.getItem('db_usuarios')) || [];
+        const parsedList = rawList
+          .filter(u => u.role === 'solicitante')
+          .map(u => u.nombreReal || u.username);
+        resolve(parsedList);
       }, 300);
     });
   },
@@ -30,18 +26,19 @@ export const DbService = {
   },
 
   
-  getResponsables: async (key = 'db_responsables') => {
+  getResponsables: async (areaOrKey = 'db_responsables') => {
     return new Promise(resolve => {
       setTimeout(() => {
-        const rawList = JSON.parse(localStorage.getItem(key));
-        const defaultList = ['Admin TI 1', 'Admin TI 2'];
-        if (!rawList) {
-          localStorage.setItem(key, JSON.stringify(defaultList));
-          resolve(defaultList);
-        } else {
-          const parsedList = rawList.map(r => typeof r === 'object' ? r.nombre : r);
-          resolve(parsedList);
-        }
+        // Extraemos el ID del área ('ge', 'gh', 'ti') a partir de la key o el string directo.
+        const areaId = areaOrKey.replace('db_responsables_', '');
+        const rawList = JSON.parse(localStorage.getItem('db_usuarios')) || [];
+        
+        // Filtramos usuarios que pertenezcan a esa área y cuyo rol no sea 'solicitante'
+        const responsables = rawList
+          .filter(u => u.area === areaId && u.role !== 'solicitante')
+          .map(u => ({ nombre: u.nombreReal, cargo: u.cargo || 'Gestor' }));
+          
+        resolve(responsables);
       }, 300);
     });
   },
