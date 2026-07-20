@@ -13,11 +13,13 @@ export const Settings = () => {
   const [users, setUsers] = useState([]);
   
   // Nuevo estado para Creación de Usuarios
-  const [newEmpNombreReal, setNewEmpNombreReal] = useState('');
-  const [newEmpUsername, setNewEmpUsername] = useState('');
-  const [newEmpCargo, setNewEmpCargo] = useState('');
+  const [newSoliNombreReal, setNewSoliNombreReal] = useState('');
+  const [newSoliUsername, setNewSoliUsername] = useState('');
+  const [newSoliCargo, setNewSoliCargo] = useState('');
   const [newEmpRole, setNewEmpRole] = useState('solicitante');
   const [newEmpArea, setNewEmpArea] = useState('');
+  
+  const [editingUsername, setEditingUsername] = useState(null);
 
   useEffect(() => {
     const settings = getAreaSettings(area);
@@ -103,6 +105,47 @@ export const Settings = () => {
     }
   };
 
+  const handleToggleSuspendUser = (username) => {
+    const db = [...users];
+    const userIndex = db.findIndex(u => u.username === username);
+    if (userIndex !== -1) {
+      db[userIndex].bloqueado = !db[userIndex].bloqueado;
+      db[userIndex].intentosFallidos = 0; // Reset intentos al cambiar estado
+      localStorage.setItem('db_usuarios', JSON.stringify(db));
+      setUsers(db);
+      showToast(`Estado de ${username} actualizado.`);
+    }
+  };
+
+  const handleDeleteUser = (username) => {
+    if (window.confirm(`¿Estás seguro de ELIMINAR PERMANENTEMENTE al usuario ${username}? Esto podría causar errores si ya tiene tickets asignados.`)) {
+      const db = users.filter(u => u.username !== username);
+      localStorage.setItem('db_usuarios', JSON.stringify(db));
+      setUsers(db);
+      showToast(`Usuario ${username} eliminado de la base de datos.`);
+    }
+  };
+
+  const handleEditClick = (user) => {
+    setEditingUsername(user.username);
+    setNewSoliNombreReal(user.nombreReal);
+    setNewSoliUsername(user.username);
+    setNewSoliCargo(user.cargo);
+    setNewEmpRole(user.role);
+    setNewEmpArea(user.area || '');
+    // Hacer scroll arriba
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const cancelEdit = () => {
+    setEditingUsername(null);
+    setNewSoliNombreReal('');
+    setNewSoliUsername('');
+    setNewSoliCargo('');
+    setNewEmpRole('solicitante');
+    setNewEmpArea('');
+  };
+
   const handleResetPassword = async (username) => {
     const newPass = window.prompt(`Ingresa la nueva contraseña para ${username}:`);
     if (newPass) {
@@ -124,42 +167,55 @@ export const Settings = () => {
     }
   };
 
-  const handleAddSolicitante = async () => {
-    if (!newEmpNombreReal.trim() || !newEmpUsername.trim()) {
+  const handleSaveUser = async () => {
+    if (!newSoliNombreReal.trim() || !newSoliUsername.trim()) {
       window.alert('El nombre real y el nombre de usuario son obligatorios.');
       return;
     }
     const db = [...users];
-    if (db.some(u => u.username === newEmpUsername.trim())) {
-      window.alert('Este usuario ya existe.');
-      return;
-    }
+    
     if ((newEmpRole === 'gestor' || newEmpRole === 'admin_ti') && !newEmpArea) {
       window.alert('Debes asignar un área obligatoriamente para los Gestores y Administradores.');
       return;
     }
 
-    const empHash = await hashPassword('12345');
-    const newUser = {
-      id: `U-${String(db.length + 1).padStart(2, '0')}`,
-      username: newEmpUsername.trim(),
-      nombreReal: newEmpNombreReal.trim(),
-      passwordHash: empHash,
-      role: newEmpRole,
-      area: (newEmpRole === 'solicitante') ? null : newEmpArea,
-      cargo: newEmpCargo.trim() || ((newEmpRole === 'solicitante') ? 'Empleado' : 'Gestor'),
-      bloqueado: false,
-      intentosFallidos: 0
-    };
-    db.push(newUser);
-    localStorage.setItem('db_usuarios', JSON.stringify(db));
-    setUsers(db);
-    setNewEmpNombreReal('');
-    setNewEmpUsername('');
-    setNewEmpCargo('');
-    setNewEmpRole('solicitante');
-    setNewEmpArea('');
-    showToast(`Usuario ${newUser.nombreReal} creado. Contraseña por defecto: 12345`);
+    if (editingUsername) {
+      const userIndex = db.findIndex(u => u.username === editingUsername);
+      if (userIndex !== -1) {
+        db[userIndex].nombreReal = newSoliNombreReal.trim();
+        db[userIndex].cargo = newSoliCargo.trim() || ((newEmpRole === 'solicitante') ? 'Empleado' : 'Gestor');
+        db[userIndex].role = newEmpRole;
+        db[userIndex].area = (newEmpRole === 'solicitante') ? null : newEmpArea;
+        
+        localStorage.setItem('db_usuarios', JSON.stringify(db));
+        setUsers(db);
+        showToast(`Usuario ${editingUsername} actualizado correctamente.`);
+        cancelEdit();
+      }
+    } else {
+      if (db.some(u => u.username === newSoliUsername.trim())) {
+        window.alert('Este nombre de usuario ya existe.');
+        return;
+      }
+
+      const empHash = await hashPassword('12345');
+      const newUser = {
+        id: `U-${String(db.length + 1).padStart(2, '0')}`,
+        username: newSoliUsername.trim(),
+        nombreReal: newSoliNombreReal.trim(),
+        passwordHash: empHash,
+        role: newEmpRole,
+        area: (newEmpRole === 'solicitante') ? null : newEmpArea,
+        cargo: newSoliCargo.trim() || ((newEmpRole === 'solicitante') ? 'Empleado' : 'Gestor'),
+        bloqueado: false,
+        intentosFallidos: 0
+      };
+      db.push(newUser);
+      localStorage.setItem('db_usuarios', JSON.stringify(db));
+      setUsers(db);
+      showToast(`Usuario ${newUser.nombreReal} creado. Contraseña por defecto: 12345`);
+      cancelEdit();
+    }
   };
 
   return (
@@ -277,18 +333,35 @@ export const Settings = () => {
                       <td style={{ padding: '12px', textAlign: 'right', display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                         <button 
                           className="btn-secondary" 
-                          style={{ padding: '6px 12px', fontSize: '12px', opacity: u.bloqueado ? 1 : 0.5 }} 
-                          disabled={!u.bloqueado}
-                          onClick={() => handleUnlockUser(u.username)}
+                          style={{ padding: '6px 12px', fontSize: '12px', color: '#3b82f6', border: '1px solid rgba(59,130,246,0.3)' }}
+                          onClick={() => handleEditClick(u)}
+                          title="Editar Usuario"
                         >
-                          <i className="fa-solid fa-unlock"></i> Desbloquear
+                          <i className="fa-solid fa-pen"></i>
+                        </button>
+                        <button 
+                          className="btn-secondary" 
+                          style={{ padding: '6px 12px', fontSize: '12px', opacity: 1, color: u.bloqueado ? '#10b981' : '#f59e0b', border: '1px solid ' + (u.bloqueado ? 'rgba(16,185,129,0.3)' : 'rgba(245,158,11,0.3)') }} 
+                          onClick={() => handleToggleSuspendUser(u.username)}
+                          title={u.bloqueado ? "Activar (Desbloquear)" : "Suspender (Soft Delete)"}
+                        >
+                          <i className={`fa-solid ${u.bloqueado ? 'fa-unlock' : 'fa-ban'}`}></i>
+                        </button>
+                        <button 
+                          className="btn-primary" 
+                          style={{ padding: '6px 12px', fontSize: '12px', background: 'transparent', color: '#ef4444', border: '1px solid rgba(239,68,68,0.3)' }}
+                          onClick={() => handleDeleteUser(u.username)}
+                          title="Eliminar Permanentemente"
+                        >
+                          <i className="fa-solid fa-trash"></i>
                         </button>
                         <button 
                           className="btn-primary" 
                           style={{ padding: '6px 12px', fontSize: '12px', background: '#3b82f6' }}
                           onClick={() => handleResetPassword(u.username)}
+                          title="Restablecer Clave a 12345"
                         >
-                          <i className="fa-solid fa-key"></i> Restablecer Clave
+                          <i className="fa-solid fa-key"></i>
                         </button>
                       </td>
                     </tr>
@@ -302,14 +375,14 @@ export const Settings = () => {
           <div className="settings-container glass-panel" style={{ padding: '24px', marginTop: '32px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(30,58,95,0.1)', paddingBottom: '16px', marginBottom: '24px' }}>
               <h2 style={{ fontSize: '18px', color: 'var(--navy)' }}>
-                <i className="fa-solid fa-id-card-clip"></i> Cuentas de Empleados (Portal) / Crear Usuario
+                <i className="fa-solid fa-id-card-clip"></i> {editingUsername ? `Editando usuario: ${editingUsername}` : 'Cuentas de Usuarios (Crear / Editar)'}
               </h2>
             </div>
 
             <div style={{ display: 'flex', gap: '12px', marginBottom: '24px', flexWrap: 'wrap', alignItems: 'center' }}>
-              <input type="text" className="glass-input" placeholder="Nombre Completo" value={newEmpNombreReal} onChange={e => setNewEmpNombreReal(e.target.value)} />
-              <input type="text" className="glass-input" placeholder="Nombre de Usuario (Login)" value={newEmpUsername} onChange={e => setNewEmpUsername(e.target.value)} />
-              <input type="text" className="glass-input" placeholder="Cargo (ej: Contador)" value={newEmpCargo} onChange={e => setNewEmpCargo(e.target.value)} />
+              <input type="text" className="glass-input" placeholder="Nombre Completo" value={newSoliNombreReal} onChange={e => setNewSoliNombreReal(e.target.value)} />
+              <input type="text" className="glass-input" placeholder="Nombre de Usuario (Login)" value={newSoliUsername} onChange={e => setNewSoliUsername(e.target.value)} disabled={!!editingUsername} />
+              <input type="text" className="glass-input" placeholder="Cargo (ej: Contador)" value={newSoliCargo} onChange={e => setNewSoliCargo(e.target.value)} />
               <select className="glass-input" value={newEmpRole} onChange={e => setNewEmpRole(e.target.value)} style={{ padding: '8px 12px' }}>
                 <option value="solicitante">Rol: Solicitante (Portal)</option>
                 <option value="gestor">Rol: Gestor de Área (Dashboard)</option>
@@ -323,7 +396,14 @@ export const Settings = () => {
                   <option value="gh">Gestión Humana</option>
                 </select>
               )}
-              <button className="btn-secondary" onClick={handleAddSolicitante}><i className="fa-solid fa-plus"></i> Añadir Usuario</button>
+              {editingUsername ? (
+                <>
+                  <button className="btn-primary" onClick={handleSaveUser} style={{ background: '#10b981' }}><i className="fa-solid fa-save"></i> Actualizar</button>
+                  <button className="btn-secondary" onClick={cancelEdit}><i className="fa-solid fa-xmark"></i> Cancelar</button>
+                </>
+              ) : (
+                <button className="btn-secondary" onClick={handleSaveUser}><i className="fa-solid fa-plus"></i> Añadir Usuario</button>
+              )}
             </div>
             
             <div style={{ overflowX: 'auto' }}>
@@ -355,18 +435,35 @@ export const Settings = () => {
                       <td style={{ padding: '12px', textAlign: 'right', display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                         <button 
                           className="btn-secondary" 
-                          style={{ padding: '6px 12px', fontSize: '12px', opacity: u.bloqueado ? 1 : 0.5 }} 
-                          disabled={!u.bloqueado}
-                          onClick={() => handleUnlockUser(u.username)}
+                          style={{ padding: '6px 12px', fontSize: '12px', color: '#3b82f6', border: '1px solid rgba(59,130,246,0.3)' }}
+                          onClick={() => handleEditClick(u)}
+                          title="Editar Usuario"
                         >
-                          <i className="fa-solid fa-unlock"></i> Desbloquear
+                          <i className="fa-solid fa-pen"></i>
+                        </button>
+                        <button 
+                          className="btn-secondary" 
+                          style={{ padding: '6px 12px', fontSize: '12px', opacity: 1, color: u.bloqueado ? '#10b981' : '#f59e0b', border: '1px solid ' + (u.bloqueado ? 'rgba(16,185,129,0.3)' : 'rgba(245,158,11,0.3)') }} 
+                          onClick={() => handleToggleSuspendUser(u.username)}
+                          title={u.bloqueado ? "Activar (Desbloquear)" : "Suspender (Soft Delete)"}
+                        >
+                          <i className={`fa-solid ${u.bloqueado ? 'fa-unlock' : 'fa-ban'}`}></i>
+                        </button>
+                        <button 
+                          className="btn-primary" 
+                          style={{ padding: '6px 12px', fontSize: '12px', background: 'transparent', color: '#ef4444', border: '1px solid rgba(239,68,68,0.3)' }}
+                          onClick={() => handleDeleteUser(u.username)}
+                          title="Eliminar Permanentemente"
+                        >
+                          <i className="fa-solid fa-trash"></i>
                         </button>
                         <button 
                           className="btn-primary" 
                           style={{ padding: '6px 12px', fontSize: '12px', background: '#3b82f6' }}
                           onClick={() => handleResetPassword(u.username)}
+                          title="Restablecer Clave a 12345"
                         >
-                          <i className="fa-solid fa-key"></i> Restablecer Clave
+                          <i className="fa-solid fa-key"></i>
                         </button>
                       </td>
                     </tr>
