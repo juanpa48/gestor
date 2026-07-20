@@ -10,7 +10,9 @@ import { ActiveAreaProvider } from './shared/contexts/ActiveAreaContext'
 import { AreaDatabase } from './pages/database/AreaDatabase'
 import { AuthProvider } from './shared/contexts/AuthContext'
 import { ProtectedRoute } from './shared/components/layout/ProtectedRoute'
+import { PortalProtectedRoute } from './shared/components/layout/PortalProtectedRoute'
 import { Login } from './pages/auth/Login'
+import { PortalLogin } from './pages/auth/PortalLogin'
 
 function App() {
   return (
@@ -33,8 +35,19 @@ function App() {
           <Route path="settings" element={<Settings />} />
         </Route>
         
-        <Route path="/portal" element={<Portal />} />
-        <Route path="/portal/:area" element={<Portal />} />
+        <Route path="/portal/login" element={<PortalLogin />} />
+        
+        <Route path="/portal" element={
+          <PortalProtectedRoute>
+            <Portal />
+          </PortalProtectedRoute>
+        } />
+        
+        <Route path="/portal/:area" element={
+          <PortalProtectedRoute>
+            <Portal />
+          </PortalProtectedRoute>
+        } />
         
         <Route path="/database" element={<Navigate to="/database/ge" replace />} />
         <Route path="/database/:area" element={

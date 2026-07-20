@@ -62,6 +62,16 @@ La aplicación se ejecuta de forma autónoma en el navegador. La lógica de nego
 Se utiliza React con Hooks funcionales (`useState`, `useEffect`, `useMemo`, `useContext`) para la lógica y renderización.
 Se preserva la capa de CSS modular, mapeando el DOM original a atributos `className` en JSX. Esto logra un diseño 1:1 sin depender de Tailwind u otras librerías externas.
 
+### 2. Capa de Seguridad y Autenticación (AuthContext.jsx)
+- **Token Local:** Genera un token enriquecido que contiene `id`, `username`, `role`, `area` y `cargo`. Este último es crucial para la integridad de los tickets.
+- **Role-Based Access Control (RBAC):**
+  - **`admin_ti`**: El único rol que puede saltarse las protecciones de enrutamiento y acceder a `/database/:area` para administrar la persistencia de otras áreas sin loguearse en cada una.
+  - **`gestor`**: Roles de operación (`gestor_ge`, `gestor_gh`, etc.) que atienden tickets.
+  - **`solicitante`**: Empleados comunes. Solo tienen acceso al Portal.
+- **Single Sign-On (SSO):** Se implementa una política de *Cuenta Unificada*. Un `gestor` que inicia sesión en `/login` usa la misma cuenta para acceder a `/portal/login`, evitando duplicación de registros de usuario.
+- **Protección de Rutas (Middlewares de UI):**
+  - `ProtectedRoute.jsx`: Bloquea accesos al Dashboard para `solicitantes` y accesos a la `/database/` para cualquier usuario que no sea `admin_ti`.
+  - `PortalProtectedRoute.jsx`: Protege las rutas públicas del portal (`/portal`), exigiendo autenticación para poder enviar una solicitud, garantizando la trazabilidad.
 ### 3.3 Estado Reactivo Centralizado (Context API)
 El estado de la aplicación es distribuido globalmente mediante Contexts altamente dinámicos:
 - **`createAreaContext.jsx`**: Un factory que genera contextos aislados (GE, GH, TI) inyectando la configuración específica de cada área.

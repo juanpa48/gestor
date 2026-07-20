@@ -24,12 +24,14 @@ export const AuthProvider = ({ children }) => {
       const geHash = await hashPassword('ge123');
       const ghHash = await hashPassword('gh123');
       const tiHash = await hashPassword('ti123');
+      const empHash = await hashPassword('emp123');
 
       users = [
-        { id: 'U-01', username: 'admin_ti', passwordHash: adminHash, role: 'admin_ti', area: 'ti', bloqueado: false, intentosFallidos: 0 },
-        { id: 'U-02', username: 'gestor_ge', passwordHash: geHash, role: 'gestor', area: 'ge', bloqueado: false, intentosFallidos: 0 },
-        { id: 'U-03', username: 'gestor_gh', passwordHash: ghHash, role: 'gestor', area: 'gh', bloqueado: false, intentosFallidos: 0 },
-        { id: 'U-04', username: 'gestor_ti', passwordHash: tiHash, role: 'gestor', area: 'ti', bloqueado: false, intentosFallidos: 0 }
+        { id: 'U-01', username: 'admin_ti', nombreReal: 'Administrador TI', passwordHash: adminHash, role: 'admin_ti', area: 'ti', bloqueado: false, intentosFallidos: 0 },
+        { id: 'U-02', username: 'gestor_ge', nombreReal: 'Gestor Empresarial', passwordHash: geHash, role: 'gestor', area: 'ge', bloqueado: false, intentosFallidos: 0 },
+        { id: 'U-03', username: 'gestor_gh', nombreReal: 'Gestor de RRHH', passwordHash: ghHash, role: 'gestor', area: 'gh', bloqueado: false, intentosFallidos: 0 },
+        { id: 'U-04', username: 'gestor_ti', nombreReal: 'Soporte TI Nivel 1', passwordHash: tiHash, role: 'gestor', area: 'ti', bloqueado: false, intentosFallidos: 0 },
+        { id: 'U-05', username: 'empleado1', nombreReal: 'Juan Pérez', passwordHash: empHash, role: 'solicitante', cargo: 'Auxiliar Contable', bloqueado: false, intentosFallidos: 0 }
       ];
       localStorage.setItem('db_usuarios', JSON.stringify(users));
     }
@@ -116,8 +118,10 @@ export const AuthProvider = ({ children }) => {
       user: {
         id: user.id,
         username: user.username,
+        nombreReal: user.nombreReal || user.username,
         role: user.role,
-        area: user.area
+        area: user.area,
+        cargo: user.cargo || ''
       },
       expiresAt: Date.now() + (8 * 60 * 60 * 1000)
     };

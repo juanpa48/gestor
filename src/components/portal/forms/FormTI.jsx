@@ -2,9 +2,12 @@ import React, { useState } from 'react';
 import { useTIContext as useTickets } from '../../../areas/soporte-ti/context/TIContext';
 import { TI_CONFIG } from '../../../areas/soporte-ti/config';
 import { UploadService } from '../../../shared/services/UploadService';
+import { useAuth } from '../../../shared/contexts/AuthContext';
 
-export const FormTI = ({ nombre, setNombre }) => {
-  const { solicitantes, getSolicitanteCargo, addTicket } = useTickets();
+export const FormTI = () => {
+  const { currentUser } = useAuth();
+  const nombre = currentUser?.nombreReal || currentUser?.username || '';
+  const { addTicket } = useTickets();
   const [tipoTramite, setTipoTramite] = useState('Soporte');
   const [solicitud, setSolicitud] = useState('');
   const [prioridad, setPrioridad] = useState('Media');
@@ -54,7 +57,7 @@ export const FormTI = ({ nombre, setNombre }) => {
         fechaCreacion: new Date().toLocaleString(),
         nombre: nombre,
         solicitante: nombre,
-        cargo: getSolicitanteCargo(nombre),
+        cargo: currentUser?.cargo || 'Usuario del Sistema',
         solicitud: solicitud,
         estado: 'Pendiente',
         prioridad: prioridad,
@@ -85,10 +88,13 @@ export const FormTI = ({ nombre, setNombre }) => {
       <div className="form-group">
         <label className="form-label">SOLICITANTE</label>
         <div className="select-wrapper">
-          <select className="glass-input" required value={nombre} onChange={(e) => setNombre(e.target.value)}>
-            <option value="" disabled>Identifíquese...</option>
-            {solicitantes.map(s => <option key={s} value={s}>{s}</option>)}
-          </select>
+          <input 
+            type="text" 
+            className="glass-input" 
+            value={`${nombre} ${currentUser?.cargo ? `(${currentUser.cargo})` : ''}`} 
+            disabled 
+            style={{ opacity: 0.8, cursor: 'not-allowed' }}
+          />
         </div>
       </div>
 

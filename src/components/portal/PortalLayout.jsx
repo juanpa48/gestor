@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useAuth } from '../../shared/contexts/AuthContext';
 
 export const PortalLayout = ({ areaConfig, areaContext, onBack, children, nombre, setNombre }) => {
   const { actividades, solicitantes, responsables } = areaContext();
+  const { logout } = useAuth();
   const [sistemas, setSistemas] = useState({});
   const [personalTI, setPersonalTI] = useState({});
   const [rawResponsables, setRawResponsables] = useState([]);
@@ -97,9 +99,14 @@ export const PortalLayout = ({ areaConfig, areaContext, onBack, children, nombre
         <div className="header-title">
           Portal - {areaConfig.nombre}
         </div>
-        <button className="btn-volver-area" onClick={onBack} title="Volver a seleccionar área">
-          <i className="fa-solid fa-arrow-left"></i> Cambiar Área
-        </button>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button className="btn-volver-area" onClick={onBack} title="Volver a seleccionar área">
+            <i className="fa-solid fa-arrow-left"></i> Cambiar Área
+          </button>
+          <button className="btn-volver-area" onClick={logout} style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#fca5a5', border: '1px solid rgba(239, 68, 68, 0.3)' }} title="Cerrar Sesión">
+            <i className="fa-solid fa-right-from-bracket"></i> Salir
+          </button>
+        </div>
       </header>
 
       <div className="top-stats">

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useActiveArea } from '../../shared/contexts/ActiveAreaContext';
-import { useAuth } from '../../shared/contexts/AuthContext';
+import { useAuth, hashPassword } from '../../shared/contexts/AuthContext';
 import '../../shared/styles/themes/database-theme.css';
 
 export const AreaDatabase = () => {
@@ -13,7 +13,8 @@ export const AreaDatabase = () => {
   const [activeTab, setActiveTab] = useState('actividades');
 
   // Forms state
-  const [newSoli, setNewSoli] = useState('');
+  const [newSoliNombreReal, setNewSoliNombreReal] = useState('');
+  const [newSoliUsername, setNewSoliUsername] = useState('');
   const [newSoliCargo, setNewSoliCargo] = useState('');
   const [newRespNombre, setNewRespNombre] = useState('');
   const [newRespCargo, setNewRespCargo] = useState('');
@@ -30,14 +31,33 @@ export const AreaDatabase = () => {
   }, []);
 
   const handleAddSoli = async () => {
-    if (!newSoli.trim()) return;
-    const solObj = {
-      nombre: newSoli.trim(),
-      cargo: newSoliCargo.trim() || ''
+    if (!newSoliNombreReal.trim() || !newSoliUsername.trim()) {
+      window.alert('El nombre real y el usuario son obligatorios.');
+      return;
+    }
+    const users = JSON.parse(localStorage.getItem('db_usuarios')) || [];
+    if (users.some(u => u.username === newSoliUsername.trim())) {
+      window.alert('Este usuario ya existe.');
+      return;
+    }
+    const empHash = await hashPassword('12345');
+    const newUser = {
+      id: `U-${String(users.length + 1).padStart(2, '0')}`,
+      username: newSoliUsername.trim(),
+      nombreReal: newSoliNombreReal.trim(),
+      passwordHash: empHash,
+      role: 'solicitante',
+      cargo: newSoliCargo.trim() || 'Empleado',
+      bloqueado: false,
+      intentosFallidos: 0
     };
-    await addSolicitante(solObj);
-    setNewSoli('');
+    users.push(newUser);
+    localStorage.setItem('db_usuarios', JSON.stringify(users));
+    setRawSolicitantes(users.filter(u => u.role === 'solicitante'));
+    setNewSoliNombreReal('');
+    setNewSoliUsername('');
     setNewSoliCargo('');
+    window.alert(`Empleado creado. Contraseña por defecto: 12345`);
   };
 
   const handleAddResp = async () => {
@@ -59,9 +79,12 @@ export const AreaDatabase = () => {
     }
   };
 
-  const handleDeleteSoli = async (index) => {
-    if (window.confirm('¿Eliminar este registro?')) {
-      await removeSolicitante(index);
+  const handleDeleteSoli = async (username) => {
+    if (window.confirm('¿Eliminar este registro de usuario permanentemente?')) {
+      let users = JSON.parse(localStorage.getItem('db_usuarios')) || [];
+      users = users.filter(u => u.username !== username);
+      localStorage.setItem('db_usuarios', JSON.stringify(users));
+      setRawSolicitantes(users.filter(u => u.role === 'solicitante'));
     }
   };
 
@@ -97,9 +120,9 @@ export const AreaDatabase = () => {
   }, [responsables, config.responsablesKey]);
 
   useEffect(() => {
-    const raw = JSON.parse(localStorage.getItem('db_solicitantes')) || [];
-    setRawSolicitantes(raw);
-  }, [solicitantes]);
+    const users = JSON.parse(localStorage.getItem('db_usuarios')) || [];
+    setRawSolicitantes(users.filter(u => u.role === 'solicitante'));
+  }, []);
 
   return (
     <div className="database-container">
@@ -167,44 +190,51 @@ export const AreaDatabase = () => {
 
       {activeTab === 'solicitantes' && (
         <div className="db-table-container">
-          <div className="add-wrapper">
+          <div className="add-wrapper" style={{ flexWrap: 'wrap' }}>
             <input 
               type="text" 
               className="add-input" 
-              placeholder="Nombre del solicitante" 
-              value={newSoli} 
-              onChange={e => setNewSoli(e.target.value)} 
+              placeholder="Nombre Completo" 
+              value={newSoliNombreReal} 
+              onChange={e => setNewSoliNombreReal(e.target.value)} 
             />
             <input 
               type="text" 
               className="add-input" 
-              placeholder="Cargo (ej: Contador, Auxiliar)" 
+              placeholder="Nombre de Usuario (Login)" 
+              value={newSoliUsername} 
+              onChange={e => setNewSoliUsername(e.target.value)} 
+            />
+            <input 
+              type="text" 
+              className="add-input" 
+              placeholder="Cargo (ej: Contador)" 
               value={newSoliCargo} 
               onChange={e => setNewSoliCargo(e.target.value)} 
             />
-            <button className="btn-add" onClick={handleAddSoli}>Añadir Solicitante</button>
+            <button className="btn-add" onClick={handleAddSoli}>Añadir Empleado</button>
           </div>
           
           <table className="db-table list-table">
             <thead>
               <tr>
-                <th>Nombre del Solicitante</th>
+                <th>Nombre Real</th>
+                <th>Usuario (Login)</th>
                 <th>Cargo</th>
                 <th style={{ width: '80px' }}>Acción</th>
               </tr>
             </thead>
             <tbody>
               {rawSolicitantes.length === 0 ? (
-                <tr><td colSpan={3} className="empty-msg">No hay registros.</td></tr>
+                <tr><td colSpan={4} className="empty-msg">No hay empleados registrados.</td></tr>
               ) : (
                 rawSolicitantes.map((s, idx) => {
-                  const nombre = typeof s === 'object' ? s.nombre : s;
-                  const cargo = typeof s === 'object' ? s.cargo : '';
                   return (
-                    <tr key={idx}>
-                      <td>{nombre}</td>
-                      <td>{cargo}</td>
-                      <td><button className="btn-action" onClick={() => handleDeleteSoli(idx)}>Borrar</button></td>
+                    <tr key={s.username}>
+                      <td>{s.nombreReal || s.username}</td>
+                      <td>{s.username}</td>
+                      <td>{s.cargo}</td>
+                      <td><button className="btn-action" onClick={() => handleDeleteSoli(s.username)}>Borrar</button></td>
                     </tr>
                   );
                 })

@@ -10,11 +10,15 @@ import { PortalLayout } from '../components/portal/PortalLayout';
 import { FormGE } from '../components/portal/forms/FormGE';
 import { FormGH } from '../components/portal/forms/FormGH';
 import { FormTI } from '../components/portal/forms/FormTI';
+import { useAuth } from '../shared/contexts/AuthContext';
 
 export const Portal = () => {
   const { area } = useParams();
   const navigate = useNavigate();
-  const [nombre, setNombre] = useState('');
+  const { currentUser } = useAuth();
+  
+  // El nombre ahora es inmutable y viene de la sesión (preferimos el Nombre Real)
+  const nombre = currentUser?.nombreReal || currentUser?.username || '';
 
   useEffect(() => {
     document.body.className = 'portal';
@@ -80,24 +84,24 @@ export const Portal = () => {
 
   if (area === 'ge') {
     return (
-      <PortalLayout areaConfig={GE_CONFIG} areaContext={useGEContext} onBack={() => navigate('/portal')} nombre={nombre} setNombre={setNombre}>
-        <FormGE nombre={nombre} setNombre={setNombre} />
+      <PortalLayout areaConfig={GE_CONFIG} areaContext={useGEContext} onBack={() => navigate('/portal')} nombre={nombre}>
+        <FormGE nombre={nombre} />
       </PortalLayout>
     );
   }
 
   if (area === 'gh') {
     return (
-      <PortalLayout areaConfig={GH_CONFIG} areaContext={useGHContext} onBack={() => navigate('/portal')} nombre={nombre} setNombre={setNombre}>
-        <FormGH nombre={nombre} setNombre={setNombre} />
+      <PortalLayout areaConfig={GH_CONFIG} areaContext={useGHContext} onBack={() => navigate('/portal')} nombre={nombre}>
+        <FormGH nombre={nombre} />
       </PortalLayout>
     );
   }
 
   if (area === 'ti') {
     return (
-      <PortalLayout areaConfig={TI_CONFIG} areaContext={useTIContext} onBack={() => navigate('/portal')} nombre={nombre} setNombre={setNombre}>
-        <FormTI nombre={nombre} setNombre={setNombre} />
+      <PortalLayout areaConfig={TI_CONFIG} areaContext={useTIContext} onBack={() => navigate('/portal')} nombre={nombre}>
+        <FormTI nombre={nombre} />
       </PortalLayout>
     );
   }

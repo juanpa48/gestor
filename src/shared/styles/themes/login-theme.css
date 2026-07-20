@@ -5,7 +5,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  min-height: 100vh;
   padding: 20px;
+  padding-bottom: 10vh; /* Ajuste óptico para que no se vea caído */
   /* El fondo se hereda de reset.css (el hermoso gradiente claro) */
 }
 
