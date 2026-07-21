@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useActiveArea } from '../../shared/contexts/ActiveAreaContext';
+import { getAreaSettings } from '../../shared/services/SettingsManager';
 
 // Parsea fecha según la lógica original de JS
 const parseFechaCreacion = (ticket) => {
@@ -34,8 +35,10 @@ const parseFechaCreacion = (ticket) => {
 };
 
 export const Actividades = () => {
-  const { ctx } = useActiveArea();
+  const { ctx, area } = useActiveArea();
   const { actividades, responsables } = ctx;
+  const settings = getAreaSettings(area);
+  const slas = settings.slas || { Urgente: 2, Alta: 8, Media: 24, Baja: 48 };
   const [searchQuery, setSearchQuery] = useState('');
   
   const [filters, setFilters] = useState({
@@ -216,6 +219,7 @@ export const Actividades = () => {
                   <th>Solicitante</th>
                   <th>Estado</th>
                   <th>Prioridad</th>
+                  <th>SLA (Restante)</th>
                   <th>Grupo</th>
                   <th>Responsable</th>
                   <th>Fecha</th>
@@ -233,6 +237,32 @@ export const Actividades = () => {
                   if (prio === 'alta' || prio === 'urgente') prioClass = 'alta';
                   else if (prio === 'media') prioClass = 'media';
 
+                  // --- CÁLCULO DE SLA ---
+                  let slaBadge = null;
+                  if (r.estado !== 'Resuelto' && r.estado !== 'Cerrado') {
+                    const startMs = parseFechaCreacion(r)?.getTime();
+                    if (startMs) {
+                      const limiteSlaHoras = slas[r.prioridad] || 48;
+                      const limiteMs = limiteSlaHoras * 3600 * 1000;
+                      // Si está suspendido, no seguimos sumando el tiempo actual, nos quedamos en fechaPausa
+                      const endMs = r.estado === 'Suspendido' && r.fechaPausa ? r.fechaPausa : Date.now();
+                      const consumidoMs = endMs - startMs - (r.tiempoPausadoTotal || 0);
+                      
+                      const restanteMs = limiteMs - consumidoMs;
+                      const horasRestantes = Math.floor(restanteMs / (3600 * 1000));
+                      
+                      if (restanteMs < 0) {
+                        slaBadge = <span className="sla-badge danger" title={`Vencido por ${Math.abs(horasRestantes)}h`}><i className="fa-solid fa-fire"></i> Vencido</span>;
+                      } else if (horasRestantes <= 2) { // 2 horas de warning
+                        slaBadge = <span className="sla-badge warning" title={`Quedan ${horasRestantes} horas`}><i className="fa-solid fa-triangle-exclamation"></i> Por vencer</span>;
+                      } else {
+                        slaBadge = <span className="sla-badge ok" title={`Quedan ${horasRestantes} horas`}><i className="fa-solid fa-check"></i> A tiempo</span>;
+                      }
+                    }
+                  } else {
+                    slaBadge = <span className="sla-badge ok"><i className="fa-solid fa-flag-checkered"></i> Cumplido</span>;
+                  }
+
                   return (
                     <tr key={r.id}>
                       <td className="col-id">{r.id || ''}</td>
@@ -242,6 +272,7 @@ export const Actividades = () => {
                       <td>{r.nombre || r.solicitante || ''}</td>
                       <td><span className={`status-badge ${estadoClass}`}>{r.estado || ''}</span></td>
                       <td><span className={`prioridad-badge ${prioClass}`}>{r.prioridad || ''}</span></td>
+                      <td>{slaBadge}</td>
                       <td>{r.grupo || ''}</td>
                       <td>{r.responsable || 'Sin asignar'}</td>
                       <td className="col-fecha">{r.fechaCreacion || ''}</td>

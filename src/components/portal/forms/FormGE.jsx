@@ -10,6 +10,7 @@ export const FormGE = () => {
   const { addTicket } = useTickets();
   const [areaGestion, setAreaGestion] = useState('');
   const [tipoTramite, setTipoTramite] = useState('');
+  const [tipo, setTipo] = useState('Requerimiento');
   const [solicitud, setSolicitud] = useState('');
   const [prioridad, setPrioridad] = useState('Media');
   const [archivos, setArchivos] = useState([]);
@@ -33,7 +34,7 @@ export const FormGE = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!nombre || !areaGestion || !tipoTramite || !solicitud) {
+    if (!nombre || !areaGestion || !tipoTramite || !solicitud || !tipo) {
       showToast('Por favor, complete todos los campos obligatorios.', 'error', 'triangle-exclamation');
       return;
     }
@@ -72,7 +73,8 @@ export const FormGE = () => {
         responsable: '',
         grupo: areaGestion,
         grupoExtra: tipoTramite,
-        clasificacion: '',
+        clasificacion: tipoTramite,
+        tipo: tipo,
         detalles: '',
         adjuntos: adjuntosUrls
       };
@@ -135,6 +137,26 @@ export const FormGE = () => {
               </>
             )}
           </select>
+        </div>
+      </div>
+
+      <div className="form-group form-group-full">
+        <label className="form-label">TIPO DE TICKET</label>
+        <div className="type-selector-container">
+          <div 
+            className={`type-selector-card ${tipo === 'Incidente' ? 'active incidente' : ''}`}
+            onClick={() => { setTipo('Incidente'); setPrioridad('Alta'); }}
+          >
+            <i className="fa-solid fa-triangle-exclamation"></i>
+            <span>Incidente / Problema</span>
+          </div>
+          <div 
+            className={`type-selector-card ${tipo === 'Requerimiento' ? 'active requerimiento' : ''}`}
+            onClick={() => { setTipo('Requerimiento'); setPrioridad('Media'); }}
+          >
+            <i className="fa-solid fa-box-open"></i>
+            <span>Requerimiento / Solicitud</span>
+          </div>
         </div>
       </div>
 

@@ -223,6 +223,7 @@ export const Gestion = () => {
               <thead>
                 <tr>
                   <th>ID</th>
+                  <th>Tipo</th>
                   <th>Solicitud</th>
                   <th>Solicitante</th>
                   <th>Estado</th>
@@ -239,6 +240,14 @@ export const Gestion = () => {
                   return (
                     <tr key={t.id} className="ticket-row-clickable" data-ticket-id={t.id} onClick={() => openModal(t.id)}>
                       <td><strong>{t.id || ''}</strong></td>
+                      <td>
+                        {t.tipo ? (
+                          <span className={`tipo-badge ${t.tipo.toLowerCase()}`}>
+                            <i className={t.tipo === 'Incidente' ? 'fa-solid fa-triangle-exclamation' : 'fa-solid fa-box-open'} style={{ marginRight: '4px' }}></i>
+                            {t.tipo}
+                          </span>
+                        ) : <span style={{ color: 'var(--text-muted)', fontSize: '11px' }}>N/A</span>}
+                      </td>
                       <td style={{ maxWidth: '350px', whiteSpace: 'normal', overflowWrap: 'anywhere', wordBreak: 'break-word', lineHeight: '1.4' }}>
                         {t.solicitud || t.nombre || ''}
                       </td>
@@ -281,7 +290,14 @@ export const Gestion = () => {
                       const dot = prioColor[prio] || '#94a3b8';
                       return (
                         <div key={t.id} className={`kanban-card ${prio.toLowerCase()}`} data-ticket-id={t.id} onClick={() => openModal(t.id)}>
-                          <div className="kanban-card-id">{t.id || ''}</div>
+                          <div className="kanban-card-id">
+                            {t.id || ''}
+                            {t.tipo && (
+                              <span className={`tipo-badge ${t.tipo.toLowerCase()}`} style={{ float: 'right', fontSize: '9px', padding: '2px 6px', marginTop: '-2px' }}>
+                                {t.tipo}
+                              </span>
+                            )}
+                          </div>
                           <div className="kanban-card-title">{t.solicitud || t.nombre || ''}</div>
                           <div className="kanban-card-who" style={{ marginBottom: '6px', color: '#475569' }}>
                             <i className="fa-regular fa-user" style={{ fontSize: '10px', marginRight: '4px' }}></i>
@@ -335,7 +351,9 @@ export const Gestion = () => {
                   <i className="fa-regular fa-clock select-icon-left red"></i>
                   <select id="m_estado" className="form-select padded-left" value={ticketEdit.estado} onChange={handleModalChange}>
                     <option value="Pendiente">Pendiente</option>
+                    <option value="Revisado">Revisado (Visto)</option>
                     <option value="En progreso">En progreso</option>
+                    <option value="Suspendido">Suspendido (Pausado)</option>
                     <option value="Resuelto">Resuelto</option>
                     <option value="Cerrado">Cerrado</option>
                   </select>
@@ -471,12 +489,32 @@ export const Gestion = () => {
               )}
             </div>
 
-            <div className="form-actions form-actions-mt">
-              <button type="button" className="btn-cancel" onClick={() => setModalOpen(false)}>Cancelar</button>
-              <button type="button" className="btn-save" onClick={saveEdits}>
-                <span className={modalLoading ? 'hidden' : ''}>Guardar Cambios</span>
-                <span className={`btn-loader ${modalLoading ? '' : 'hidden'}`}><i className="fa-solid fa-spinner fa-spin"></i></span>
-              </button>
+            <div className="modal-footer-actions">
+              <div className="modal-footer-left">
+                <button 
+                  type="button" 
+                  className={`btn-quick-action revisado ${ticketEdit.estado === 'Revisado' ? 'active' : ''}`}
+                  title="Marcar como Visto/Revisado"
+                  onClick={() => setTicketEdit(prev => ({...prev, estado: 'Revisado'}))}
+                >
+                  <i className="fa-solid fa-eye"></i> <span className="hide-mobile">Revisado</span>
+                </button>
+                <button 
+                  type="button" 
+                  className={`btn-quick-action suspendido ${ticketEdit.estado === 'Suspendido' ? 'active' : ''}`}
+                  title="Suspender ticket (Pausar SLA)"
+                  onClick={() => setTicketEdit(prev => ({...prev, estado: 'Suspendido'}))}
+                >
+                  <i className="fa-solid fa-pause"></i> <span className="hide-mobile">Suspender</span>
+                </button>
+              </div>
+              <div className="modal-footer-right">
+                <button type="button" className="btn-cancel" onClick={() => setModalOpen(false)}>Cancelar</button>
+                <button type="button" className="btn-save" onClick={saveEdits}>
+                  <span className={modalLoading ? 'hidden' : ''}>Guardar Cambios</span>
+                  <span className={`btn-loader ${modalLoading ? '' : 'hidden'}`}><i className="fa-solid fa-spinner fa-spin"></i></span>
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -9,6 +9,7 @@ export const FormGH = () => {
   const nombre = currentUser?.nombreReal || currentUser?.username || '';
   const { addTicket } = useTickets();
   const [tipoTramite, setTipoTramite] = useState('');
+  const [tipo, setTipo] = useState('Requerimiento');
   const [solicitud, setSolicitud] = useState('');
   const [prioridad, setPrioridad] = useState('Media');
   const [archivos, setArchivos] = useState([]);
@@ -25,7 +26,7 @@ export const FormGH = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!nombre || !tipoTramite || !solicitud) {
+    if (!nombre || !tipoTramite || !solicitud || !tipo) {
       showToast('Por favor, complete todos los campos obligatorios.', 'error', 'triangle-exclamation');
       return;
     }
@@ -64,7 +65,8 @@ export const FormGH = () => {
         responsable: '',
         grupo: 'Trámites de Personal',
         grupoExtra: tipoTramite,
-        clasificacion: '',
+        clasificacion: tipoTramite,
+        tipo: tipo,
         detalles: '',
         adjuntos: adjuntosUrls
       };
@@ -106,6 +108,26 @@ export const FormGH = () => {
             <option value="" disabled>Seleccione el Trámite...</option>
             {(GH_CONFIG.grupos[0]?.tramites || []).map(t => <option key={t} value={t}>{t}</option>)}
           </select>
+        </div>
+      </div>
+
+      <div className="form-group form-group-full">
+        <label className="form-label">TIPO DE TICKET</label>
+        <div className="type-selector-container">
+          <div 
+            className={`type-selector-card ${tipo === 'Incidente' ? 'active incidente' : ''}`}
+            onClick={() => { setTipo('Incidente'); setPrioridad('Alta'); }}
+          >
+            <i className="fa-solid fa-triangle-exclamation"></i>
+            <span>Incidente / Problema</span>
+          </div>
+          <div 
+            className={`type-selector-card ${tipo === 'Requerimiento' ? 'active requerimiento' : ''}`}
+            onClick={() => { setTipo('Requerimiento'); setPrioridad('Media'); }}
+          >
+            <i className="fa-solid fa-box-open"></i>
+            <span>Requerimiento / Solicitud</span>
+          </div>
         </div>
       </div>
 

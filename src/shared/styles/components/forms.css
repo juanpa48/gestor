@@ -50,6 +50,16 @@ input[type="file"]::file-selector-button:hover {
 .form-input-full { width: 100%; border-radius: 10px; }
 .form-actions-mt { margin-top: 20px; }
 
+/* MODAL FOOTER ACTIONS (Refactor Inline CSS) */
+.modal-footer-actions { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-top: 20px; width: 100%; }
+.modal-footer-left { display: flex; gap: 8px; flex: 1; flex-wrap: wrap; }
+.modal-footer-right { display: flex; gap: 12px; flex-wrap: wrap; justify-content: flex-end; }
+.btn-quick-action { padding: 8px 12px; font-size: 13px; display: flex; align-items: center; gap: 6px; border-radius: 8px; border: 1.5px solid rgba(200, 215, 235, 0.6); background: rgba(255, 255, 255, 0.5); cursor: pointer; transition: all var(--transition); font-weight: 600; color: var(--text-muted); }
+.btn-quick-action:hover { background: rgba(255,255,255,0.9); border-color: rgba(30, 58, 95, 0.2); transform: translateY(-1px); }
+.btn-quick-action.active.revisado { background: rgba(59, 130, 246, 0.1); border-color: #3b82f6; color: #1d4ed8; }
+.btn-quick-action.active.suspendido { background: rgba(245, 158, 11, 0.1); border-color: #f59e0b; color: #b45309; }
+
+
 /* LAYOUT GENERAL UTILES */
 .flex-between { display: flex; justify-content: space-between; align-items: center; }
 .flex-center { display: flex; justify-content: center; align-items: center; }
@@ -58,8 +68,19 @@ input[type="file"]::file-selector-button:hover {
 
 /* BOTONES PEQUEÑOS Y MODAL */
 .btn-text-link { background: none; border: none; color: #3b82f6; cursor: pointer; font-size: 11px; font-weight: 600; padding: 0; display: flex; align-items: center; gap: 3px; }
-.btn-rapido { padding: 6px 14px; font-size: 12px; display: flex; align-items: center; gap: 6px; border-color: rgba(245, 158, 11, 0.4); color: #b45309; }
 .btn-rapido i { color: #f59e0b; }
+
+/* Selector de Tipo (Incidente vs Requerimiento) */
+.type-selector-container { display: flex; gap: 12px; margin-top: 4px; }
+.type-selector-card { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 16px; border-radius: 12px; border: 1.5px solid rgba(200, 215, 235, 0.6); background: rgba(255, 255, 255, 0.5); cursor: pointer; transition: all var(--transition); text-align: center; }
+.type-selector-card i { font-size: 24px; color: var(--text-muted); transition: all var(--transition); }
+.type-selector-card span { font-size: 13px; font-weight: 700; color: var(--text-muted); transition: all var(--transition); }
+.type-selector-card:hover { border-color: rgba(30, 58, 95, 0.2); background: rgba(255, 255, 255, 0.8); transform: translateY(-2px); }
+.type-selector-card.active.incidente { border-color: rgba(232, 25, 44, 0.5); background: rgba(232, 25, 44, 0.05); box-shadow: 0 4px 12px rgba(232, 25, 44, 0.1); }
+.type-selector-card.active.incidente i, .type-selector-card.active.incidente span { color: var(--red); }
+.type-selector-card.active.requerimiento { border-color: rgba(59, 130, 246, 0.5); background: rgba(59, 130, 246, 0.05); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1); }
+.type-selector-card.active.requerimiento i, .type-selector-card.active.requerimiento span { color: #3b82f6; }
+
 
 /* KANBAN CARD COMPONENTS */
 .kanban-label-small { font-size:11px; font-weight:700; color:#64748b; letter-spacing:.08em; }

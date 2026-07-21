@@ -118,6 +118,16 @@ export const createAreaContext = (config) => {
             merged.fechaInicio = new Date().toLocaleString();
             merged.fechaInicioTimestamp = Date.now();
           }
+
+          // Lógica SLA: Suspender / Pausar
+          if (merged.estado === 'Suspendido' && a.estado !== 'Suspendido') {
+            merged.fechaPausa = Date.now();
+          }
+          if (a.estado === 'Suspendido' && merged.estado !== 'Suspendido' && a.fechaPausa) {
+            const pausedTime = Date.now() - a.fechaPausa;
+            merged.tiempoPausadoTotal = (a.tiempoPausadoTotal || 0) + pausedTime;
+            merged.fechaPausa = null;
+          }
           
           if ((merged.estado === 'Resuelto' || merged.estado === 'Finalizado' || merged.estado === 'Cerrado') && !merged.fechaFin) {
             merged.fechaFin = new Date().toLocaleString();
@@ -125,7 +135,8 @@ export const createAreaContext = (config) => {
             
             if (merged.fechaInicioTimestamp) {
               const diff = merged.fechaFinTimestamp - merged.fechaInicioTimestamp;
-              merged.tiempo = formatDuration(diff);
+              const netTime = diff - (merged.tiempoPausadoTotal || 0);
+              merged.tiempo = formatDuration(netTime > 0 ? netTime : 0);
             }
           }
           

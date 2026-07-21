@@ -65,10 +65,16 @@ const defaultTramitesTI = [
 export const initSettingsDB = () => {
   let settings = localStorage.getItem('db_settings');
   if (!settings) {
+    const defaultSlas = {
+      Urgente: 2,
+      Alta: 8,
+      Media: 24,
+      Baja: 48
+    };
     settings = {
-      ge: { grupos: defaultTramitesGE },
-      gh: { grupos: defaultTramitesGH },
-      ti: { grupos: defaultTramitesTI }
+      ge: { grupos: defaultTramitesGE, slas: { ...defaultSlas } },
+      gh: { grupos: defaultTramitesGH, slas: { ...defaultSlas } },
+      ti: { grupos: defaultTramitesTI, slas: { ...defaultSlas } }
     };
     localStorage.setItem('db_settings', JSON.stringify(settings));
   }
@@ -80,9 +86,13 @@ export const getAreaSettings = (areaId) => {
   return settings[areaId] || { grupos: [] };
 };
 
-export const saveAreaSettings = (areaId, grupos) => {
+export const saveAreaSettings = (areaId, grupos, slas) => {
   initSettingsDB();
   const settings = JSON.parse(localStorage.getItem('db_settings'));
-  settings[areaId] = { grupos };
+  const oldSettings = settings[areaId] || {};
+  settings[areaId] = { 
+    grupos,
+    slas: slas !== undefined ? slas : (oldSettings.slas || { Urgente: 2, Alta: 8, Media: 24, Baja: 48 })
+  };
   localStorage.setItem('db_settings', JSON.stringify(settings));
 };
