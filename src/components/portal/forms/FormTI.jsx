@@ -123,7 +123,7 @@ export const FormTI = () => {
             className={`type-selector-card ${tipo === 'Requerimiento' ? 'active requerimiento' : ''}`}
             onClick={() => { setTipo('Requerimiento'); setPrioridad('Media'); }}
           >
-            <i className="fa-solid fa-box-open"></i>
+            <i className="fa-solid fa-file-lines"></i>
             <span>Requerimiento / Solicitud</span>
           </div>
         </div>

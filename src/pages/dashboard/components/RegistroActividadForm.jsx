@@ -20,6 +20,7 @@ export const RegistroActividadForm = () => {
     prioridad: '',
     grupo: '',
     clasificacion: '',
+    tipo: 'Incidente',
     fechaInicio: '',
     fechaFin: '',
     fechaProgramada: '',
@@ -32,6 +33,7 @@ export const RegistroActividadForm = () => {
     qr_responsable: '',
     qr_solicitud: '',
     qr_estado: 'Pendiente',
+    qr_tipo: 'Incidente',
     qr_prioridad: ''
   });
 
@@ -121,6 +123,7 @@ export const RegistroActividadForm = () => {
         grupo: formData.grupo,
         grupoExtra: formData.clasificacion,
         clasificacion: formData.clasificacion,
+        tipo: formData.tipo,
         fechaInicio: formData.fechaInicio,
         fechaFin: formData.fechaFin,
         fechaProgramada: formData.fechaProgramada,
@@ -135,7 +138,7 @@ export const RegistroActividadForm = () => {
       // Reset form
       setFormData({
         solicitante: '', responsable: '', solicitud: '', estado: 'Pendiente', 
-        prioridad: '', grupo: '', clasificacion: '', fechaInicio: '', 
+        prioridad: '', grupo: '', clasificacion: '', tipo: 'Incidente', fechaInicio: '', 
         fechaFin: '', fechaProgramada: '', detalles: ''
       });
       setArchivos([]);
@@ -172,6 +175,7 @@ export const RegistroActividadForm = () => {
         cargo: getSolicitanteCargo(quickFormData.qr_solicitante),
         solicitud: quickFormData.qr_solicitud,
         estado: quickFormData.qr_estado,
+        tipo: quickFormData.qr_tipo,
         prioridad: quickFormData.qr_prioridad || 'Baja',
         responsable: quickFormData.qr_responsable || '',
         grupo: '',
@@ -187,7 +191,7 @@ export const RegistroActividadForm = () => {
       await addTicket(newTicket);
       showToast('¡Ticket rápido creado!');
       setModalOpen(false);
-      setQuickFormData({ qr_solicitante: '', qr_responsable: '', qr_solicitud: '', qr_estado: 'Pendiente', qr_prioridad: '' });
+      setQuickFormData({ qr_solicitante: '', qr_responsable: '', qr_solicitud: '', qr_estado: 'Pendiente', qr_tipo: 'Incidente', qr_prioridad: '' });
     } catch (err) {
       console.error(err);
       showToast('Error al crear ticket rápido');
@@ -255,7 +259,9 @@ export const RegistroActividadForm = () => {
               <i className="fa-regular fa-clock select-icon-left red"></i>
               <select id="estado" name="estado" className="form-select padded-left" required value={formData.estado} onChange={handleInputChange}>
                 <option value="Pendiente">Pendiente</option>
+                <option value="Revisado">Revisado</option>
                 <option value="En progreso">En progreso</option>
+                <option value="Suspendido">Suspendido</option>
                 <option value="Resuelto">Resuelto</option>
                 <option value="Cerrado">Cerrado</option>
               </select>
@@ -278,6 +284,29 @@ export const RegistroActividadForm = () => {
           </div>
 
           {/* Fila 4 */}
+          <div className="form-group full-width">
+            <label className="form-label">Tipo de Ticket</label>
+            <div className="type-selector-container">
+              <div 
+                className={`type-selector-card ${formData.tipo === 'Incidente' ? 'active incidente' : ''}`}
+                onClick={() => setFormData({...formData, tipo: 'Incidente', prioridad: 'Alta'})}
+                style={{ padding: '12px' }}
+              >
+                <i className="fa-solid fa-triangle-exclamation"></i>
+                <span>Incidente / Problema</span>
+              </div>
+              <div 
+                className={`type-selector-card ${formData.tipo === 'Requerimiento' ? 'active requerimiento' : ''}`}
+                onClick={() => setFormData({...formData, tipo: 'Requerimiento', prioridad: 'Media'})}
+                style={{ padding: '12px' }}
+              >
+                <i className="fa-solid fa-file-lines"></i>
+                <span>Requerimiento / Solicitud</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Fila 5 */}
           <div className="form-group">
             <label className="form-label" htmlFor="grupo">Área de Gestión</label>
             <div className="select-wrapper">
@@ -419,6 +448,28 @@ export const RegistroActividadForm = () => {
                   <textarea id="qr_solicitud" className="form-textarea" placeholder="¿Qué se necesita urgente?..." rows="3" required value={quickFormData.qr_solicitud} onChange={handleQuickInputChange}></textarea>
                 </div>
 
+                <div className="form-group">
+                  <label className="form-label">Tipo de Ticket</label>
+                  <div className="type-selector-container">
+                    <div 
+                      className={`type-selector-card ${quickFormData.qr_tipo === 'Incidente' ? 'active incidente' : ''}`}
+                      onClick={() => setQuickFormData({...quickFormData, qr_tipo: 'Incidente', qr_prioridad: 'Alta'})}
+                      style={{ padding: '10px' }}
+                    >
+                      <i className="fa-solid fa-triangle-exclamation"></i>
+                      <span style={{ fontSize: '11px' }}>Incidente</span>
+                    </div>
+                    <div 
+                      className={`type-selector-card ${quickFormData.qr_tipo === 'Requerimiento' ? 'active requerimiento' : ''}`}
+                      onClick={() => setQuickFormData({...quickFormData, qr_tipo: 'Requerimiento', qr_prioridad: 'Media'})}
+                      style={{ padding: '10px' }}
+                    >
+                      <i className="fa-solid fa-file-lines"></i>
+                      <span style={{ fontSize: '11px' }}>Requerimiento</span>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="form-grid form-grid-2">
                   <div className="form-group">
                     <label className="form-label">Estado *</label>
@@ -426,7 +477,9 @@ export const RegistroActividadForm = () => {
                       <i className="fa-regular fa-clock select-icon-left red"></i>
                       <select id="qr_estado" className="form-select padded-left" required value={quickFormData.qr_estado} onChange={handleQuickInputChange}>
                         <option value="Pendiente">Pendiente</option>
+                        <option value="Revisado">Revisado</option>
                         <option value="En progreso">En progreso</option>
+                        <option value="Suspendido">Suspendido</option>
                         <option value="Resuelto">Resuelto</option>
                         <option value="Cerrado">Cerrado</option>
                       </select>

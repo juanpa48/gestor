@@ -243,7 +243,7 @@ export const Gestion = () => {
                       <td>
                         {t.tipo ? (
                           <span className={`tipo-badge ${t.tipo.toLowerCase()}`}>
-                            <i className={t.tipo === 'Incidente' ? 'fa-solid fa-triangle-exclamation' : 'fa-solid fa-box-open'} style={{ marginRight: '4px' }}></i>
+                            <i className={t.tipo === 'Incidente' ? 'fa-solid fa-triangle-exclamation' : 'fa-solid fa-file-lines'} style={{ marginRight: '4px' }}></i>
                             {t.tipo}
                           </span>
                         ) : <span style={{ color: 'var(--text-muted)', fontSize: '11px' }}>N/A</span>}

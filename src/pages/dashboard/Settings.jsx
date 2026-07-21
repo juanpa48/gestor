@@ -255,13 +255,34 @@ export const Settings = () => {
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <input 
                   type="number" 
-                  min="1"
+                  min="0"
                   className="glass-input" 
-                  value={slas[prio]} 
-                  onChange={(e) => setSlas({...slas, [prio]: parseInt(e.target.value) || 0})}
-                  style={{ width: '80px', textAlign: 'center', fontWeight: 'bold' }}
+                  value={Math.floor(slas[prio] || 0)} 
+                  onChange={(e) => {
+                    const h = parseInt(e.target.value) || 0;
+                    const m = Math.round(((slas[prio] || 0) % 1) * 60);
+                    setSlas({...slas, [prio]: h + (m / 60)});
+                  }}
+                  style={{ width: '60px', textAlign: 'center', fontWeight: 'bold', padding: '8px' }}
                 />
-                <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>horas</span>
+                <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>h</span>
+
+                <input 
+                  type="number" 
+                  min="0"
+                  max="59"
+                  className="glass-input" 
+                  value={Math.round(((slas[prio] || 0) % 1) * 60)} 
+                  onChange={(e) => {
+                    const h = Math.floor(slas[prio] || 0);
+                    let m = parseInt(e.target.value) || 0;
+                    if (m > 59) m = 59;
+                    if (m < 0) m = 0;
+                    setSlas({...slas, [prio]: h + (m / 60)});
+                  }}
+                  style={{ width: '60px', textAlign: 'center', fontWeight: 'bold', padding: '8px' }}
+                />
+                <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>m</span>
               </div>
             </div>
           ))}

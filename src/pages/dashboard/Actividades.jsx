@@ -40,17 +40,21 @@ export const Actividades = () => {
   const settings = getAreaSettings(area);
   const slas = settings.slas || { Urgente: 2, Alta: 8, Media: 24, Baja: 48 };
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(15);
   
   const [filters, setFilters] = useState({
     estado: '',
     prioridad: '',
     responsable: '',
-    periodo: ''
+    periodo: '',
+    tipo: ''
   });
 
   useEffect(() => {
     const handleSearch = (e) => {
       setSearchQuery(e.detail?.query || '');
+      setCurrentPage(1);
     };
     document.addEventListener('searchTriggered', handleSearch);
     
@@ -64,17 +68,20 @@ export const Actividades = () => {
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
     setFilters(prev => ({ ...prev, [name]: value }));
+    setCurrentPage(1);
   };
 
   const clearFilters = () => {
-    setFilters({ estado: '', prioridad: '', responsable: '', periodo: '' });
+    setFilters({ estado: '', prioridad: '', responsable: '', periodo: '', tipo: '' });
+    setCurrentPage(1);
   };
 
   const filteredActividades = useMemo(() => {
-    return actividades.filter(a => {
+    const result = actividades.filter(a => {
       if (filters.estado && a.estado !== filters.estado) return false;
       if (filters.prioridad && a.prioridad !== filters.prioridad) return false;
       if (filters.responsable && a.responsable !== filters.responsable) return false;
+      if (filters.tipo && a.tipo !== filters.tipo) return false;
 
       if (filters.periodo) {
         const fecha = parseFechaCreacion(a);
@@ -109,7 +116,20 @@ export const Actividades = () => {
 
       return true;
     });
+
+    return result.sort((a, b) => {
+      const dA = parseFechaCreacion(a);
+      const dB = parseFechaCreacion(b);
+      if (dA && dB) return dB - dA;
+      return 0;
+    });
   }, [actividades, filters, searchQuery]);
+
+  const totalPages = Math.ceil(filteredActividades.length / itemsPerPage);
+  const paginatedActividades = filteredActividades.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   // Quick Stats
   const stats = useMemo(() => {
@@ -140,9 +160,19 @@ export const Actividades = () => {
           <select name="estado" className="filter-select filter-actividades" value={filters.estado} onChange={handleFilterChange}>
             <option value="">Todos</option>
             <option value="Pendiente">Pendiente</option>
+            <option value="Revisado">Revisado</option>
             <option value="En progreso">En progreso</option>
+            <option value="Suspendido">Suspendido</option>
             <option value="Resuelto">Resuelto</option>
             <option value="Cerrado">Cerrado</option>
+          </select>
+        </div>
+        <div className="filter-group">
+          <label className="filter-label">Tipo</label>
+          <select name="tipo" className="filter-select filter-actividades" value={filters.tipo} onChange={handleFilterChange}>
+            <option value="">Todos</option>
+            <option value="Incidente">Incidente</option>
+            <option value="Requerimiento">Requerimiento</option>
           </select>
         </div>
         <div className="filter-group">
@@ -205,13 +235,7 @@ export const Actividades = () => {
 
       <div className="table-card">
         <div id="activityTable">
-          {filteredActividades.length === 0 ? (
-            <div className="empty-state">
-              <i className="fa-solid fa-filter"></i>
-              <p>Sin resultados para los filtros aplicados o búsqueda</p>
-            </div>
-          ) : (
-            <table className="data-table">
+          <table className="data-table">
               <thead>
                 <tr>
                   <th>ID</th>
@@ -226,7 +250,7 @@ export const Actividades = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredActividades.map(r => {
+                {paginatedActividades.map(r => {
                   const estado = (r.estado || '').toLowerCase();
                   let estadoClass = 'pendiente';
                   if (estado.includes('progreso')) estadoClass = 'progreso';
@@ -249,14 +273,18 @@ export const Actividades = () => {
                       const consumidoMs = endMs - startMs - (r.tiempoPausadoTotal || 0);
                       
                       const restanteMs = limiteMs - consumidoMs;
-                      const horasRestantes = Math.floor(restanteMs / (3600 * 1000));
+                      const absMs = Math.abs(restanteMs);
+                      const totalMins = Math.floor(absMs / (60 * 1000));
+                      const hours = Math.floor(totalMins / 60);
+                      const mins = totalMins % 60;
+                      const timeString = `${hours}h ${mins}m`;
                       
                       if (restanteMs < 0) {
-                        slaBadge = <span className="sla-badge danger" title={`Vencido por ${Math.abs(horasRestantes)}h`}><i className="fa-solid fa-fire"></i> Vencido</span>;
-                      } else if (horasRestantes <= 2) { // 2 horas de warning
-                        slaBadge = <span className="sla-badge warning" title={`Quedan ${horasRestantes} horas`}><i className="fa-solid fa-triangle-exclamation"></i> Por vencer</span>;
+                        slaBadge = <span className="sla-badge danger" title={`Vencido por ${timeString}`}><i className="fa-solid fa-fire"></i> Vencido</span>;
+                      } else if (restanteMs <= 2 * 3600 * 1000) { // Menos de 2 horas
+                        slaBadge = <span className="sla-badge warning" title={`Quedan ${timeString}`}><i className="fa-solid fa-triangle-exclamation"></i> Por vencer</span>;
                       } else {
-                        slaBadge = <span className="sla-badge ok" title={`Quedan ${horasRestantes} horas`}><i className="fa-solid fa-check"></i> A tiempo</span>;
+                        slaBadge = <span className="sla-badge ok" title={`Quedan ${timeString}`}><i className="fa-solid fa-check"></i> A tiempo</span>;
                       }
                     }
                   } else {
@@ -279,9 +307,64 @@ export const Actividades = () => {
                     </tr>
                   );
                 })}
+                {paginatedActividades.length === 0 && (
+                  <tr>
+                    <td colSpan="9" style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
+                      No se encontraron actividades con los filtros actuales.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
-          )}
+          
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', padding: '0 8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                Mostrando {filteredActividades.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1} a {Math.min(currentPage * itemsPerPage, filteredActividades.length)} de {filteredActividades.length} registros
+              </span>
+              
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Filas por página:</span>
+                <select 
+                  style={{ fontSize: '12px', padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--card-border)', outline: 'none' }}
+                  value={itemsPerPage}
+                  onChange={(e) => {
+                    setItemsPerPage(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                >
+                  <option value="15">15</option>
+                  <option value="25">25</option>
+                  <option value="50">50</option>
+                  <option value="100">100</option>
+                </select>
+              </div>
+            </div>
+            
+            {totalPages > 1 && (
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button 
+                  className="btn-secondary" 
+                  style={{ padding: '6px 12px', fontSize: '12px' }}
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                >
+                  <i className="fa-solid fa-chevron-left"></i> Anterior
+                </button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', fontWeight: 'bold', color: 'var(--navy)' }}>
+                  Página {currentPage} de {totalPages}
+                </div>
+                <button 
+                  className="btn-secondary" 
+                  style={{ padding: '6px 12px', fontSize: '12px' }}
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                >
+                  Siguiente <i className="fa-solid fa-chevron-right"></i>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </section>
