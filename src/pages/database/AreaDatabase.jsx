@@ -73,6 +73,7 @@ export const AreaDatabase = () => {
     { title: 'Solicitante', key: 'solicitante' },
     { title: 'Cargo', key: 'cargo' },
     { title: 'Solicitud del usuario', key: 'solicitud' },
+    { title: 'Tipo de Ticket', key: 'tipo' },
     { title: 'Prioridad', key: 'prioridad' },
     { title: 'Estado', key: 'estado' },
     { title: 'Grupo de actividad', key: 'grupo' },
@@ -84,10 +85,12 @@ export const AreaDatabase = () => {
     { title: 'Accion tenica', key: 'accion' },
     { title: 'Fecha progamada', key: 'fechaProgramada' },
     { title: 'Detalles (opcional)', key: 'detalles' },
-    { title: 'Responsable', key: 'responsable' }
+    { title: 'Responsable', key: 'responsable' },
+    { title: 'Fecha de Pausa (SLA)', key: 'fechaPausa' },
+    { title: 'Tiempo Pausado (ms)', key: 'tiempoPausadoTotal' }
   ];
 
-  const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P'];
+  const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S'];
 
   const [rawSolicitantes, setRawSolicitantes] = useState([]);
 
