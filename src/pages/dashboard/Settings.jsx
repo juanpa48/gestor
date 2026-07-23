@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getAreaSettings, saveAreaSettings } from '../../shared/services/SettingsManager';
 import { useActiveArea } from '../../shared/contexts/ActiveAreaContext';
 import { useAuth, hashPassword } from '../../shared/contexts/AuthContext';
 
 export const Settings = () => {
+  const navigate = useNavigate();
   const { area, config } = useActiveArea();
   const { currentUser } = useAuth();
   const isAdmin = currentUser?.role === 'admin_ti';
@@ -226,6 +228,19 @@ export const Settings = () => {
         <div>
           <h1 className="page-title"><i className="fa-solid fa-gear" style={{ color: config.color }}></i> Panel de Ajustes</h1>
           <p className="page-subtitle">Gestiona la configuración de {config.nombre}</p>
+          {isAdmin && (
+            <div style={{ display: 'flex', gap: '10px', marginTop: '12px' }}>
+              <button onClick={() => navigate('/dashboard/ti/settings')} className={`btn-secondary ${area === 'ti' ? 'active' : ''}`} style={{ padding: '6px 12px', fontSize: '12px', border: area === 'ti' ? '1.5px solid var(--navy)' : '1px solid rgba(0,0,0,0.1)' }}>
+                Soporte TI
+              </button>
+              <button onClick={() => navigate('/dashboard/ge/settings')} className={`btn-secondary ${area === 'ge' ? 'active' : ''}`} style={{ padding: '6px 12px', fontSize: '12px', border: area === 'ge' ? '1.5px solid var(--navy)' : '1px solid rgba(0,0,0,0.1)' }}>
+                Gestión Empresarial
+              </button>
+              <button onClick={() => navigate('/dashboard/gh/settings')} className={`btn-secondary ${area === 'gh' ? 'active' : ''}`} style={{ padding: '6px 12px', fontSize: '12px', border: area === 'gh' ? '1.5px solid var(--navy)' : '1px solid rgba(0,0,0,0.1)' }}>
+                Gestión Humana
+              </button>
+            </div>
+          )}
         </div>
         <button className="btn-primary" onClick={handleSave} disabled={isSaving} style={{ background: config.color }}>
           {isSaving ? (
@@ -236,7 +251,8 @@ export const Settings = () => {
         </button>
       </div>
 
-      <div className="settings-container glass-panel" style={{ padding: '24px', marginBottom: '32px' }}>
+      {isAdmin && (
+        <div className="settings-container glass-panel" style={{ padding: '24px', marginBottom: '32px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(30,58,95,0.1)', paddingBottom: '16px', marginBottom: '24px' }}>
           <h2 style={{ fontSize: '18px', color: 'var(--navy)' }}>
             <i className="fa-solid fa-stopwatch"></i> Acuerdos de Nivel de Servicio (SLA)
@@ -288,6 +304,7 @@ export const Settings = () => {
           ))}
         </div>
       </div>
+      )}
 
       <div className="settings-container glass-panel" style={{ padding: '24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(30,58,95,0.1)', paddingBottom: '16px', marginBottom: '24px' }}>

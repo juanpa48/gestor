@@ -25,6 +25,7 @@
 - **Archivos:** `AuthContext.jsx`, `ProtectedRoute.jsx`, `SettingsManager.js`, `Login.jsx`, `Settings.jsx`, `App.jsx`.
 - **Autenticación (SHA-256):** Se implementó un sistema de login duro. Las contraseñas se almacenan hasheadas con SHA-256 en `db_usuarios` en localStorage.
 - **Protección de Rutas y Áreas:** `ProtectedRoute.jsx` bloquea accesos no autorizados. Si la gestora de `GE` intenta acceder a la base de datos de `TI`, el sistema la expulsa a su área correspondiente.
+- **Seguridad y Navegación en Ajustes (SLAs):** El panel de Acuerdos de Nivel de Servicio (SLA) en `Settings.jsx` ahora está restringido exclusivamente para el rol `admin_ti`. Además, se agregó una botonera de acceso rápido ("Soporte TI", "Gestión Empresarial", "Gestión Humana") visible solo para administradores, que permite cambiar dinámicamente de área sin editar la URL.
 - **Panel de Ajustes Dinámico:** Se eliminó el archivo rígido `tramitesData.js`. Ahora la configuración de trámites por área vive en `db_settings` y se gestiona mediante UI visual (`Settings.jsx`).
 - **Módulo TI:** Panel exclusivo para el `admin_ti` para ver los intentos fallidos, desbloquear usuarios bloqueados temporalmente (tras 4 intentos) y restablecer contraseñas de las gestoras.
 
