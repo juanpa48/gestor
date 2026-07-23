@@ -1,44 +1,14 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useActiveArea } from '../../shared/contexts/ActiveAreaContext';
 import { getAreaSettings } from '../../shared/services/SettingsManager';
-
-// Parsea fecha según la lógica original de JS
-const parseFechaCreacion = (ticket) => {
-  if (ticket.fechaISO) {
-    const d = new Date(ticket.fechaISO);
-    if (!isNaN(d.getTime())) return d;
-  }
-  const raw = ticket.fechaCreacion || '';
-  if (!raw) return null;
-  const d2 = new Date(raw);
-  if (!isNaN(d2.getTime())) return d2;
-
-  const match = raw.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-  if (match) {
-    const day = parseInt(match[1], 10);
-    const month = parseInt(match[2], 10) - 1;
-    const year = parseInt(match[3], 10);
-
-    const timeMatch = raw.match(/(\d{1,2}):(\d{2}):?(\d{2})?/);
-    let hours = 0, minutes = 0, seconds = 0;
-    if (timeMatch) {
-      hours = parseInt(timeMatch[1], 10);
-      minutes = parseInt(timeMatch[2], 10);
-      seconds = timeMatch[3] ? parseInt(timeMatch[3], 10) : 0;
-      if (/p\.?\s*m\.?/i.test(raw) && hours < 12) hours += 12;
-      if (/a\.?\s*m\.?/i.test(raw) && hours === 12) hours = 0;
-    }
-    const d3 = new Date(year, month, day, hours, minutes, seconds);
-    if (!isNaN(d3.getTime())) return d3;
-  }
-  return null;
-};
+import { calculateSlaBadge, parseFechaCreacion } from '../../shared/utils/timeHelpers';
 
 export const Actividades = () => {
   const { ctx, area } = useActiveArea();
   const { actividades, responsables } = ctx;
   const settings = getAreaSettings(area);
   const slas = settings.slas || { Urgente: 2, Alta: 8, Media: 24, Baja: 48 };
+  const [tick, setTick] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(15);
@@ -61,8 +31,16 @@ export const Actividades = () => {
     // Also grab current value just in case it was typed before mount
     const searchInput = document.getElementById('searchInput');
     if (searchInput) setSearchQuery(searchInput.value.toLowerCase());
-
-    return () => document.removeEventListener('searchTriggered', handleSearch);
+    
+    // Timer para actualizar los SLAs en tiempo real (cada 60 segundos)
+    const intervalId = setInterval(() => {
+      setTick(t => t + 1);
+    }, 60000);
+    
+    return () => {
+      document.removeEventListener('searchTriggered', handleSearch);
+      clearInterval(intervalId);
+    };
   }, []);
 
   const handleFilterChange = (e) => {
@@ -262,34 +240,7 @@ export const Actividades = () => {
                   else if (prio === 'media') prioClass = 'media';
 
                   // --- CÁLCULO DE SLA ---
-                  let slaBadge = null;
-                  if (r.estado !== 'Resuelto' && r.estado !== 'Cerrado') {
-                    const startMs = parseFechaCreacion(r)?.getTime();
-                    if (startMs) {
-                      const limiteSlaHoras = slas[r.prioridad] || 48;
-                      const limiteMs = limiteSlaHoras * 3600 * 1000;
-                      // Si está suspendido, no seguimos sumando el tiempo actual, nos quedamos en fechaPausa
-                      const endMs = r.estado === 'Suspendido' && r.fechaPausa ? r.fechaPausa : Date.now();
-                      const consumidoMs = endMs - startMs - (r.tiempoPausadoTotal || 0);
-                      
-                      const restanteMs = limiteMs - consumidoMs;
-                      const absMs = Math.abs(restanteMs);
-                      const totalMins = Math.floor(absMs / (60 * 1000));
-                      const hours = Math.floor(totalMins / 60);
-                      const mins = totalMins % 60;
-                      const timeString = `${hours}h ${mins}m`;
-                      
-                      if (restanteMs < 0) {
-                        slaBadge = <span className="sla-badge danger" title={`Vencido por ${timeString}`}><i className="fa-solid fa-fire"></i> Vencido</span>;
-                      } else if (restanteMs <= 2 * 3600 * 1000) { // Menos de 2 horas
-                        slaBadge = <span className="sla-badge warning" title={`Quedan ${timeString}`}><i className="fa-solid fa-triangle-exclamation"></i> Por vencer</span>;
-                      } else {
-                        slaBadge = <span className="sla-badge ok" title={`Quedan ${timeString}`}><i className="fa-solid fa-check"></i> A tiempo</span>;
-                      }
-                    }
-                  } else {
-                    slaBadge = <span className="sla-badge ok"><i className="fa-solid fa-flag-checkered"></i> Cumplido</span>;
-                  }
+                  const slaBadge = calculateSlaBadge(r, slas);
 
                   return (
                     <tr key={r.id}>

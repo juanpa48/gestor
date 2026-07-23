@@ -1,12 +1,18 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useActiveArea } from '../../shared/contexts/ActiveAreaContext';
+import { getAreaSettings } from '../../shared/services/SettingsManager';
+import { calculateSlaBadge } from '../../shared/utils/timeHelpers';
 
 export const Gestion = () => {
-  const { ctx, config } = useActiveArea();
+  const { ctx, config, area } = useActiveArea();
   const { actividades, responsables, updateTicket } = ctx;
+  const settings = getAreaSettings(area);
+  const slas = settings.slas || { Urgente: 2, Alta: 8, Media: 24, Baja: 48 };
+  
   const [view, setView] = useState('tabla'); // 'tabla' o 'kanban'
   const [filtroEstado, setFiltroEstado] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [tick, setTick] = useState(0);
 
   // Modal State
   const [modalOpen, setModalOpen] = useState(false);
@@ -35,7 +41,16 @@ export const Gestion = () => {
     const searchInput = document.getElementById('searchInput');
     if (searchInput) setSearchQuery(searchInput.value.toLowerCase());
 
-    return () => document.removeEventListener('searchTriggered', handleSearch);
+    
+    // Timer para actualizar los SLAs en tiempo real (cada 60 segundos)
+    const intervalId = setInterval(() => {
+      setTick(t => t + 1);
+    }, 60000);
+
+    return () => {
+      document.removeEventListener('searchTriggered', handleSearch);
+      clearInterval(intervalId);
+    };
   }, []);
 
   const activos = useMemo(() => {
@@ -228,6 +243,7 @@ export const Gestion = () => {
                   <th>Solicitante</th>
                   <th>Estado</th>
                   <th>Prioridad</th>
+                  <th>SLA (Restante)</th>
                   <th>Responsable</th>
                   <th>Creado</th>
                 </tr>
@@ -258,6 +274,7 @@ export const Gestion = () => {
                           <span className="prioridad-dot" style={{ background: dot }}></span>{prio}
                         </span>
                       </td>
+                      <td>{calculateSlaBadge(t, slas)}</td>
                       <td>{t.responsable || 'Sin asignar'}</td>
                       <td style={{ color: '#64748b', fontSize: '11px' }}>{t.fechaCreacion || ''}</td>
                     </tr>
@@ -311,6 +328,9 @@ export const Gestion = () => {
                             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '11px' }}>
                               <span className="prioridad-dot" style={{ background: dot }}></span>{prio}
                             </span>
+                          </div>
+                          <div style={{ marginTop: '8px', borderTop: '1px solid rgba(0,0,0,0.05)', paddingTop: '8px' }}>
+                            {calculateSlaBadge(t, slas)}
                           </div>
                         </div>
                       );
