@@ -48,9 +48,13 @@ export const PortalLayout = ({ areaConfig, areaContext, onBack, children, nombre
   const showToast = (message, type = 'success', icon = 'check') => {
     const toast = document.getElementById('toast');
     if (toast) {
-      toast.className = `toast show ${type === 'error' ? 'error' : type === 'warning' ? 'warning' : ''}`;
+      toast.className = `toast show ${type}`;
       toast.innerHTML = `<i class="fa-solid fa-${icon}"></i> &nbsp;${message}`;
-      setTimeout(() => { toast.className = 'toast hidden'; }, 4000);
+      
+      if (window.toastTimeout) {
+        clearTimeout(window.toastTimeout);
+      }
+      window.toastTimeout = setTimeout(() => { toast.className = 'toast'; }, 10000);
     }
   };
 
@@ -241,7 +245,7 @@ export const PortalLayout = ({ areaConfig, areaContext, onBack, children, nombre
           </div>
         </aside>
       </div>
-      <div id="toast" className="toast hidden"></div>
+      <div id="toast" className="toast"></div>
     </div>
   );
 };

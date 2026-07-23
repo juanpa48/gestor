@@ -16,6 +16,11 @@
 
 ## Julio 2026
 
+### [2026-07-22] — Reactivación de Widget de Estado de Sistemas 📡
+- **Archivos:** `widgets.css`, `PanelPrincipal.jsx`, `WidgetSistemas.jsx`.
+- **Reactivación y Seguridad:** Se restauró la visibilidad del "Panel de Control Estado Sistemas" (`WidgetSistemas.jsx`), inyectando lógica de seguridad mediante los contextos globales (`useAuth` y `useActiveArea`) para asegurar que **únicamente** sea visible cuando el usuario esté operando bajo el área de Soporte TI (`ti`) y ostente el rol de administrador (`admin_ti`).
+- **Mejoras UI y Toast Flotante:** Se reemplazó el campo temporal `<input type="text">` de los mensajes a empleados por su estructura original con ícono de megáfono garantizando siempre su visibilidad. Además, el sistema de alertas (Toasts) se rediseñó bajo el estilo Glassmorphism (píldora flotante inferior centrada) corrigiendo el contraste de texto, ajustando la duración a 10 segundos y limpiando colisiones de timeouts múltiples (`PortalLayout.jsx`).
+
 ### [2026-07-19] — Autenticación Local, Seguridad y Ajustes Dinámicos 🔐
 - **Archivos:** `AuthContext.jsx`, `ProtectedRoute.jsx`, `SettingsManager.js`, `Login.jsx`, `Settings.jsx`, `App.jsx`.
 - **Autenticación (SHA-256):** Se implementó un sistema de login duro. Las contraseñas se almacenan hasheadas con SHA-256 en `db_usuarios` en localStorage.

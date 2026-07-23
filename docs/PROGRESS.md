@@ -31,3 +31,10 @@
   - [x] Comprobación de que no haya estilos `inline` prohibidos.
   - [x] Ajustes de `flexbox` y `gap` para que los nuevos botones no rompan la UI móvil ni de escritorio.
   - [x] Mostrar insignias de colores (Verde, Amarillo, Rojo) según el estado del SLA (A tiempo, Por Vencer, Vencido).
+
+---
+
+## Nuevo Objetivo: Reactivación de Widget de Estado de Sistemas
+- [x] Habilitar la visibilidad en CSS retirando `display: none` de `#panelControlSistemas`.
+- [x] Implementar renderizado condicional en `PanelPrincipal.jsx` para mostrar el Widget únicamente si el usuario está en el área `ti` y posee el rol `admin_ti`.
+- [x] Ajustar el campo de "Mensaje a Empleados" cambiando de `<input>` temporal a un `<textarea>` permanente para mejor detalle.

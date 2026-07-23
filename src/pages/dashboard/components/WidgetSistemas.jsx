@@ -77,14 +77,14 @@ export const WidgetSistemas = () => {
           </div>
         </div>
 
-        <div className={`form-group widget-group-lg ${estado === 'ok' ? 'hidden' : ''}`} id="grupo_mensaje">
+        <div className="form-group widget-group-lg" id="grupo_mensaje">
           <label className="form-label panel-label-small">Mensaje a Empleados</label>
           <div className="input-wrapper">
             <i className="fa-solid fa-bullhorn input-icon"></i>
             <input 
               type="text" 
               id="ctrl_mensaje" 
-              className="form-input" 
+              className="form-input padded-left" 
               placeholder="Ej. Equipo TI trabajando en solución..."
               value={mensaje}
               onChange={(e) => setMensaje(e.target.value)}
