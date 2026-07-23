@@ -1,0 +1,19 @@
+eliminnar para gestion humana el modulo de TIPO DE TICKET
+y prioridad
+
+para gestion humana pornerle solo un sla 9 horas de respuesta
+
+cuando llega una solicitud debe contar el tiempo del sla
+
+mirar si es posible implementar una firma para la deducion de nomina, tambein cuando se llena el formulario que se pueda imprimir la solcitud para dejarlo como evidencia 
+
+Mirar la implementacion de reporte diario de control de personal (visitas y trabajo en casa)
+
+clasificacion de tickets para novedad de nomina para el formulario de gh poner un chulo
+
+poner en el dashboard de gh alerta de tickets pronto a vencer 
+
+pausar el tiempo del sla cuando estan en tiempo de almuerzo, reuniones, fuera de horario laboral
+
+poner condicional para que el sla empiece a contar solo en jornada laboral
+
