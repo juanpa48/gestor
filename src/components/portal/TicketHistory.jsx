@@ -27,9 +27,8 @@ export const TicketHistory = () => {
           </div>
         ) : (
           misTickets.map(t => {
-            const estadoClase = (t.estado || '').toLowerCase().includes('progreso') ? 'progreso' 
-                              : (t.estado || '').toLowerCase().includes('resuelto') ? 'resuelto' 
-                              : 'pendiente';
+            const rawEstado = t.estado || 'Pendiente';
+            const estadoClase = rawEstado.toLowerCase().replace(' ', '-');
 
             return (
               <div key={t.id} className="history-card">

@@ -230,9 +230,8 @@ export const Actividades = () => {
               <tbody>
                 {paginatedActividades.map(r => {
                   const estado = (r.estado || '').toLowerCase();
-                  let estadoClass = 'pendiente';
-                  if (estado.includes('progreso')) estadoClass = 'progreso';
-                  else if (estado.includes('resuelto') || estado.includes('cerrado')) estadoClass = 'resuelto';
+                  const rawEstado = r.estado || 'Pendiente';
+                  const estadoClass = rawEstado.toLowerCase().replace(' ', '-');
 
                   const prio = (r.prioridad || '').toLowerCase();
                   let prioClass = 'baja';

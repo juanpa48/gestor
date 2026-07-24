@@ -262,7 +262,8 @@ export const Gestion = () => {
                 {activos.map(t => {
                   const prio = t.prioridad || 'Baja';
                   const dot = prioColor[prio] || '#94a3b8';
-                  const estadoClase = (t.estado || '').toLowerCase().includes('progreso') ? 'progreso' : 'pendiente';
+                  const rawEstado = t.estado || 'Pendiente';
+                  const estadoClase = rawEstado.toLowerCase().replace(' ', '-');
                   return (
                     <tr key={t.id} className="ticket-row-clickable" data-ticket-id={t.id} onClick={() => openModal(t.id)}>
                       <td><strong>{t.id || ''}</strong></td>
