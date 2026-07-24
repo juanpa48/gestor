@@ -114,8 +114,11 @@ export const Actividades = () => {
     return {
       total: filteredActividades.length,
       pendientes: filteredActividades.filter(d => d.estado === 'Pendiente').length,
+      revisados: filteredActividades.filter(d => d.estado === 'Revisado').length,
       progreso: filteredActividades.filter(d => (d.estado || '').includes('progreso')).length,
-      resueltos: filteredActividades.filter(d => d.estado === 'Resuelto' || d.estado === 'Cerrado').length,
+      suspendidos: filteredActividades.filter(d => d.estado === 'Suspendido').length,
+      resueltos: filteredActividades.filter(d => d.estado === 'Resuelto').length,
+      cerrados: filteredActividades.filter(d => d.estado === 'Cerrado').length,
       urgentes: filteredActividades.filter(d => d.prioridad === 'Urgente').length
     };
   }, [filteredActividades]);
@@ -197,13 +200,25 @@ export const Actividades = () => {
           <div className="qs-value" id="qsPendientes">{stats.pendientes}</div>
           <div className="qs-label">Pendientes</div>
         </div>
+        <div className="quick-stat-card revisado">
+          <div className="qs-value" id="qsRevisados">{stats.revisados}</div>
+          <div className="qs-label">Revisados</div>
+        </div>
         <div className="quick-stat-card progreso">
           <div className="qs-value" id="qsProgreso">{stats.progreso}</div>
           <div className="qs-label">En Progreso</div>
         </div>
+        <div className="quick-stat-card suspendido">
+          <div className="qs-value" id="qsSuspendidos">{stats.suspendidos}</div>
+          <div className="qs-label">Suspendidos</div>
+        </div>
         <div className="quick-stat-card resueltos">
           <div className="qs-value" id="qsResueltos">{stats.resueltos}</div>
           <div className="qs-label">Resueltos</div>
+        </div>
+        <div className="quick-stat-card cerrado">
+          <div className="qs-value" id="qsCerrados">{stats.cerrados}</div>
+          <div className="qs-label">Cerrados</div>
         </div>
         <div className="quick-stat-card urgentes">
           <div className="qs-value" id="qsUrgentes">{stats.urgentes}</div>

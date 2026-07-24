@@ -94,8 +94,9 @@
 .bg-disponible { background-color: #22c55e; }
 .bg-desarrollo { background-color: #3b82f6; }
 .bg-reunion { background-color: #a855f7; }
+.bg-almuerzo { background-color: #f59e0b; }
 .bg-atendiendo { background-color: #ef4444; }
-.bg-urgente { background-color: #7f1d1d; box-shadow: 0 0 6px rgba(127, 29, 29, 0.5); }
+.bg-ausente { background-color: #94a3b8; }
 .view-toggle { display: flex; background: rgba(255, 255, 255, 0.5); border-radius: 10px; padding: 3px; border: 1.5px solid rgba(200, 215, 235, 0.5); }
 
 /* UTILIDADES Y COMPONENTES EXTRACCIÓN (Refactor Inline CSS) */
@@ -201,8 +202,9 @@
 .bg-disponible { background-color: #22c55e; }
 .bg-desarrollo { background-color: #3b82f6; }
 .bg-reunion { background-color: #a855f7; }
+.bg-almuerzo { background-color: #f59e0b; }
 .bg-atendiendo { background-color: #ef4444; }
-.bg-urgente { background-color: #7f1d1d; box-shadow: 0 0 6px rgba(127, 29, 29, 0.5); }
+.bg-ausente { background-color: #94a3b8; }
 .view-toggle { display: flex; background: rgba(255, 255, 255, 0.5); border-radius: 10px; padding: 3px; border: 1.5px solid rgba(200, 215, 235, 0.5); }
 
 /* UTILIDADES Y COMPONENTES EXTRACCIÓN (Refactor Inline CSS) */

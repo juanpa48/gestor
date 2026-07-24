@@ -61,10 +61,11 @@ export const WidgetMiEstado = () => {
   const getEstadoLabel = (estado) => {
     const labels = {
       'disponible': 'Disponible (En Oficina)',
-      'en_desarrollo': 'Disponible (Home Office)',
+      'en_desarrollo': 'Disponible (Trabajo en casa)',
       'reunion': 'En Reunión',
-      'atendiendo': 'Ocupada (Trámite)',
-      'urgente': 'Urgencia'
+      'almuerzo': 'Hora de Almuerzo',
+      'atendiendo': 'Ocupado (Trámite)',
+      'ausente': 'Ausente (No laborando)'
     };
     return labels[estado] || 'Desconocido';
   };
@@ -107,19 +108,21 @@ export const WidgetMiEstado = () => {
               onChange={(e) => setMiEstado(e.target.value)}
             >
               <option value="disponible">🟢 Disponible (En Oficina)</option>
-              <option value="en_desarrollo">🔵 Disponible (Home Office)</option>
+              <option value="en_desarrollo">🔵 Disponible (Trabajo en casa)</option>
               <option value="reunion">🟣 En Reunión</option>
-              <option value="atendiendo">🔴 Ocupada (Trámite)</option>
-              <option value="urgente">🔴 Urgencia</option>
+              <option value="almuerzo">🟠 Hora de Almuerzo</option>
+              <option value="atendiendo">🔴 Ocupado (Trámite)</option>
+              <option value="ausente">⚪ Ausente (No laborando)</option>
             </select>
             <i className="fa-solid fa-chevron-down select-arrow"></i>
           </div>
           <div className="status-circles-container flex-center mt-10px">
             <button type="button" className="status-circle-btn bg-disponible" title="Disponible (En Oficina)" onClick={() => handleSetEstadoRapido('disponible')}></button>
-            <button type="button" className="status-circle-btn bg-desarrollo" title="Disponible (Home Office)" onClick={() => handleSetEstadoRapido('en_desarrollo')}></button>
+            <button type="button" className="status-circle-btn bg-desarrollo" title="Disponible (Trabajo en casa)" onClick={() => handleSetEstadoRapido('en_desarrollo')}></button>
             <button type="button" className="status-circle-btn bg-reunion" title="En Reunión" onClick={() => handleSetEstadoRapido('reunion')}></button>
-            <button type="button" className="status-circle-btn bg-atendiendo" title="Ocupada (Trámite)" onClick={() => handleSetEstadoRapido('atendiendo')}></button>
-            <button type="button" className="status-circle-btn bg-urgente" title="Urgencia" onClick={() => handleSetEstadoRapido('urgente')}></button>
+            <button type="button" className="status-circle-btn bg-almuerzo" title="Hora de Almuerzo" onClick={() => handleSetEstadoRapido('almuerzo')}></button>
+            <button type="button" className="status-circle-btn bg-atendiendo" title="Ocupado (Trámite)" onClick={() => handleSetEstadoRapido('atendiendo')}></button>
+            <button type="button" className="status-circle-btn bg-ausente" title="Ausente (No laborando)" onClick={() => handleSetEstadoRapido('ausente')}></button>
           </div>
         </div>
 

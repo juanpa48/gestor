@@ -79,10 +79,11 @@ export const PortalLayout = ({ areaConfig, areaContext, onBack, children, nombre
   const getEstadoDetails = (estado) => {
     const estadoMap = {
       disponible:    { dot: 'dot-green',       txt: 'text-green',       label: 'Disponible (Oficina)'    },
-      en_desarrollo: { dot: 'dot-blue',        txt: 'text-blue',        label: 'Disponible (Home Office)' },
+      en_desarrollo: { dot: 'dot-blue',        txt: 'text-blue',        label: 'Disponible (Trabajo en casa)' },
       reunion:       { dot: 'dot-purple',      txt: 'text-purple',      label: 'En Reunión'    },
-      atendiendo:    { dot: 'dot-red',         txt: 'text-red',         label: 'Ocupada (Trámite)'    },
-      urgente:       { dot: 'dot-red-intense', txt: 'text-red-intense', label: 'Urgencia'       }
+      almuerzo:      { dot: 'dot-yellow',      txt: 'text-yellow',      label: 'Hora de Almuerzo' },
+      atendiendo:    { dot: 'dot-red',         txt: 'text-red',         label: 'Ocupado (Trámite)'    },
+      ausente:       { dot: 'dot-slate',       txt: 'text-slate',       label: 'Ausente (No laborando)' }
     };
     return estadoMap[estado] || estadoMap.disponible;
   };
