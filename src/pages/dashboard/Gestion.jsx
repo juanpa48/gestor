@@ -211,7 +211,11 @@ export const Gestion = () => {
           <select id="filtroEstado" className="form-select header-select" value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value)}>
             <option value="">Todos los estados</option>
             <option value="Pendiente">Pendiente</option>
+            <option value="Revisado">Revisado (Visto)</option>
             <option value="En progreso">En progreso</option>
+            <option value="Suspendido">Suspendido (Pausado)</option>
+            <option value="Resuelto">Resuelto</option>
+            <option value="Cerrado">Cerrado</option>
           </select>
           <div className="view-toggle">
             <button className={`toggle-btn ${view === 'tabla' ? 'active' : ''}`} onClick={() => setView('tabla')}>
