@@ -72,6 +72,7 @@ export const Gestion = () => {
 
   const kanbanCols = [
     { key: 'Pendiente', label: 'Pendiente', color: '#94a3b8' },
+    { key: 'Revisado', label: 'Revisado', color: '#8b5cf6' },
     { key: 'En progreso', label: 'En Progreso', color: '#3b82f6' },
     { key: 'Suspendido', label: 'Suspendido', color: '#f59e0b' },
     { key: 'Resuelto', label: 'Resuelto', color: '#10b981' }
