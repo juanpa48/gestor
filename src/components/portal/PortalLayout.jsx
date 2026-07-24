@@ -82,7 +82,7 @@ export const PortalLayout = ({ areaConfig, areaContext, onBack, children, nombre
       en_desarrollo: { dot: 'dot-blue',        txt: 'text-blue',        label: 'Disponible (Trabajo en casa)' },
       reunion:       { dot: 'dot-purple',      txt: 'text-purple',      label: 'En Reunión'    },
       almuerzo:      { dot: 'dot-yellow',      txt: 'text-yellow',      label: 'Hora de Almuerzo' },
-      atendiendo:    { dot: 'dot-red',         txt: 'text-red',         label: 'Ocupado (Trámite)'    },
+      atendiendo:    { dot: 'dot-red',         txt: 'text-red',         label: 'Ocupado'    },
       ausente:       { dot: 'dot-slate',       txt: 'text-slate',       label: 'Ausente (No laborando)' }
     };
     return estadoMap[estado] || estadoMap.disponible;

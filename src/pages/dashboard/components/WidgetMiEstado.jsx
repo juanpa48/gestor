@@ -64,7 +64,7 @@ export const WidgetMiEstado = () => {
       'en_desarrollo': 'Disponible (Trabajo en casa)',
       'reunion': 'En Reunión',
       'almuerzo': 'Hora de Almuerzo',
-      'atendiendo': 'Ocupado (Trámite)',
+      'atendiendo': 'Ocupado',
       'ausente': 'Ausente (No laborando)'
     };
     return labels[estado] || 'Desconocido';
@@ -111,7 +111,7 @@ export const WidgetMiEstado = () => {
               <option value="en_desarrollo">🔵 Disponible (Trabajo en casa)</option>
               <option value="reunion">🟣 En Reunión</option>
               <option value="almuerzo">🟠 Hora de Almuerzo</option>
-              <option value="atendiendo">🔴 Ocupado (Trámite)</option>
+              <option value="atendiendo">🔴 Ocupado</option>
               <option value="ausente">⚪ Ausente (No laborando)</option>
             </select>
             <i className="fa-solid fa-chevron-down select-arrow"></i>
@@ -121,7 +121,7 @@ export const WidgetMiEstado = () => {
             <button type="button" className="status-circle-btn bg-desarrollo" title="Disponible (Trabajo en casa)" onClick={() => handleSetEstadoRapido('en_desarrollo')}></button>
             <button type="button" className="status-circle-btn bg-reunion" title="En Reunión" onClick={() => handleSetEstadoRapido('reunion')}></button>
             <button type="button" className="status-circle-btn bg-almuerzo" title="Hora de Almuerzo" onClick={() => handleSetEstadoRapido('almuerzo')}></button>
-            <button type="button" className="status-circle-btn bg-atendiendo" title="Ocupado (Trámite)" onClick={() => handleSetEstadoRapido('atendiendo')}></button>
+            <button type="button" className="status-circle-btn bg-atendiendo" title="Ocupado" onClick={() => handleSetEstadoRapido('atendiendo')}></button>
             <button type="button" className="status-circle-btn bg-ausente" title="Ausente (No laborando)" onClick={() => handleSetEstadoRapido('ausente')}></button>
           </div>
         </div>
