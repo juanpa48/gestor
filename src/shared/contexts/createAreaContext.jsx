@@ -20,6 +20,7 @@ export const createAreaContext = (config) => {
 
     const fetchTickets = useCallback(async () => {
       try {
+        await DbService.autoCloseTickets(storageKey, 72); // 72 horas (3 días)
         const data = await DbService.getActividades(storageKey);
         setActividades(data);
       } catch (error) {
@@ -30,6 +31,7 @@ export const createAreaContext = (config) => {
     const loadInitialData = useCallback(async () => {
       setLoading(true);
       try {
+        await DbService.autoCloseTickets(storageKey, 72);
         const [tickets, sols, resps] = await Promise.all([
           DbService.getActividades(storageKey),
           DbService.getSolicitantes(),

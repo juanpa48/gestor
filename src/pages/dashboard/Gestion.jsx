@@ -55,9 +55,12 @@ export const Gestion = () => {
 
   const activos = useMemo(() => {
     return actividades.filter(a => {
-      const isActive = !['Resuelto', 'Cerrado'].includes(a.estado);
-      if (!isActive) return false;
-      if (filtroEstado && a.estado !== filtroEstado) return false;
+      // Si hay filtro explícito, respetar. Si no, ocultar Cerrado por defecto.
+      if (filtroEstado) {
+        if (a.estado !== filtroEstado) return false;
+      } else {
+        if (a.estado === 'Cerrado') return false;
+      }
 
       if (searchQuery) {
         const matchesId = (a.id || '').toLowerCase().includes(searchQuery);

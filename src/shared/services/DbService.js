@@ -176,5 +176,34 @@ export const DbService = {
         resolve({ success: true });
       }, 300);
     });
+  },
+
+  autoCloseTickets: async (key = 'db_actividades', gracePeriodHours = 72) => {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        let acts = JSON.parse(localStorage.getItem(key)) || [];
+        let modified = false;
+        const now = Date.now();
+        
+        acts = acts.map(a => {
+          if (a.estado === 'Resuelto' && a.fechaFinTimestamp) {
+            const hoursElapsed = (now - a.fechaFinTimestamp) / (1000 * 60 * 60);
+            if (hoursElapsed >= gracePeriodHours) {
+              a.estado = 'Cerrado';
+              a.fechaCierreTimestamp = now;
+              a.accion = (a.accion ? a.accion + '\n' : '') + `[SISTEMA]: Ticket cerrado automáticamente tras expirar periodo de gracia de ${gracePeriodHours}h.`;
+              modified = true;
+            }
+          }
+          return a;
+        });
+
+        if (modified) {
+          localStorage.setItem(key, JSON.stringify(acts));
+          window.dispatchEvent(new Event('ticketActualizado'));
+        }
+        resolve({ success: true, updated: modified });
+      }, 0); // Resolución inmediata para no bloquear la carga inicial
+    });
   }
 };
