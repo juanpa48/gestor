@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useGHContext as useTickets } from '../../../areas/gestion-humana/context/GHContext';
-import { GH_CONFIG } from '../../../areas/gestion-humana/config';
+import { getAreaSettings } from '../../../shared/services/SettingsManager';
 import { UploadService } from '../../../shared/services/UploadService';
 import { useAuth } from '../../../shared/contexts/AuthContext';
 
@@ -8,7 +8,10 @@ export const FormGH = () => {
   const { currentUser } = useAuth();
   const nombre = currentUser?.nombreReal || currentUser?.username || '';
   const { addTicket } = useTickets();
+  const [areaGestion, setAreaGestion] = useState('');
   const [tipoTramite, setTipoTramite] = useState('');
+  const settings = getAreaSettings('gh');
+  const grupos = settings.grupos || [];
   const [tipo, setTipo] = useState('Requerimiento');
   const [solicitud, setSolicitud] = useState('');
   const [prioridad, setPrioridad] = useState('Media');
@@ -63,7 +66,7 @@ export const FormGH = () => {
         estado: 'Pendiente',
         prioridad: prioridad,
         responsable: '',
-        grupo: 'Trámites de Personal',
+        grupo: areaGestion || 'Trámites de Personal',
         grupoExtra: tipoTramite,
         clasificacion: tipoTramite,
         tipo: tipo,
@@ -74,6 +77,7 @@ export const FormGH = () => {
       await addTicket(nuevoTicket);
       
       setSolicitud('');
+      setAreaGestion('');
       setTipoTramite('');
       setPrioridad('Media');
       setArchivos([]);
@@ -101,12 +105,24 @@ export const FormGH = () => {
         </div>
       </div>
 
-      <div className="form-group">
+      <div className="form-group form-group-full">
+        <label className="form-label">ÁREA DE GESTIÓN (GRUPO)</label>
+        <div className="select-wrapper">
+          <select className="glass-input" required value={areaGestion} onChange={(e) => { setAreaGestion(e.target.value); setTipoTramite(''); }}>
+            <option value="" disabled>Seleccione el Grupo...</option>
+            {grupos.map(g => <option key={g.nombre} value={g.nombre}>{g.nombre}</option>)}
+          </select>
+        </div>
+      </div>
+
+      <div className="form-group form-group-full">
         <label className="form-label">TIPO DE TRÁMITE (GH)</label>
         <div className="select-wrapper">
-          <select className="glass-input" required value={tipoTramite} onChange={(e) => setTipoTramite(e.target.value)}>
+          <select className="glass-input" required value={tipoTramite} onChange={(e) => setTipoTramite(e.target.value)} disabled={!areaGestion}>
             <option value="" disabled>Seleccione el Trámite...</option>
-            {(GH_CONFIG.grupos[0]?.tramites || []).map(t => <option key={t} value={t}>{t}</option>)}
+            {areaGestion && (grupos.find(g => g.nombre === areaGestion)?.tramites || []).map(t => (
+              <option key={t} value={t}>{t}</option>
+            ))}
           </select>
         </div>
       </div>

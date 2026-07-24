@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAreaTickets as useTickets } from '../../../areas/gestion-empresarial/context/GEContext';
-import { GE_CONFIG } from '../../../areas/gestion-empresarial/config';
+import { getAreaSettings } from '../../../shared/services/SettingsManager';
 import { UploadService } from '../../../shared/services/UploadService';
 import { useAuth } from '../../../shared/contexts/AuthContext';
 
@@ -10,6 +10,8 @@ export const FormGE = () => {
   const { addTicket } = useTickets();
   const [areaGestion, setAreaGestion] = useState('');
   const [tipoTramite, setTipoTramite] = useState('');
+  const settings = getAreaSettings('ge');
+  const grupos = settings.grupos || [];
   const [tipo, setTipo] = useState('Requerimiento');
   const [solicitud, setSolicitud] = useState('');
   const [prioridad, setPrioridad] = useState('Media');
@@ -25,12 +27,7 @@ export const FormGE = () => {
     }
   };
 
-  const renderTramites = () => {
-    let list = [];
-    if (areaGestion.includes('Área 1') || areaGestion.includes('Estructural')) list = GE_CONFIG.grupos[0]?.tramites || [];
-    else if (areaGestion.includes('Área 2') || areaGestion.includes('Operativo')) list = GE_CONFIG.grupos[1]?.tramites || [];
-    return list.map(t => <option key={t} value={t}>{t}</option>);
-  };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -110,32 +107,24 @@ export const FormGE = () => {
         </div>
       </div>
 
-      <div className="form-group">
-        <label className="form-label">ÁREA DE GESTIÓN (GE)</label>
+      <div className="form-group form-group-full">
+        <label className="form-label">ÁREA DE GESTIÓN (GRUPO)</label>
         <div className="select-wrapper">
-          <select className="glass-input" required value={areaGestion} onChange={(e) => {
-            setAreaGestion(e.target.value);
-            setTipoTramite('');
-          }}>
-            <option value="" disabled>Seleccione el Área...</option>
-            <option value="Área 1 (Estructurales)">Área 1 (Estructurales / Legales)</option>
-            <option value="Área 2 (Operativos)">Área 2 (Operativos / Documentales)</option>
+          <select className="glass-input" required value={areaGestion} onChange={(e) => { setAreaGestion(e.target.value); setTipoTramite(''); }}>
+            <option value="" disabled>Seleccione el Grupo...</option>
+            {grupos.map(g => <option key={g.nombre} value={g.nombre}>{g.nombre}</option>)}
           </select>
         </div>
       </div>
 
-      <div className="form-group">
+      <div className="form-group form-group-full">
         <label className="form-label">TIPO DE TRÁMITE</label>
         <div className="select-wrapper">
-          <select className="glass-input" required value={tipoTramite} onChange={(e) => setTipoTramite(e.target.value)}>
-            {!areaGestion ? (
-              <option value="" disabled>Primero seleccione un Área...</option>
-            ) : (
-              <>
-                <option value="" disabled>Seleccione el Trámite...</option>
-                {renderTramites()}
-              </>
-            )}
+          <select className="glass-input" required value={tipoTramite} onChange={(e) => setTipoTramite(e.target.value)} disabled={!areaGestion}>
+            <option value="" disabled>Seleccione el Trámite...</option>
+            {areaGestion && (grupos.find(g => g.nombre === areaGestion)?.tramites || []).map(t => (
+              <option key={t} value={t}>{t}</option>
+            ))}
           </select>
         </div>
       </div>
