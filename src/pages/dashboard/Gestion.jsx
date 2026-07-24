@@ -72,7 +72,9 @@ export const Gestion = () => {
 
   const kanbanCols = [
     { key: 'Pendiente', label: 'Pendiente', color: '#94a3b8' },
-    { key: 'En progreso', label: 'En Progreso', color: '#3b82f6' }
+    { key: 'En progreso', label: 'En Progreso', color: '#3b82f6' },
+    { key: 'Suspendido', label: 'Suspendido', color: '#f59e0b' },
+    { key: 'Resuelto', label: 'Resuelto', color: '#10b981' }
   ];
   
   const prioColor = { Urgente: '#ef4444', Alta: '#f59e0b', Media: '#3b82f6', Baja: '#22c55e' };
