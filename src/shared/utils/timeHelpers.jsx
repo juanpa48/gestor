@@ -37,25 +37,24 @@ export const parseFechaCreacion = (ticket) => {
 };
 
 /**
- * Calcula el tiempo SLA restante y devuelve un badge React.
- * Retorna null si no aplica (ej. si no hay fechaCreacion o ya se resolvió).
+ * Calcula los milisegundos restantes del SLA de un ticket.
+ * Retorna Infinity si ya está cerrado o no tiene fecha.
  */
-export const calculateSlaBadge = (ticket, slas) => {
+export const getSlaRemainingMs = (ticket, slas) => {
   if (ticket.estado === 'Resuelto' || ticket.estado === 'Cerrado' || ticket.estado === 'Finalizado') {
-    return <span className="sla-badge ok" title="Cumplido a tiempo"><i className="fa-solid fa-flag-checkered"></i> Cumplido</span>;
+    return Infinity;
   }
 
   const startMs = parseFechaCreacion(ticket)?.getTime();
-  if (!startMs) return null;
+  if (!startMs) return Infinity;
 
   let limiteSlaHoras = slas[ticket.prioridad] || 48;
   if ((ticket.id && ticket.id.startsWith('GH-')) || ticket.area === 'gh') {
-    limiteSlaHoras = 9; // SLA estricto de 9 horas para Gestión Humana
+    limiteSlaHoras = 9;
   }
   
   const limiteMs = limiteSlaHoras * 3600 * 1000;
   
-  // Si está suspendido por sistema o por pausa de colaborador
   let endMs = Date.now();
   if (ticket.estado === 'Suspendido' && ticket.fechaPausa) {
     endMs = ticket.fechaPausa;
@@ -64,8 +63,21 @@ export const calculateSlaBadge = (ticket, slas) => {
   }
 
   const consumidoMs = calculateWorkingMilliseconds(startMs, endMs) - (ticket.tiempoPausadoTotal || 0);
-  
-  const restanteMs = limiteMs - consumidoMs;
+  return limiteMs - consumidoMs;
+};
+
+/**
+ * Calcula el tiempo SLA restante y devuelve un badge React.
+ * Retorna null si no aplica (ej. si no hay fechaCreacion o ya se resolvió).
+ */
+export const calculateSlaBadge = (ticket, slas) => {
+  if (ticket.estado === 'Resuelto' || ticket.estado === 'Cerrado' || ticket.estado === 'Finalizado') {
+    return <span className="sla-badge ok" title="Cumplido a tiempo"><i className="fa-solid fa-flag-checkered"></i> Cumplido</span>;
+  }
+
+  const restanteMs = getSlaRemainingMs(ticket, slas);
+  if (restanteMs === Infinity) return null;
+
   const absMs = Math.abs(restanteMs);
   const totalMins = Math.floor(absMs / (60 * 1000));
   const hours = Math.floor(totalMins / 60);

@@ -66,6 +66,7 @@ export const FormGH = () => {
         grupo: areaGestion || 'Trámites de Personal',
         grupoExtra: tipoTramite,
         clasificacion: tipoTramite,
+        novedadNomina: false,
         detalles: '',
         adjuntos: adjuntosUrls
       };

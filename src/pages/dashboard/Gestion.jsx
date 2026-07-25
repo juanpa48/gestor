@@ -27,6 +27,7 @@ export const Gestion = () => {
     grupo: '',
     clasificacion: '',
     detalles: '',
+    novedadNomina: false,
     adjuntos: []
   });
   const [archivosVistos, setArchivosVistos] = useState(new Set());
@@ -109,6 +110,7 @@ export const Gestion = () => {
       detalles: t.detalles || '',
       fechaProgramada: t.fechaProgramada || '',
       accion: t.accion || '',
+      novedadNomina: !!t.novedadNomina,
       adjuntos: t.adjuntos || []
     });
     setArchivosVistos(new Set()); // Resetear vistos al abrir nuevo ticket
@@ -116,10 +118,11 @@ export const Gestion = () => {
   };
 
   const handleModalChange = (e) => {
-    const { id, value } = e.target;
+    const { id, value, type, checked } = e.target;
     const field = id.replace('m_', ''); // e.g. m_estado -> estado
+    const val = type === 'checkbox' ? checked : value;
     setTicketEdit(prev => {
-      const next = { ...prev, [field]: value };
+      const next = { ...prev, [field]: val };
       if (field === 'grupo') {
         next.clasificacion = ''; // Reset when group changes
       }
@@ -145,6 +148,7 @@ export const Gestion = () => {
         grupo: ticketEdit.grupo,
         grupoExtra: ticketEdit.clasificacion,
         clasificacion: ticketEdit.clasificacion,
+        novedadNomina: ticketEdit.novedadNomina,
         detalles: ticketEdit.detalles,
         fechaProgramada: ticketEdit.fechaProgramada,
         accion: ticketEdit.accion
@@ -253,6 +257,7 @@ export const Gestion = () => {
                   <th>Solicitante</th>
                   <th>Estado</th>
                   {area !== 'gh' && <th>Prioridad</th>}
+                  {area === 'gh' && <th>Nómina</th>}
                   <th>SLA (Restante)</th>
                   <th>Responsable</th>
                   <th>Creado</th>
@@ -288,6 +293,9 @@ export const Gestion = () => {
                             <span className="prioridad-dot" style={{ background: dot }}></span>{prio}
                           </span>
                         </td>
+                      )}
+                      {area === 'gh' && (
+                        <td style={{textAlign: 'center'}}>{t.novedadNomina ? <i className="fa-solid fa-check" style={{color: 'var(--success)'}}></i> : <i className="fa-solid fa-xmark" style={{color: 'var(--text-muted)'}}></i>}</td>
                       )}
                       <td>{calculateSlaBadge(t, slas)}</td>
                       <td>{t.responsable || 'Sin asignar'}</td>
@@ -451,6 +459,22 @@ export const Gestion = () => {
                   <i className="fa-solid fa-chevron-down select-arrow"></i>
                 </div>
               </div>
+
+              {area === 'gh' && (
+                <div className="form-group form-group-full" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '10px' }}>
+                  <input 
+                    type="checkbox" 
+                    id="m_novedadNomina" 
+                    checked={ticketEdit.novedadNomina} 
+                    onChange={handleModalChange} 
+                    style={{ width: '20px', height: '20px', cursor: 'pointer' }}
+                  />
+                  <label htmlFor="m_novedadNomina" style={{ cursor: 'pointer', margin: 0, fontWeight: '600' }}>
+                    <i className="fa-solid fa-money-check-dollar" style={{ color: 'var(--primary)', marginRight: '6px' }}></i>
+                    Novedad de Nómina
+                  </label>
+                </div>
+              )}
 
               <div className="form-group">
                 <label className="form-label">Fecha Programada</label>

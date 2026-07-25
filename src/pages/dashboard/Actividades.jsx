@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useActiveArea } from '../../shared/contexts/ActiveAreaContext';
 import { getAreaSettings } from '../../shared/services/SettingsManager';
-import { calculateSlaBadge, parseFechaCreacion } from '../../shared/utils/timeHelpers';
+import { calculateSlaBadge, parseFechaCreacion, getSlaRemainingMs } from '../../shared/utils/timeHelpers';
 
 export const Actividades = () => {
   const { ctx, area } = useActiveArea();
@@ -119,9 +119,15 @@ export const Actividades = () => {
       suspendidos: filteredActividades.filter(d => d.estado === 'Suspendido').length,
       resueltos: filteredActividades.filter(d => d.estado === 'Resuelto').length,
       cerrados: filteredActividades.filter(d => d.estado === 'Cerrado').length,
-      urgentes: filteredActividades.filter(d => d.prioridad === 'Urgente').length
+      urgentes: area === 'gh' 
+        ? filteredActividades.filter(d => {
+            if (['Resuelto', 'Cerrado'].includes(d.estado)) return false;
+            const remaining = getSlaRemainingMs(d, slas);
+            return remaining !== Infinity && remaining <= 2 * 3600 * 1000;
+          }).length
+        : filteredActividades.filter(d => d.prioridad === 'Urgente').length
     };
-  }, [filteredActividades]);
+  }, [filteredActividades, area, slas]);
 
   return (
     <section id="section-recents" className="section active">
@@ -226,7 +232,7 @@ export const Actividades = () => {
         </div>
         <div className="quick-stat-card urgentes">
           <div className="qs-value" id="qsUrgentes">{stats.urgentes}</div>
-          <div className="qs-label">Urgentes</div>
+          <div className="qs-label">{area === 'gh' ? 'Por Vencer' : 'Urgentes'}</div>
         </div>
       </div>
 
@@ -240,6 +246,7 @@ export const Actividades = () => {
                   <th>Solicitante</th>
                   <th>Estado</th>
                   {area !== 'gh' && <th>Prioridad</th>}
+                  {area === 'gh' && <th>Nómina</th>}
                   <th>SLA (Restante)</th>
                   <th>Grupo</th>
                   <th>Responsable</th>
@@ -270,6 +277,9 @@ export const Actividades = () => {
                       <td><span className={`status-badge ${estadoClass}`}>{r.estado || ''}</span></td>
                       {area !== 'gh' && (
                         <td><span className={`prioridad-badge ${prioClass}`}>{r.prioridad || ''}</span></td>
+                      )}
+                      {area === 'gh' && (
+                        <td style={{textAlign: 'center'}}>{r.novedadNomina ? <i className="fa-solid fa-check" style={{color: 'var(--success)'}}></i> : <i className="fa-solid fa-xmark" style={{color: 'var(--text-muted)'}}></i>}</td>
                       )}
                       <td>{slaBadge}</td>
                       <td>{r.grupo || ''}</td>

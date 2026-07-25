@@ -24,6 +24,7 @@ export const RegistroActividadForm = () => {
     fechaInicio: '',
     fechaFin: '',
     fechaProgramada: '',
+    novedadNomina: false,
     detalles: ''
   });
 
@@ -34,6 +35,7 @@ export const RegistroActividadForm = () => {
     qr_solicitud: '',
     qr_estado: 'Pendiente',
     qr_tipo: 'Incidente',
+    qr_novedadNomina: false,
     qr_prioridad: ''
   });
 
@@ -50,9 +52,10 @@ export const RegistroActividadForm = () => {
   }, []);
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
+    const val = type === 'checkbox' ? checked : value;
     setFormData(prev => {
-      const newData = { ...prev, [name]: value };
+      const newData = { ...prev, [name]: val };
       if (name === 'grupo') {
         newData.clasificacion = ''; // Reset clasificacion when group changes
       }
@@ -61,8 +64,11 @@ export const RegistroActividadForm = () => {
   };
 
   const handleQuickInputChange = (e) => {
-    const { id, value } = e.target;
-    setQuickFormData(prev => ({ ...prev, [id]: value }));
+    const { name, value, type, checked, id } = e.target;
+    const val = type === 'checkbox' ? checked : value;
+    // support both name and id
+    const fieldName = name || id; 
+    setQuickFormData(prev => ({ ...prev, [fieldName]: val }));
   };
 
   const setHoy = (field) => {
@@ -124,6 +130,7 @@ export const RegistroActividadForm = () => {
         grupoExtra: formData.clasificacion,
         clasificacion: formData.clasificacion,
         tipo: formData.tipo,
+        novedadNomina: formData.novedadNomina,
         fechaInicio: formData.fechaInicio,
         fechaFin: formData.fechaFin,
         fechaProgramada: formData.fechaProgramada,
@@ -181,6 +188,7 @@ export const RegistroActividadForm = () => {
         grupo: '',
         grupoExtra: '',
         clasificacion: '',
+        novedadNomina: quickFormData.qr_novedadNomina,
         fechaInicio: '',
         fechaFin: '',
         fechaProgramada: '',
@@ -191,7 +199,7 @@ export const RegistroActividadForm = () => {
       await addTicket(newTicket);
       showToast('¡Ticket rápido creado!');
       setModalOpen(false);
-      setQuickFormData({ qr_solicitante: '', qr_responsable: '', qr_solicitud: '', qr_estado: 'Pendiente', qr_tipo: 'Incidente', qr_prioridad: '' });
+      setQuickFormData({ qr_solicitante: '', qr_responsable: '', qr_solicitud: '', qr_estado: 'Pendiente', qr_tipo: 'Incidente', qr_novedadNomina: false, qr_prioridad: '' });
     } catch (err) {
       console.error(err);
       showToast('Error al crear ticket rápido');
@@ -336,6 +344,23 @@ export const RegistroActividadForm = () => {
               <i className="fa-solid fa-chevron-down select-arrow"></i>
             </div>
           </div>
+
+          {area === 'gh' && (
+            <div className="form-group form-group-full" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <input 
+                type="checkbox" 
+                id="novedadNomina" 
+                name="novedadNomina"
+                checked={formData.novedadNomina} 
+                onChange={handleInputChange} 
+                style={{ width: '20px', height: '20px', cursor: 'pointer' }}
+              />
+              <label htmlFor="novedadNomina" style={{ cursor: 'pointer', margin: 0, fontWeight: '600' }}>
+                <i className="fa-solid fa-money-check-dollar" style={{ color: 'var(--primary)', marginRight: '6px' }}></i>
+                Novedad de Nómina
+              </label>
+            </div>
+          )}
 
           {/* Fila 5 - Fechas */}
           <div className="form-group">
@@ -508,6 +533,23 @@ export const RegistroActividadForm = () => {
                   </div>
                 </div>
               </div>
+
+              {area === 'gh' && (
+                <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '15px', marginBottom: '15px' }}>
+                  <input 
+                    type="checkbox" 
+                    id="qr_novedadNomina" 
+                    name="qr_novedadNomina"
+                    checked={quickFormData.qr_novedadNomina} 
+                    onChange={handleQuickInputChange} 
+                    style={{ width: '20px', height: '20px', cursor: 'pointer' }}
+                  />
+                  <label htmlFor="qr_novedadNomina" style={{ cursor: 'pointer', margin: 0, fontWeight: '600' }}>
+                    <i className="fa-solid fa-money-check-dollar" style={{ color: 'var(--primary)', marginRight: '6px' }}></i>
+                    Novedad de Nómina
+                  </label>
+                </div>
+              )}
 
               <div className="form-actions form-actions-mt">
                 <button type="button" className="btn-cancel" onClick={() => setModalOpen(false)}>Cancelar</button>

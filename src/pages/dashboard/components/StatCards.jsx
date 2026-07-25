@@ -1,5 +1,7 @@
 import React, { useMemo } from 'react';
 import { useActiveArea } from '../../../shared/contexts/ActiveAreaContext';
+import { getSlaRemainingMs } from '../../../shared/utils/timeHelpers';
+import { getAreaSettings } from '../../../shared/services/SettingsManager';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -17,35 +19,61 @@ ChartJS.defaults.color = '#94a3b8';
 ChartJS.defaults.font.family = "'DM Sans', sans-serif";
 
 export const StatCards = () => {
-  const { ctx, config } = useActiveArea();
+  const { ctx, config, area } = useActiveArea();
   const { actividades } = ctx;
+  const slas = getAreaSettings(area).slas || {};
 
   // Mapear los datos reales para las estadísticas principales
   const stats = useMemo(() => {
     const open = actividades.filter(a => a.estado === 'Pendiente' || a.estado === 'En progreso').length;
     const inProg = actividades.filter(a => a.estado === 'En progreso').length;
-    const urgent = actividades.filter(a => a.prioridad === 'Urgente' && !['Resuelto', 'Cerrado'].includes(a.estado)).length;
+    
+    let urgentCount = 0;
+    if (area === 'gh') {
+      urgentCount = actividades.filter(a => {
+        if (['Resuelto', 'Cerrado'].includes(a.estado)) return false;
+        const remaining = getSlaRemainingMs(a, slas);
+        return remaining !== Infinity && remaining <= 2 * 3600 * 1000;
+      }).length;
+    } else {
+      urgentCount = actividades.filter(a => a.prioridad === 'Urgente' && !['Resuelto', 'Cerrado'].includes(a.estado)).length;
+    }
+
     const resolved = actividades.filter(a => a.estado === 'Resuelto' || a.estado === 'Cerrado').length;
-    return { open, inProgress: inProg, urgent, resolved };
-  }, [actividades]);
+    return { open, inProgress: inProg, urgent: urgentCount, resolved };
+  }, [actividades, area, slas]);
 
   // Chart 1: Total Abiertos (Pie)
   const chart1Data = useMemo(() => {
     const abiertos = actividades.filter(a => a.estado === 'Pendiente' || a.estado === 'En progreso');
-    const pUrgente = abiertos.filter(a => a.prioridad === 'Urgente').length;
-    const pAlta = abiertos.filter(a => a.prioridad === 'Alta').length;
-    const pMedia = abiertos.filter(a => a.prioridad === 'Media').length;
-    const pBaja = abiertos.filter(a => a.prioridad === 'Baja').length;
+    
+    if (area === 'gh') {
+      const pPendiente = abiertos.filter(a => a.estado === 'Pendiente').length;
+      const pProgreso = abiertos.filter(a => a.estado === 'En progreso').length;
+      return {
+        labels: ['Pendientes', 'En Progreso'],
+        datasets: [{
+          data: [pPendiente, pProgreso],
+          backgroundColor: ['#f59e0b', '#3b82f6'],
+          borderWidth: 0
+        }]
+      };
+    } else {
+      const pUrgente = abiertos.filter(a => a.prioridad === 'Urgente').length;
+      const pAlta = abiertos.filter(a => a.prioridad === 'Alta').length;
+      const pMedia = abiertos.filter(a => a.prioridad === 'Media').length;
+      const pBaja = abiertos.filter(a => a.prioridad === 'Baja').length;
 
-    return {
-      labels: ['Urgente', 'Alta', 'Media', 'Baja'],
-      datasets: [{
-        data: [pUrgente, pAlta, pMedia, pBaja],
-        backgroundColor: ['#e8192c', '#f59e0b', '#3b82f6', '#10b981'],
-        borderWidth: 0
-      }]
-    };
-  }, [actividades]);
+      return {
+        labels: ['Urgente', 'Alta', 'Media', 'Baja'],
+        datasets: [{
+          data: [pUrgente, pAlta, pMedia, pBaja],
+          backgroundColor: ['#e8192c', '#f59e0b', '#3b82f6', '#10b981'],
+          borderWidth: 0
+        }]
+      };
+    }
+  }, [actividades, area]);
 
   const chart1Options = {
     responsive: true,
@@ -120,9 +148,18 @@ export const StatCards = () => {
     }
   };
 
-  // Chart 4: Tareas Urgentes (Doughnut)
+  // Chart 4: Tareas Urgentes (Doughnut) o Próximo a vencer
   const chart4Data = useMemo(() => {
-    const urgentes = actividades.filter(a => a.prioridad === 'Urgente');
+    let urgentes = [];
+    if (area === 'gh') {
+      urgentes = actividades.filter(a => {
+        const remaining = getSlaRemainingMs(a, slas);
+        return remaining !== Infinity && remaining <= 2 * 3600 * 1000;
+      });
+    } else {
+      urgentes = actividades.filter(a => a.prioridad === 'Urgente');
+    }
+    
     const uResueltas = urgentes.filter(a => a.estado === 'Resuelto' || a.estado === 'Cerrado').length;
     const uPendientes = urgentes.filter(a => a.estado === 'Pendiente' || a.estado === 'En progreso').length;
 
@@ -134,7 +171,7 @@ export const StatCards = () => {
         borderWidth: 0
       }]
     };
-  }, [actividades]);
+  }, [actividades, area, slas]);
 
   const chart4Options = {
     cutout: '60%',
@@ -189,7 +226,7 @@ export const StatCards = () => {
       <div className="stat-card card-urgent">
         <div className="stat-top">
           <div>
-            <div className="stat-label">TAREAS URGENTES</div>
+            <div className="stat-label">{area === 'gh' ? 'PRÓXIMO A VENCER' : 'TAREAS URGENTES'}</div>
             <div className="stat-value red">{String(stats.urgent).padStart(2, '0')}</div>
           </div>
           <div className="stat-icon red-icon"><i className="fa-solid fa-triangle-exclamation"></i></div>

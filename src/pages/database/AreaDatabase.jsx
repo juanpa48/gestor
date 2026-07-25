@@ -92,6 +92,7 @@ export const AreaDatabase = () => {
 
   if (area === 'gh') {
     exactCols = exactCols.filter(c => c.key !== 'tipo' && c.key !== 'prioridad');
+    exactCols.splice(exactCols.findIndex(c => c.key === 'estado') + 1, 0, { title: 'Novedad de Nómina', key: 'novedadNomina' });
   }
 
   const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S'];
@@ -156,7 +157,9 @@ export const AreaDatabase = () => {
                   <tr key={row.id}>
                     <td className="row-num">{index + 2}</td>
                     {exactCols.map(c => (
-                      <td key={c.key}>{row[c.key] || ''}</td>
+                      <td key={c.key}>
+                        {c.key === 'novedadNomina' ? (row[c.key] ? 'Sí' : 'No') : (row[c.key] || '')}
+                      </td>
                     ))}
                   </tr>
                 ))
