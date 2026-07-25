@@ -16,6 +16,14 @@
 
 ## Julio 2026
 
+### [2026-07-25] — Motor SLA Inteligente, Pausas Dinámicas y Módulo de Festivos ⏱️
+- **Archivos:** `businessHours.js`, `timeHelpers.jsx`, `DbService.js`, `WidgetMiEstado.jsx`, `Settings.jsx`, `Actividades.jsx`, `PortalLayout.jsx`.
+- **Motor SLA ITIL:** Se implementó `businessHours.js` para calcular el consumo del SLA respetando estrictamente el horario laboral configurado (ej. L-J 7:30 a 17:00, V 7:00 a 16:00). Ignora noches y fines de semana.
+- **Pausas de Agente Dinámicas:** El SLA de los tickets ahora se pausa automáticamente cuando el resolutor asignado cambia su estado a "Hora de Almuerzo", "En Reunión" o "Ausente", y reanuda inteligentemente al regresar a un estado disponible.
+- **Módulo Global de Festivos:** Se añadió una interfaz en la configuración (`Settings.jsx`) para que administradores registren días festivos. El motor SLA ignora estos días automáticamente.
+- **Auto-Cierre y Métricas:** Se implementó la regla ITIL de cierre automático de tickets "Resueltos" tras 72 horas. Además, se completaron los Quick Stats del dashboard para reflejar absolutamente todos los estados de los tickets.
+- **Personalización de Estados:** Se ajustaron los labels y colores de estados de los gestores (eliminado "Trámite", cambiado "Disponible" a Home Office) según requisitos operativos.
+
 ### [2026-07-22] — Reactivación de Widget de Estado de Sistemas 📡
 - **Archivos:** `widgets.css`, `PanelPrincipal.jsx`, `WidgetSistemas.jsx`.
 - **Reactivación y Seguridad:** Se restauró la visibilidad del "Panel de Control Estado Sistemas" (`WidgetSistemas.jsx`), inyectando lógica de seguridad mediante los contextos globales (`useAuth` y `useActiveArea`) para asegurar que **únicamente** sea visible cuando el usuario esté operando bajo el área de Soporte TI (`ti`) y ostente el rol de administrador (`admin_ti`).

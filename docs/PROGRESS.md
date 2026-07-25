@@ -38,3 +38,12 @@
 - [x] Habilitar la visibilidad en CSS retirando `display: none` de `#panelControlSistemas`.
 - [x] Implementar renderizado condicional en `PanelPrincipal.jsx` para mostrar el Widget únicamente si el usuario está en el área `ti` y posee el rol `admin_ti`.
 - [x] Ajustar el campo de "Mensaje a Empleados" cambiando de `<input>` temporal a un `<textarea>` permanente para mejor detalle.
+
+---
+
+## Nuevo Objetivo: Motor SLA Avanzado (ITIL)
+- [x] **Horario Laboral:** Implementación matemática en `businessHours.js` para descontar horas nocturnas y fines de semana del SLA.
+- [x] **Pausas Dinámicas:** Al cambiar a "Almuerzo", "Reunión" o "Ausente", se pausan automáticamente los tickets en progreso del gestor y se reanudan al cambiar a disponible.
+- [x] **Módulo de Festivos:** Interfaz para que el administrador configure las fechas festivas y el SLA las descuente automáticamente.
+- [x] **Reglas de Cierre ITIL:** Los tickets "Resueltos" pasan automáticamente a estado "Cerrado" pasadas las 72 horas.
+- [x] **Métricas de Estados Completas:** Renderizado de tarjetas de estadísticas para todos los estados posibles en la vista de Dashboard (Actividades).

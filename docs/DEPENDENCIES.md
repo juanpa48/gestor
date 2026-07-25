@@ -103,9 +103,15 @@ flowchart TD
 
 ### 📄 Capa de Servicios (`src/services/DbService.js` y `SettingsManager.js`)
 - Persistencia temporal. Promisifican operaciones sobre `localStorage`.
-- `DbService.js` interactúa con las llaves de tickets (`db_actividades_ge`, etc.).
+- `DbService.js` interactúa con las llaves de tickets (`db_actividades_ge`, etc.) y gestiona los Festivos Globales (`db_festivos`) y las estampas de pausas dinámicas de los agentes.
 - `SettingsManager.js` controla las llaves de configuración global (`db_settings`) para nutrir dinámicamente los menús de trámites.
 - `AuthContext.jsx` controla dinámicamente `db_usuarios` con soporte para validación criptográfica (SHA-256).
+
+---
+
+### 📄 Motor SLA ITIL (`src/shared/utils/`)
+- **`businessHours.js`**: Core matemático que calcula milisegundos netos laborables descontando noches, fines de semana y consumiendo la lista de festivos de `DbService.js`.
+- **`timeHelpers.jsx`**: Transforma los cálculos matemáticos en insignias visuales (badges) y orquesta la matemática fina contra las pausas manuales o automáticas de los colaboradores.
 
 ---
 

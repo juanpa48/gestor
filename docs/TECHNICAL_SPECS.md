@@ -53,6 +53,11 @@ Este documento desglosa la implementación actual del proyecto desde una perspec
   - **`GH-XXX`**: Solicitudes a Gestión Humana.
 - **Dashboard:** **`TKT-XXX`**: Registros de actividad manuales creados en el Dashboard (Panel Principal).
 
+### Lógica y Constraints del Motor SLA
+1. **Business Hours:** El cálculo base (`businessHours.js`) jamás descuenta horas nocturnas ni fines de semana del límite del SLA. Solo itera sobre horas laborables netas.
+2. **Pausas Manuales:** Todo gestor tiene el deber de cambiar su estado a "Almuerzo" o "Ausente" (solo durante el horario laboral) si se retira, para que el sistema detenga el contador (`agentPauseStart`).
+3. **Festivos Globales:** Se deben registrar en `Settings.jsx` por los administradores. El sistema matemático los asimila como si fueran domingos (cero horas de trabajo).
+
 ### Flujo de creación Portal -> Dashboard
 1. Colaborador envía form (`REQ-XXX`). `Portal.jsx` llama a `addTicket()`.
 2. `TicketContext` lo guarda vía `DbService.saveActividades()`.

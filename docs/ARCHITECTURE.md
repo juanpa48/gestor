@@ -88,6 +88,12 @@ El `TicketContext` intercepta los cambios de estado de los tickets para registra
 - **`tiempo`**: Cálculo matemático de la diferencia entre inicio y fin, en formato `HH:mm:ss` (compatible con Excel / herramientas de análisis).
 - **Registros retrospectivos**: Si se crea un ticket directamente como resuelto con fechas manuales (`YYYY-MM-DD`), el Context parsea las fechas y calcula el `tiempo` igualmente.
 
+### 3.5 Motor Matemático SLA (Híbrido)
+Para cumplir con normativas ITIL sin requerir un backend con cron-jobs, se implementó un motor matemático (`businessHours.js`) acoplado a la Capa de Servicios:
+- **Cálculo de Jornada:** El motor calcula dinámicamente los milisegundos reales consumidos dentro del horario laboral definido, descartando de tajo noches y fines de semana.
+- **Días Festivos:** Lee `db_festivos` (configurados en `Settings.jsx`) e ignora matemáticamente esos días.
+- **Pausas Dinámicas:** Si el gestor cambia su estado personal (`WidgetMiEstado`) a "Ausente", "Almuerzo" o "Reunión", `DbService.js` estampa `agentPauseStart` en sus tickets activos, deteniendo el contador SLA automáticamente hasta que el gestor regrese.
+
 ## 4. Componentes Principales
 
 ### 4.1 Dashboard Administrativo (Layout & Rutas)
