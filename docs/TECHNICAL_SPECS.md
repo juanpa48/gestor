@@ -10,6 +10,9 @@ Este documento desglosa la implementación actual del proyecto desde una perspec
 - **Persistencia:** `localStorage` del navegador.
 - **Comunicación en Tiempo Real:** Evento nativo `storage` para sincronización inter-pestañas.
 - **Notificaciones:** API de Notificaciones del navegador + `AudioContext` para alertas sonoras.
+- **Gestión Humana:** Módulo `/gh`. Aislado de Tipo/Prioridad en frontend, SLA fijo de 9 horas inyectado a nivel de motor.
+- **Login Global:** Autenticación local.
+- **Panel Administrativo (Dashboard):** Vista consolidada (DDR) con renderizado condicional por área.
 - **Seguridad:** SHA-256 (Web Crypto API) para hasheo de contraseñas local.
 
 ## 2. Patrones de Diseño Implementados
@@ -55,7 +58,7 @@ Este documento desglosa la implementación actual del proyecto desde una perspec
 
 ### Lógica y Constraints del Motor SLA
 1. **Business Hours:** El cálculo base (`businessHours.js`) jamás descuenta horas nocturnas ni fines de semana del límite del SLA. Solo itera sobre horas laborables netas.
-2. **Pausas Manuales:** Todo gestor tiene el deber de cambiar su estado a "Almuerzo" o "Ausente" (solo durante el horario laboral) si se retira, para que el sistema detenga el contador (`agentPauseStart`).
+2.- **SLA Dinámico vs Estricto:** TI y GE dependen de los SLAs configurables por prioridad en `SettingsManager.js`. Sin embargo, para `GH`, el motor (`timeHelpers.jsx`) inyecta por código un SLA inamovible de 9 horas netas laborales. sistema detenga el contador (`agentPauseStart`).
 3. **Festivos Globales:** Se deben registrar en `Settings.jsx` por los administradores. El sistema matemático los asimila como si fueran domingos (cero horas de trabajo).
 
 ### Flujo de creación Portal -> Dashboard

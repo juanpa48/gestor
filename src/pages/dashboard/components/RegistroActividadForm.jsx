@@ -4,7 +4,7 @@ import { DbService } from '../../../shared/services/DbService';
 import { UploadService } from '../../../shared/services/UploadService';
 
 export const RegistroActividadForm = () => {
-  const { ctx, config } = useActiveArea();
+  const { ctx, config, area } = useActiveArea();
   const { addTicket, getSolicitanteCargo, responsables } = ctx;
   const [solicitantes, setSolicitantes] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -268,43 +268,47 @@ export const RegistroActividadForm = () => {
               <i className="fa-solid fa-chevron-down select-arrow"></i>
             </div>
           </div>
-          <div className="form-group">
-            <label className="form-label" htmlFor="prioridad">Prioridad</label>
-            <div className="select-wrapper">
-              <i className="fa-solid fa-arrow-down select-icon-left"></i>
-              <select id="prioridad" name="prioridad" className="form-select padded-left" required value={formData.prioridad} onChange={handleInputChange}>
-                <option value="" disabled>Prioridad</option>
-                <option value="Baja">Baja</option>
-                <option value="Media">Media</option>
-                <option value="Alta">Alta</option>
-                <option value="Urgente">Urgente</option>
-              </select>
-              <i className="fa-solid fa-chevron-down select-arrow"></i>
+          {area !== 'gh' && (
+            <div className="form-group">
+              <label className="form-label" htmlFor="prioridad">Prioridad</label>
+              <div className="select-wrapper">
+                <i className="fa-solid fa-arrow-down select-icon-left"></i>
+                <select id="prioridad" name="prioridad" className="form-select padded-left" required value={formData.prioridad} onChange={handleInputChange}>
+                  <option value="" disabled>Prioridad</option>
+                  <option value="Baja">Baja</option>
+                  <option value="Media">Media</option>
+                  <option value="Alta">Alta</option>
+                  <option value="Urgente">Urgente</option>
+                </select>
+                <i className="fa-solid fa-chevron-down select-arrow"></i>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Fila 4 */}
-          <div className="form-group full-width">
-            <label className="form-label">Tipo de Ticket</label>
-            <div className="type-selector-container">
-              <div 
-                className={`type-selector-card ${formData.tipo === 'Incidente' ? 'active incidente' : ''}`}
-                onClick={() => setFormData({...formData, tipo: 'Incidente', prioridad: 'Alta'})}
-                style={{ padding: '12px' }}
-              >
-                <i className="fa-solid fa-triangle-exclamation"></i>
-                <span>Incidente / Problema</span>
-              </div>
-              <div 
-                className={`type-selector-card ${formData.tipo === 'Requerimiento' ? 'active requerimiento' : ''}`}
-                onClick={() => setFormData({...formData, tipo: 'Requerimiento', prioridad: 'Media'})}
-                style={{ padding: '12px' }}
-              >
-                <i className="fa-solid fa-file-lines"></i>
-                <span>Requerimiento / Solicitud</span>
+          {area !== 'gh' && (
+            <div className="form-group full-width">
+              <label className="form-label">Tipo de Ticket</label>
+              <div className="type-selector-container">
+                <div 
+                  className={`type-selector-card ${formData.tipo === 'Incidente' ? 'active incidente' : ''}`}
+                  onClick={() => setFormData({...formData, tipo: 'Incidente', prioridad: 'Alta'})}
+                  style={{ padding: '12px' }}
+                >
+                  <i className="fa-solid fa-triangle-exclamation"></i>
+                  <span>Incidente / Problema</span>
+                </div>
+                <div 
+                  className={`type-selector-card ${formData.tipo === 'Requerimiento' ? 'active requerimiento' : ''}`}
+                  onClick={() => setFormData({...formData, tipo: 'Requerimiento', prioridad: 'Media'})}
+                  style={{ padding: '12px' }}
+                >
+                  <i className="fa-solid fa-file-lines"></i>
+                  <span>Requerimiento / Solicitud</span>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Fila 5 */}
           <div className="form-group">
@@ -448,27 +452,29 @@ export const RegistroActividadForm = () => {
                   <textarea id="qr_solicitud" className="form-textarea" placeholder="¿Qué se necesita urgente?..." rows="3" required value={quickFormData.qr_solicitud} onChange={handleQuickInputChange}></textarea>
                 </div>
 
-                <div className="form-group">
-                  <label className="form-label">Tipo de Ticket</label>
-                  <div className="type-selector-container">
-                    <div 
-                      className={`type-selector-card ${quickFormData.qr_tipo === 'Incidente' ? 'active incidente' : ''}`}
-                      onClick={() => setQuickFormData({...quickFormData, qr_tipo: 'Incidente', qr_prioridad: 'Alta'})}
-                      style={{ padding: '10px' }}
-                    >
-                      <i className="fa-solid fa-triangle-exclamation"></i>
-                      <span style={{ fontSize: '11px' }}>Incidente</span>
-                    </div>
-                    <div 
-                      className={`type-selector-card ${quickFormData.qr_tipo === 'Requerimiento' ? 'active requerimiento' : ''}`}
-                      onClick={() => setQuickFormData({...quickFormData, qr_tipo: 'Requerimiento', qr_prioridad: 'Media'})}
-                      style={{ padding: '10px' }}
-                    >
-                      <i className="fa-solid fa-file-lines"></i>
-                      <span style={{ fontSize: '11px' }}>Requerimiento</span>
+                {area !== 'gh' && (
+                  <div className="form-group full-width">
+                    <label className="form-label">Tipo de Ticket</label>
+                    <div className="type-selector-container" style={{ gridTemplateColumns: '1fr 1fr' }}>
+                      <div 
+                        className={`type-selector-card ${quickFormData.qr_tipo === 'Incidente' ? 'active incidente' : ''}`}
+                        onClick={() => setQuickFormData({...quickFormData, qr_tipo: 'Incidente', qr_prioridad: 'Alta'})}
+                        style={{ padding: '10px' }}
+                      >
+                        <i className="fa-solid fa-triangle-exclamation" style={{ fontSize: '14px', marginBottom: '4px' }}></i>
+                        <span style={{ fontSize: '11px' }}>Incidente</span>
+                      </div>
+                      <div 
+                        className={`type-selector-card ${quickFormData.qr_tipo === 'Requerimiento' ? 'active requerimiento' : ''}`}
+                        onClick={() => setQuickFormData({...quickFormData, qr_tipo: 'Requerimiento', qr_prioridad: 'Media'})}
+                        style={{ padding: '10px' }}
+                      >
+                        <i className="fa-solid fa-file-lines" style={{ fontSize: '14px', marginBottom: '4px' }}></i>
+                        <span style={{ fontSize: '11px' }}>Requerimiento</span>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
 
                 <div className="form-grid form-grid-2">
                   <div className="form-group">

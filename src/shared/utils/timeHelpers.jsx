@@ -48,7 +48,11 @@ export const calculateSlaBadge = (ticket, slas) => {
   const startMs = parseFechaCreacion(ticket)?.getTime();
   if (!startMs) return null;
 
-  const limiteSlaHoras = slas[ticket.prioridad] || 48;
+  let limiteSlaHoras = slas[ticket.prioridad] || 48;
+  if ((ticket.id && ticket.id.startsWith('GH-')) || ticket.area === 'gh') {
+    limiteSlaHoras = 9; // SLA estricto de 9 horas para Gestión Humana
+  }
+  
   const limiteMs = limiteSlaHoras * 3600 * 1000;
   
   // Si está suspendido por sistema o por pausa de colaborador

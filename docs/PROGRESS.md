@@ -41,6 +41,17 @@
 
 ---
 
+## Nuevo Objetivo: Módulo de Gestión Humana (Especialización - Fase 1)
+- [x] Eliminación visual y de estado de "Tipo de Ticket" en `FormGH.jsx`.
+- [x] Eliminación de bloque de "Prioridad" en `FormGH.jsx`.
+- [x] Ocultamiento condicional de Tipo y Prioridad en tablas y modales del Dashboard (`Gestion.jsx`, `Actividades.jsx`, `RegistroActividadForm.jsx`) para `area === 'gh'`.
+- [x] Ocultamiento de campos Tipo y Prioridad en `AreaDatabase.jsx` para GH.
+- [x] Ocultamiento del configurador de SLA en `Settings.jsx` para GH.
+- [x] Forzado de límite SLA estricto de 9 horas para tickets `GH-` en `timeHelpers.jsx`.
+- [x] Script de migración automática en `DbService.js` para limpiar Tipo/Prioridad de la base de datos histórica de GH.
+
+---
+
 ## Nuevo Objetivo: Motor SLA Avanzado (ITIL)
 - [x] **Horario Laboral:** Implementación matemática en `businessHours.js` para descontar horas nocturnas y fines de semana del SLA.
 - [x] **Pausas Dinámicas:** Al cambiar a "Almuerzo", "Reunión" o "Ausente", se pausan automáticamente los tickets en progreso del gestor y se reanudan al cambiar a disponible.

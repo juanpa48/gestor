@@ -7,7 +7,7 @@ import '../../shared/styles/themes/database-theme.css';
 export const AreaDatabase = () => {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
-  const { ctx, config } = useActiveArea();
+  const { ctx, config, area } = useActiveArea();
   const { actividades, solicitantes, refreshTickets } = ctx;
   
   const [activeTab, setActiveTab] = useState('actividades');
@@ -68,7 +68,7 @@ export const AreaDatabase = () => {
     }
   };
 
-  const exactCols = [
+  let exactCols = [
     { title: 'Fecha de Creación', key: 'fechaCreacion' },
     { title: 'Solicitante', key: 'solicitante' },
     { title: 'Cargo', key: 'cargo' },
@@ -89,6 +89,10 @@ export const AreaDatabase = () => {
     { title: 'Fecha de Pausa (SLA)', key: 'fechaPausa' },
     { title: 'Tiempo Pausado (ms)', key: 'tiempoPausadoTotal' }
   ];
+
+  if (area === 'gh') {
+    exactCols = exactCols.filter(c => c.key !== 'tipo' && c.key !== 'prioridad');
+  }
 
   const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S'];
 

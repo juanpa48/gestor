@@ -248,11 +248,11 @@ export const Gestion = () => {
               <thead>
                 <tr>
                   <th>ID</th>
-                  <th>Tipo</th>
+                  {area !== 'gh' && <th>Tipo</th>}
                   <th>Solicitud</th>
                   <th>Solicitante</th>
                   <th>Estado</th>
-                  <th>Prioridad</th>
+                  {area !== 'gh' && <th>Prioridad</th>}
                   <th>SLA (Restante)</th>
                   <th>Responsable</th>
                   <th>Creado</th>
@@ -267,24 +267,28 @@ export const Gestion = () => {
                   return (
                     <tr key={t.id} className="ticket-row-clickable" data-ticket-id={t.id} onClick={() => openModal(t.id)}>
                       <td><strong>{t.id || ''}</strong></td>
-                      <td>
-                        {t.tipo ? (
-                          <span className={`tipo-badge ${t.tipo.toLowerCase()}`}>
-                            <i className={t.tipo === 'Incidente' ? 'fa-solid fa-triangle-exclamation' : 'fa-solid fa-file-lines'} style={{ marginRight: '4px' }}></i>
-                            {t.tipo}
-                          </span>
-                        ) : <span style={{ color: 'var(--text-muted)', fontSize: '11px' }}>N/A</span>}
-                      </td>
+                      {area !== 'gh' && (
+                        <td>
+                          {t.tipo ? (
+                            <span className={`tipo-badge ${t.tipo.toLowerCase()}`}>
+                              <i className={t.tipo === 'Incidente' ? 'fa-solid fa-triangle-exclamation' : 'fa-solid fa-file-lines'} style={{ marginRight: '4px' }}></i>
+                              {t.tipo}
+                            </span>
+                          ) : <span style={{ color: 'var(--text-muted)', fontSize: '11px' }}>N/A</span>}
+                        </td>
+                      )}
                       <td style={{ maxWidth: '350px', whiteSpace: 'normal', overflowWrap: 'anywhere', wordBreak: 'break-word', lineHeight: '1.4' }}>
                         {t.solicitud || t.nombre || ''}
                       </td>
                       <td>{t.nombre || t.solicitante || ''}</td>
                       <td><span className={`status-badge ${estadoClase}`}>{t.estado || ''}</span></td>
-                      <td>
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                          <span className="prioridad-dot" style={{ background: dot }}></span>{prio}
-                        </span>
-                      </td>
+                      {area !== 'gh' && (
+                        <td>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                            <span className="prioridad-dot" style={{ background: dot }}></span>{prio}
+                          </span>
+                        </td>
+                      )}
                       <td>{calculateSlaBadge(t, slas)}</td>
                       <td>{t.responsable || 'Sin asignar'}</td>
                       <td style={{ color: '#64748b', fontSize: '11px' }}>{t.fechaCreacion || ''}</td>
@@ -406,19 +410,21 @@ export const Gestion = () => {
                 </div>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Prioridad</label>
-                <div className="select-wrapper">
-                  <i className="fa-solid fa-arrow-down select-icon-left"></i>
-                  <select id="m_prioridad" className="form-select padded-left" value={ticketEdit.prioridad} onChange={handleModalChange}>
-                    <option value="Baja">Baja</option>
-                    <option value="Media">Media</option>
-                    <option value="Alta">Alta</option>
-                    <option value="Urgente">Urgente</option>
-                  </select>
-                  <i className="fa-solid fa-chevron-down select-arrow"></i>
+              {area !== 'gh' && (
+                <div className="form-group">
+                  <label className="form-label">Prioridad</label>
+                  <div className="select-wrapper">
+                    <i className="fa-solid fa-arrow-down select-icon-left"></i>
+                    <select id="m_prioridad" className="form-select padded-left" value={ticketEdit.prioridad} onChange={handleModalChange}>
+                      <option value="Baja">Baja</option>
+                      <option value="Media">Media</option>
+                      <option value="Alta">Alta</option>
+                      <option value="Urgente">Urgente</option>
+                    </select>
+                    <i className="fa-solid fa-chevron-down select-arrow"></i>
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div className="form-group">
                 <label className="form-label">Área de Gestión</label>

@@ -88,6 +88,15 @@
 
 ## [Unreleased]
 ### Added
+- **Dashboard GH**: Ocultamiento dinámico de filtros y columnas de Tipo y Prioridad para el área de Gestión Humana.
+- **Base de Datos (UI)**: Ocultamiento dinámico de columnas de Tipo y Prioridad para el área de Gestión Humana.
+- **Motor SLA**: Regla de SLA estricto de 9 horas para todos los tickets originados en GH (`GH-`).
+- **Migración Automática**: Script en `DbService.js` para limpiar datos históricos de Tipo y Prioridad en `db_actividades_gh`.
+
+### Removed
+- **Formulario GH**: Eliminación completa de selectores y estado interno de "Tipo de Ticket" (Incidente/Requerimiento) y "Prioridad" en el portal de GH.
+
+## [1.0.3] - 2026-07-25
 - **Backend Propio:** Se creó el servicio Node.js + Express en `backend/server.js` para recibir y almacenar archivos subidos al puerto 3001 usando Multer.
 - **Frontend Uploads:** `UploadService.js` añadido para realizar las peticiones `multipart/form-data`.
 - **Formularios con Adjuntos:** `FormGE`, `FormGH`, `FormTI`, `TicketForm` y `RegistroActividadForm` ahora soportan la carga de múltiples archivos (`<input type="file" multiple />`).

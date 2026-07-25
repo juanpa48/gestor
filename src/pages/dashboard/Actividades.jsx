@@ -148,24 +148,28 @@ export const Actividades = () => {
             <option value="Cerrado">Cerrado</option>
           </select>
         </div>
-        <div className="filter-group">
-          <label className="filter-label">Tipo</label>
-          <select name="tipo" className="filter-select filter-actividades" value={filters.tipo} onChange={handleFilterChange}>
-            <option value="">Todos</option>
-            <option value="Incidente">Incidente</option>
-            <option value="Requerimiento">Requerimiento</option>
-          </select>
-        </div>
-        <div className="filter-group">
-          <label className="filter-label">Prioridad</label>
-          <select name="prioridad" className="filter-select filter-actividades" value={filters.prioridad} onChange={handleFilterChange}>
-            <option value="">Todas</option>
-            <option value="Urgente">Urgente</option>
-            <option value="Alta">Alta</option>
-            <option value="Media">Media</option>
-            <option value="Baja">Baja</option>
-          </select>
-        </div>
+        {area !== 'gh' && (
+          <div className="filter-group">
+            <label className="filter-label">Tipo</label>
+            <select name="tipo" className="filter-select filter-actividades" value={filters.tipo} onChange={handleFilterChange}>
+              <option value="">Todos</option>
+              <option value="Incidente">Incidente</option>
+              <option value="Requerimiento">Requerimiento</option>
+            </select>
+          </div>
+        )}
+        {area !== 'gh' && (
+          <div className="filter-group">
+            <label className="filter-label">Prioridad</label>
+            <select name="prioridad" className="filter-select filter-actividades" value={filters.prioridad} onChange={handleFilterChange}>
+              <option value="">Todas</option>
+              <option value="Urgente">Urgente</option>
+              <option value="Alta">Alta</option>
+              <option value="Media">Media</option>
+              <option value="Baja">Baja</option>
+            </select>
+          </div>
+        )}
         <div className="filter-group">
           <label className="filter-label">Responsable</label>
           <select name="responsable" className="filter-select filter-actividades" value={filters.responsable} onChange={handleFilterChange}>
@@ -235,7 +239,7 @@ export const Actividades = () => {
                   <th>Solicitud</th>
                   <th>Solicitante</th>
                   <th>Estado</th>
-                  <th>Prioridad</th>
+                  {area !== 'gh' && <th>Prioridad</th>}
                   <th>SLA (Restante)</th>
                   <th>Grupo</th>
                   <th>Responsable</th>
@@ -264,7 +268,9 @@ export const Actividades = () => {
                       </td>
                       <td>{r.nombre || r.solicitante || ''}</td>
                       <td><span className={`status-badge ${estadoClass}`}>{r.estado || ''}</span></td>
-                      <td><span className={`prioridad-badge ${prioClass}`}>{r.prioridad || ''}</span></td>
+                      {area !== 'gh' && (
+                        <td><span className={`prioridad-badge ${prioClass}`}>{r.prioridad || ''}</span></td>
+                      )}
                       <td>{slaBadge}</td>
                       <td>{r.grupo || ''}</td>
                       <td>{r.responsable || 'Sin asignar'}</td>
@@ -274,7 +280,7 @@ export const Actividades = () => {
                 })}
                 {paginatedActividades.length === 0 && (
                   <tr>
-                    <td colSpan="9" style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
+                    <td colSpan={area !== 'gh' ? "9" : "8"} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
                       No se encontraron actividades con los filtros actuales.
                     </td>
                   </tr>

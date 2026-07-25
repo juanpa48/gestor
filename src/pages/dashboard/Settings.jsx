@@ -280,7 +280,8 @@ export const Settings = () => {
 
       {isAdmin && (
         <>
-        <div className="settings-container glass-panel" style={{ padding: '24px', marginBottom: '32px' }}>
+        {area !== 'gh' && (
+          <div className="settings-container glass-panel" style={{ padding: '24px', marginBottom: '32px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(30,58,95,0.1)', paddingBottom: '16px', marginBottom: '24px' }}>
           <h2 style={{ fontSize: '18px', color: 'var(--navy)' }}>
             <i className="fa-solid fa-stopwatch"></i> Acuerdos de Nivel de Servicio (SLA)
@@ -332,6 +333,7 @@ export const Settings = () => {
           ))}
         </div>
       </div>
+      )}
 
       <div className="settings-container glass-panel" style={{ padding: '24px', marginBottom: '32px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(30,58,95,0.1)', paddingBottom: '16px', marginBottom: '24px' }}>

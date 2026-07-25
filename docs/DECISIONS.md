@@ -123,6 +123,24 @@
   - ✅ Autenticación sorprendentemente segura y realista sin servidor.
   - ✅ El `admin_ti` (Soporte TI) recibe herramientas para gestionar estos bloqueos en el UI.
 
+### [DEC-012] SLA Híbrido en Frontend (Sin Cronjobs Backend)
+**Fecha:** 2026-07-25
+**Problema:** Necesidad de calcular SLA pausando horas no laborales (noches, fines de semana, festivos, estado ausente del gestor) sin tener un servidor backend corriendo cronjobs para actualizar los tickets.
+**Decisión:** 
+- Implementar cálculo de tiempo matemático en caliente (`businessHours.js`) que se dispara cada vez que se visualiza un ticket.
+- Guardar la `fechaCreacion` y el inicio de pausas (`agentPauseStart`). Al renderizar, el tiempo restante = SLA_MAX_MS - (Date.now() - Pausas_Calculadas).
+**Justificación:** Mantiene el sistema 100% serverless / frontend-heavy. Minimiza la complejidad de implementar un backend worker, aprovechando la capacidad del cliente para realizar matemáticas de tiempo exactas.
+
+### [DEC-013] Especialización de UI y Datos por Área (Aislamiento de Gestión Humana)
+**Fecha:** 2026-07-25
+**Problema:** Gestión Humana no utiliza los conceptos de "Tipo de Ticket" ni "Prioridad", y su SLA siempre es de 9 horas. Mantener estos campos generaba fricción.
+**Decisión:** 
+- En el Portal, GH tiene su propio formulario (`FormGH.jsx`) 100% independiente donde se eliminaron los campos.
+- En el Dashboard (código compartido), se implementó renderizado condicional (`area !== 'gh'`) en columnas, filtros, modales y configuración SLA.
+- Inyección de SLA duro de 9 horas en `timeHelpers.jsx` para tickets `GH-`.
+- Limpieza en caliente: `DbService.js` mapea la base de datos `db_actividades_gh` al arrancar y elimina los atributos deprecados.
+**Justificación:** Se preserva el principio DRY en el Dashboard administrativo (un solo código base) pero se otorga total independencia funcional y visual a cada área. en el UI.
+
 ---
 
 ## DEC-011: Configuración Dinámica de Trámites

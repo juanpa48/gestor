@@ -140,7 +140,24 @@ export const DbService = {
   getActividades: async (key = 'db_actividades') => {
     return new Promise(resolve => {
       setTimeout(() => {
-        const acts = JSON.parse(localStorage.getItem(key)) || [];
+        let acts = JSON.parse(localStorage.getItem(key)) || [];
+        
+        // MIGRACIÓN AUTOMÁTICA: Limpieza de Tipo y Prioridad para GH
+        if (key === 'db_actividades_gh') {
+          let dirty = false;
+          acts = acts.map(a => {
+            if (a.tipo !== undefined || a.prioridad !== undefined) {
+              delete a.tipo;
+              delete a.prioridad;
+              dirty = true;
+            }
+            return a;
+          });
+          if (dirty) {
+            localStorage.setItem(key, JSON.stringify(acts));
+          }
+        }
+
         resolve(acts);
       }, 300);
     });

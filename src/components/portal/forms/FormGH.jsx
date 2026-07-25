@@ -12,9 +12,7 @@ export const FormGH = () => {
   const [tipoTramite, setTipoTramite] = useState('');
   const settings = getAreaSettings('gh');
   const grupos = settings.grupos || [];
-  const [tipo, setTipo] = useState('Requerimiento');
   const [solicitud, setSolicitud] = useState('');
-  const [prioridad, setPrioridad] = useState('Media');
   const [archivos, setArchivos] = useState([]);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
 
@@ -29,7 +27,7 @@ export const FormGH = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!nombre || !tipoTramite || !solicitud || !tipo) {
+    if (!nombre || !tipoTramite || !solicitud) {
       showToast('Por favor, complete todos los campos obligatorios.', 'error', 'triangle-exclamation');
       return;
     }
@@ -64,12 +62,10 @@ export const FormGH = () => {
         cargo: currentUser?.cargo || 'Usuario del Sistema',
         solicitud: solicitud,
         estado: 'Pendiente',
-        prioridad: prioridad,
         responsable: '',
         grupo: areaGestion || 'Trámites de Personal',
         grupoExtra: tipoTramite,
         clasificacion: tipoTramite,
-        tipo: tipo,
         detalles: '',
         adjuntos: adjuntosUrls
       };
@@ -79,7 +75,6 @@ export const FormGH = () => {
       setSolicitud('');
       setAreaGestion('');
       setTipoTramite('');
-      setPrioridad('Media');
       setArchivos([]);
       
       showToast(`¡Solicitud <strong>${newId}</strong> enviada a Gestión Humana!`, 'success', 'check');
@@ -127,25 +122,6 @@ export const FormGH = () => {
         </div>
       </div>
 
-      <div className="form-group form-group-full">
-        <label className="form-label">TIPO DE TICKET</label>
-        <div className="type-selector-container">
-          <div 
-            className={`type-selector-card ${tipo === 'Incidente' ? 'active incidente' : ''}`}
-            onClick={() => { setTipo('Incidente'); setPrioridad('Alta'); }}
-          >
-            <i className="fa-solid fa-triangle-exclamation"></i>
-            <span>Incidente / Problema</span>
-          </div>
-          <div 
-            className={`type-selector-card ${tipo === 'Requerimiento' ? 'active requerimiento' : ''}`}
-            onClick={() => { setTipo('Requerimiento'); setPrioridad('Media'); }}
-          >
-            <i className="fa-solid fa-file-lines"></i>
-            <span>Requerimiento / Solicitud</span>
-          </div>
-        </div>
-      </div>
 
       <div className="form-group">
         <label className="form-label">DESCRIPCIÓN DE LA SOLICITUD</label>
@@ -173,20 +149,7 @@ export const FormGH = () => {
         </div>
       </div>
 
-      <div className="form-group">
-        <label className="form-label">PRIORIDAD</label>
-        <div className="priority-group">
-          {['Baja', 'Media', 'Alta', 'Urgente'].map(p => (
-            <div 
-              key={p} 
-              className={`priority-btn ${prioridad === p ? 'active' : ''}`}
-              onClick={() => setPrioridad(p)}
-            >
-              {p.toUpperCase()}
-            </div>
-          ))}
-        </div>
-      </div>
+
 
       <button type="submit" className={`btn-submit ${loadingSubmit ? 'loading' : ''}`} disabled={loadingSubmit}>
         {loadingSubmit ? (
