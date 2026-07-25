@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useActiveArea } from '../../../shared/contexts/ActiveAreaContext';
+import { DbService } from '../../../shared/services/DbService';
 
 export const WidgetMiEstado = () => {
   const { ctx, config } = useActiveArea();
@@ -35,6 +36,10 @@ export const WidgetMiEstado = () => {
       estado: miEstado,
       timestamp: Date.now()
     };
+
+    // Actualizar SLA Inteligente
+    const isPausedState = ['almuerzo', 'reunion', 'ausente'].includes(miEstado);
+    await DbService.updateTicketsAgentPauseState(miNombre, isPausedState);
 
     localStorage.setItem(`db_mi_seleccion_${config.id}`, JSON.stringify(estadoObj));
 

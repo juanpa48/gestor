@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getAreaSettings, saveAreaSettings } from '../../shared/services/SettingsManager';
 import { useActiveArea } from '../../shared/contexts/ActiveAreaContext';
 import { useAuth, hashPassword } from '../../shared/contexts/AuthContext';
+import { DbService } from '../../shared/services/DbService';
 
 export const Settings = () => {
   const navigate = useNavigate();
@@ -24,11 +25,18 @@ export const Settings = () => {
   
   const [editingUsername, setEditingUsername] = useState(null);
 
+  // Estado para Festivos
+  const [festivos, setFestivos] = useState([]);
+  const [newFestivoFecha, setNewFestivoFecha] = useState('');
+  const [newFestivoNombre, setNewFestivoNombre] = useState('');
+
   useEffect(() => {
     const settings = getAreaSettings(area);
     setGrupos(settings.grupos || []);
     if (settings.slas) setSlas(settings.slas);
     
+    DbService.getFestivos().then(f => setFestivos(f));
+
     if (isAdmin) {
       loadUsers();
     }
@@ -89,10 +97,29 @@ export const Settings = () => {
   const handleSave = () => {
     setIsSaving(true);
     saveAreaSettings(area, grupos, slas);
+    DbService.saveFestivos(festivos);
     setTimeout(() => {
       setIsSaving(false);
       showToast('Configuración guardada exitosamente');
     }, 400);
+  };
+
+  const handleAddFestivo = () => {
+    if (!newFestivoFecha || !newFestivoNombre) {
+      alert("Por favor ingresa fecha y nombre del festivo");
+      return;
+    }
+    setFestivos([...festivos, { fecha: newFestivoFecha, nombre: newFestivoNombre }]);
+    setNewFestivoFecha('');
+    setNewFestivoNombre('');
+  };
+
+  const handleRemoveFestivo = (idx) => {
+    if (window.confirm("¿Eliminar este día festivo?")) {
+      const newF = [...festivos];
+      newF.splice(idx, 1);
+      setFestivos(newF);
+    }
   };
 
   const handleUnlockUser = (username) => {
@@ -252,6 +279,7 @@ export const Settings = () => {
       </div>
 
       {isAdmin && (
+        <>
         <div className="settings-container glass-panel" style={{ padding: '24px', marginBottom: '32px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(30,58,95,0.1)', paddingBottom: '16px', marginBottom: '24px' }}>
           <h2 style={{ fontSize: '18px', color: 'var(--navy)' }}>
@@ -304,6 +332,58 @@ export const Settings = () => {
           ))}
         </div>
       </div>
+
+      <div className="settings-container glass-panel" style={{ padding: '24px', marginBottom: '32px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(30,58,95,0.1)', paddingBottom: '16px', marginBottom: '24px' }}>
+          <h2 style={{ fontSize: '18px', color: 'var(--navy)' }}>
+            <i className="fa-solid fa-calendar-day"></i> Días Festivos (Global)
+          </h2>
+        </div>
+        <p style={{ color: 'var(--text-muted)', fontSize: '13.5px', marginBottom: '20px' }}>
+          Los días registrados aquí serán ignorados automáticamente por el motor de SLA. No es necesario que los colaboradores se pongan en estado "Ausente".
+        </p>
+        
+        <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+          <input 
+            type="date" 
+            className="glass-input" 
+            value={newFestivoFecha}
+            onChange={(e) => setNewFestivoFecha(e.target.value)}
+          />
+          <input 
+            type="text" 
+            className="glass-input" 
+            placeholder="Nombre del Festivo (Ej. Día de la Independencia)"
+            value={newFestivoNombre}
+            onChange={(e) => setNewFestivoNombre(e.target.value)}
+            style={{ flex: 1 }}
+          />
+          <button className="btn-primary" onClick={handleAddFestivo} style={{ padding: '8px 16px' }}>
+            <i className="fa-solid fa-plus"></i> Agregar
+          </button>
+        </div>
+
+        {festivos.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '20px', color: 'var(--text-muted)' }}>
+            No hay días festivos registrados.
+          </div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '12px' }}>
+            {festivos.sort((a,b) => new Date(a.fecha) - new Date(b.fecha)).map((f, idx) => (
+              <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.6)', padding: '12px 16px', borderRadius: '8px', border: '1px solid var(--card-border)' }}>
+                <div>
+                  <strong style={{ display: 'block', color: 'var(--navy)', fontSize: '14px' }}>{f.fecha}</strong>
+                  <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{f.nombre}</span>
+                </div>
+                <button onClick={() => handleRemoveFestivo(idx)} className="btn-icon danger" title="Eliminar festivo" style={{ background: 'transparent', color: '#ef4444', border: 'none', cursor: 'pointer', padding: '8px' }}>
+                  <i className="fa-solid fa-trash"></i>
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      </>
       )}
 
       <div className="settings-container glass-panel" style={{ padding: '24px' }}>

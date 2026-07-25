@@ -51,6 +51,24 @@ export const DbService = {
       }, 300);
     });
   },
+
+  getFestivos: async () => {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        const festivos = JSON.parse(localStorage.getItem('db_festivos')) || [];
+        resolve(festivos);
+      }, 100);
+    });
+  },
+
+  saveFestivos: async (festivos) => {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        localStorage.setItem('db_festivos', JSON.stringify(festivos));
+        resolve({ success: true });
+      }, 100);
+    });
+  },
   
   getDashboardStats: async (key = 'db_actividades') => {
     return new Promise(resolve => {
@@ -204,6 +222,47 @@ export const DbService = {
         }
         resolve({ success: true, updated: modified });
       }, 0); // Resolución inmediata para no bloquear la carga inicial
+    });
+  },
+
+  updateTicketsAgentPauseState: async (agentName, isPaused) => {
+    return new Promise(async (resolve) => {
+      // Usamos import dinamico para la funcion ya que no esta exportada globalmente y evitamos problemas de bundler aqui
+      const { calculateWorkingMilliseconds } = await import('../utils/businessHours.js');
+      
+      const areas = ['db_actividades_ge', 'db_actividades_gh', 'db_actividades_ti'];
+      
+      for (const key of areas) {
+        let activities = JSON.parse(localStorage.getItem(key)) || [];
+        let updated = false;
+
+        activities = activities.map(ticket => {
+          if (ticket.responsable === agentName && ['Pendiente', 'En progreso', 'Suspendido'].includes(ticket.estado)) {
+            if (isPaused) {
+              if (!ticket.agentPauseStart) {
+                ticket.agentPauseStart = Date.now();
+                updated = true;
+              }
+            } else {
+              if (ticket.agentPauseStart) {
+                const pausedTimeMs = calculateWorkingMilliseconds(ticket.agentPauseStart, Date.now());
+                ticket.tiempoPausadoTotal = (ticket.tiempoPausadoTotal || 0) + pausedTimeMs;
+                ticket.agentPauseStart = null;
+                updated = true;
+              }
+            }
+          }
+          return ticket;
+        });
+
+        if (updated) {
+          localStorage.setItem(key, JSON.stringify(activities));
+        }
+      }
+      
+      window.dispatchEvent(new Event('ticketActualizado'));
+      window.dispatchEvent(new Event('storage'));
+      resolve({ success: true });
     });
   }
 };

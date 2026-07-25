@@ -1,4 +1,5 @@
 import React from 'react';
+import { calculateWorkingMilliseconds } from './businessHours';
 
 /**
  * Parsea la fecha de creación de un ticket a objeto Date.
@@ -50,9 +51,15 @@ export const calculateSlaBadge = (ticket, slas) => {
   const limiteSlaHoras = slas[ticket.prioridad] || 48;
   const limiteMs = limiteSlaHoras * 3600 * 1000;
   
-  // Si está suspendido, no sumamos el tiempo actual
-  const endMs = (ticket.estado === 'Suspendido' && ticket.fechaPausa) ? ticket.fechaPausa : Date.now();
-  const consumidoMs = endMs - startMs - (ticket.tiempoPausadoTotal || 0);
+  // Si está suspendido por sistema o por pausa de colaborador
+  let endMs = Date.now();
+  if (ticket.estado === 'Suspendido' && ticket.fechaPausa) {
+    endMs = ticket.fechaPausa;
+  } else if (ticket.agentPauseStart) {
+    endMs = ticket.agentPauseStart;
+  }
+
+  const consumidoMs = calculateWorkingMilliseconds(startMs, endMs) - (ticket.tiempoPausadoTotal || 0);
   
   const restanteMs = limiteMs - consumidoMs;
   const absMs = Math.abs(restanteMs);

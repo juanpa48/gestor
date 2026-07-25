@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { DbService } from '../services/DbService';
+import { calculateWorkingMilliseconds } from '../utils/businessHours';
 
 export const createAreaContext = (config) => {
   const {
@@ -126,7 +127,7 @@ export const createAreaContext = (config) => {
             merged.fechaPausa = Date.now();
           }
           if (a.estado === 'Suspendido' && merged.estado !== 'Suspendido' && a.fechaPausa) {
-            const pausedTime = Date.now() - a.fechaPausa;
+            const pausedTime = calculateWorkingMilliseconds(a.fechaPausa, Date.now());
             merged.tiempoPausadoTotal = (a.tiempoPausadoTotal || 0) + pausedTime;
             merged.fechaPausa = null;
           }
