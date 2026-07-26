@@ -1,6 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import SignatureCanvas from 'react-signature-canvas';
 
 export const FormConvenio = ({ detalles, setDetalles, tipoTramite }) => {
+  const sigCanvas = useRef({});
+  const [consentimiento, setConsentimiento] = useState(detalles.consentimientoLegal || false);
+  const [firmaVacia, setFirmaVacia] = useState(true);
 
   // Inicializar campos base
   useEffect(() => {
@@ -10,7 +14,9 @@ export const FormConvenio = ({ detalles, setDetalles, tipoTramite }) => {
       cuotas: prev.cuotas || '',
       periodicidad: prev.periodicidad || 'Quincenal',
       fechaInicio: prev.fechaInicio || '',
-      fechaFin: prev.fechaFin || ''
+      fechaFin: prev.fechaFin || '',
+      consentimientoLegal: prev.consentimientoLegal || false,
+      firmaLegal: prev.firmaLegal || null
     }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -35,6 +41,29 @@ export const FormConvenio = ({ detalles, setDetalles, tipoTramite }) => {
     } else {
       handleChange('valorMontoTotal', '');
     }
+  };
+
+  const handleClearSignature = (e) => {
+    e.preventDefault();
+    if (sigCanvas.current && typeof sigCanvas.current.clear === 'function') {
+      sigCanvas.current.clear();
+      setFirmaVacia(true);
+      handleChange('firmaLegal', null);
+    }
+  };
+
+  const handleEndDrawing = () => {
+    if (sigCanvas.current) {
+      setFirmaVacia(sigCanvas.current.isEmpty());
+      if (!sigCanvas.current.isEmpty()) {
+        handleChange('firmaLegal', sigCanvas.current.getTrimmedCanvas().toDataURL('image/png'));
+      }
+    }
+  };
+
+  const handleConsentimiento = (e) => {
+    setConsentimiento(e.target.checked);
+    handleChange('consentimientoLegal', e.target.checked);
   };
 
   return (
@@ -124,6 +153,59 @@ export const FormConvenio = ({ detalles, setDetalles, tipoTramite }) => {
             onChange={(e) => handleChange('fechaFin', e.target.value)}
           />
         </div>
+      </div>
+
+      <div style={{ marginTop: '25px', padding: '15px', background: 'rgba(239, 68, 68, 0.05)', border: '1px dashed var(--red)', borderRadius: '8px' }}>
+        <h5 style={{ color: 'var(--red)', marginBottom: '10px', fontSize: '14px' }}>
+          <i className="fa-solid fa-scale-balanced"></i> Autorización de Descuento (Consentimiento Legal)
+        </h5>
+        
+        <div style={{ fontSize: '12px', color: 'var(--text-muted)', lineHeight: '1.6', marginBottom: '15px', textAlign: 'justify' }}>
+          <p>
+            Autorizo de manera expresa, voluntaria e irrevocable a mi Empleador, para que deduzca de mis salarios, prestaciones sociales, vacaciones, bonificaciones y liquidación final de contrato (si a ello hubiere lugar), el valor total del monto aquí detallado bajo el concepto de "Convenio {tipoTramite}".
+          </p>
+          <p style={{ marginTop: '8px' }}>
+            Esta autorización se entiende vigente hasta la cancelación total de la obligación. Declaro que conozco y acepto las condiciones del convenio.
+          </p>
+        </div>
+
+        <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer', marginBottom: '20px' }}>
+          <input 
+            type="checkbox" 
+            required
+            checked={consentimiento}
+            onChange={handleConsentimiento}
+            style={{ marginTop: '3px' }}
+          />
+          <span style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--navy)' }}>
+            He leído, entiendo y otorgo mi consentimiento legal para la deducción de nómina descrita. *
+          </span>
+        </label>
+
+        {consentimiento && (
+          <div style={{ animation: 'fadeIn 0.4s' }}>
+            <label className="form-label" style={{ color: 'var(--navy)' }}>Firma del Empleado *</label>
+            <div style={{ background: '#fff', border: '1px solid #ccc', borderRadius: '8px', overflow: 'hidden', height: '150px' }}>
+              <SignatureCanvas 
+                ref={sigCanvas}
+                penColor="blue"
+                canvasProps={{ width: 500, height: 150, className: 'sigCanvas', style: { width: '100%', height: '100%' } }}
+                onEnd={handleEndDrawing}
+              />
+            </div>
+            
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
+              <span style={{ fontSize: '11px', color: firmaVacia ? 'var(--red)' : 'var(--green)' }}>
+                {firmaVacia ? 'Por favor dibuje su firma arriba.' : 'Firma capturada correctamente.'}
+              </span>
+              <button className="btn-secondary" onClick={handleClearSignature} style={{ padding: '4px 10px', fontSize: '11px' }}>
+                <i className="fa-solid fa-eraser"></i> Limpiar Firma
+              </button>
+            </div>
+            {/* Input oculto para validación requerida de HTML5 */}
+            <input type="text" style={{ opacity: 0, width: 0, height: 0, position: 'absolute' }} required value={detalles.firmaLegal || ''} readOnly />
+          </div>
+        )}
       </div>
 
     </div>
