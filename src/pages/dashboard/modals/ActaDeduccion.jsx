@@ -3,6 +3,19 @@ import React from 'react';
 export const ActaDeduccion = ({ ticket, onClose }) => {
   const d = ticket.detalles || {};
   const fechaGeneracion = new Date().toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' });
+  
+  // Buscar datos del solicitante en la BD local
+  const usuarios = JSON.parse(localStorage.getItem('db_usuarios') || '[]');
+  const solicitanteStr = typeof ticket.solicitante === 'string' ? ticket.solicitante : (ticket.solicitante?.nombreReal || 'Usuario');
+  const userObj = usuarios.find(u => u.nombreReal === solicitanteStr) || {};
+  
+  const cedula = d.cedula || userObj.cedula || ticket.solicitante?.cedula || 'N/A';
+  const cargo = userObj.cargo || ticket.solicitante?.cargo || 'N/A';
+
+  // Usar fechaISO si existe, sino intentar parsear la creación
+  const dateObj = ticket.fechaISO ? new Date(ticket.fechaISO) : new Date(ticket.fechaCreacion);
+  const fechaSolicitudStr = !isNaN(dateObj) ? dateObj.toLocaleDateString() : ticket.fechaCreacion;
+  const fechaFirmaStr = !isNaN(dateObj) ? dateObj.toLocaleString() : ticket.fechaCreacion;
 
   return (
     <div className="acta-overlay">
@@ -20,8 +33,8 @@ export const ActaDeduccion = ({ ticket, onClose }) => {
         {/* Encabezado del Acta */}
         <div style={{ textAlign: 'center', marginBottom: '30px', borderBottom: '2px solid #000', paddingBottom: '20px' }}>
           <h1 style={{ fontSize: '24px', margin: '0 0 10px 0', textTransform: 'uppercase' }}>Acta de Autorización de Descuento</h1>
-          <h2 style={{ fontSize: '16px', margin: 0, fontWeight: 'normal' }}>Convenio: {ticket.tipoTramite}</h2>
-          <p style={{ margin: '5px 0 0 0', fontSize: '14px', color: '#555' }}>Ticket ID: {ticket.id} | Fecha de Solicitud: {new Date(ticket.fechaCreacion).toLocaleDateString()}</p>
+          <h2 style={{ fontSize: '16px', margin: 0, fontWeight: 'normal' }}>Convenio: {ticket.clasificacion}</h2>
+          <p style={{ margin: '5px 0 0 0', fontSize: '14px', color: '#555' }}>Ticket ID: {ticket.id} | Fecha de Solicitud: {fechaSolicitudStr}</p>
         </div>
 
         {/* Datos del Empleado */}
@@ -31,15 +44,15 @@ export const ActaDeduccion = ({ ticket, onClose }) => {
             <tbody>
               <tr>
                 <td style={{ padding: '8px 0', width: '30%' }}><strong>Nombre Completo:</strong></td>
-                <td>{ticket.solicitante.nombreReal}</td>
+                <td>{solicitanteStr}</td>
               </tr>
               <tr>
                 <td style={{ padding: '8px 0' }}><strong>Cédula:</strong></td>
-                <td>{d.cedula || ticket.solicitante.cedula || 'N/A'}</td>
+                <td>{cedula}</td>
               </tr>
               <tr>
                 <td style={{ padding: '8px 0' }}><strong>Cargo:</strong></td>
-                <td>{ticket.solicitante.cargo || 'N/A'}</td>
+                <td>{cargo}</td>
               </tr>
             </tbody>
           </table>
@@ -52,7 +65,7 @@ export const ActaDeduccion = ({ ticket, onClose }) => {
             <tbody>
               <tr>
                 <td style={{ padding: '8px 0', width: '30%' }}><strong>Tipo de Convenio:</strong></td>
-                <td>{ticket.tipoTramite}</td>
+                <td>{ticket.clasificacion}</td>
               </tr>
               <tr>
                 <td style={{ padding: '8px 0' }}><strong>Valor Monto Total:</strong></td>
@@ -82,7 +95,7 @@ export const ActaDeduccion = ({ ticket, onClose }) => {
         <div style={{ marginBottom: '40px', fontSize: '14px', textAlign: 'justify' }}>
           <h3 style={{ fontSize: '16px', borderBottom: '1px solid #ccc', paddingBottom: '5px', marginBottom: '15px' }}>3. Consentimiento y Autorización</h3>
           <p style={{ marginBottom: '10px' }}>
-            Yo, <strong>{ticket.solicitante.nombreReal}</strong>, identificado(a) con la cédula de ciudadanía número <strong>{d.cedula || ticket.solicitante.cedula || '______________'}</strong>, autorizo de manera expresa, voluntaria e irrevocable a mi Empleador, para que deduzca de mis salarios, prestaciones sociales, vacaciones, bonificaciones y liquidación final de contrato (si a ello hubiere lugar), el valor total del monto aquí detallado bajo el concepto de "Convenio {ticket.tipoTramite}".
+            Yo, <strong>{solicitanteStr}</strong>, identificado(a) con la cédula de ciudadanía número <strong>{cedula !== 'N/A' ? cedula : '______________'}</strong>, autorizo de manera expresa, voluntaria e irrevocable a mi Empleador, para que deduzca de mis salarios, prestaciones sociales, vacaciones, bonificaciones y liquidación final de contrato (si a ello hubiere lugar), el valor total del monto aquí detallado bajo el concepto de "Convenio {ticket.clasificacion}".
           </p>
           <p>
             Esta autorización se entiende vigente a partir de la <strong>Fecha Inicio Deducción</strong> y hasta la cancelación total de la obligación descrita en este documento. Declaro que conozco y acepto las condiciones comerciales y financieras aplicables a este convenio, y certifico que la firma adjunta en este documento constituye mi consentimiento legal formal.
@@ -91,17 +104,19 @@ export const ActaDeduccion = ({ ticket, onClose }) => {
 
         {/* Firmas */}
         <div style={{ marginTop: '50px' }}>
-          {d.firmaLegal ? (
-            <div style={{ marginBottom: '10px' }}>
-              <img src={d.firmaLegal} alt="Firma del Empleado" style={{ height: '80px', objectFit: 'contain', borderBottom: '1px solid #000', paddingBottom: '5px', display: 'block' }} />
+          {d.firmaCedula ? (
+            <div style={{ marginBottom: '10px', padding: '15px', border: '2px solid #ccc', borderRadius: '4px', background: '#f9f9f9', width: '350px' }}>
+              <p style={{ margin: '0 0 5px 0', fontSize: '13px', color: '#333' }}><strong>DOCUMENTO FIRMADO ELECTRÓNICAMENTE</strong></p>
+              <p style={{ margin: '0 0 5px 0', fontSize: '12px', color: '#555' }}>Mecanismo: Validación por Credenciales y Cédula</p>
+              <p style={{ margin: '0 0 5px 0', fontSize: '12px', color: '#555' }}>ID Trazabilidad: {ticket.id}-{new Date(ticket.fechaISO || ticket.fechaCreacion).getTime()}</p>
             </div>
           ) : (
             <div style={{ height: '80px', borderBottom: '1px solid #000', width: '250px', marginBottom: '10px' }}></div>
           )}
           
           <p style={{ margin: 0, fontSize: '14px', fontWeight: 'bold' }}>Firma del Empleado</p>
-          <p style={{ margin: '5px 0 0 0', fontSize: '12px', color: '#555' }}>C.C. {d.cedula || ticket.solicitante.cedula || '______________'}</p>
-          <p style={{ margin: '5px 0 0 0', fontSize: '12px', color: '#555' }}>Firmado digitalmente el: {new Date(ticket.fechaCreacion).toLocaleString()}</p>
+          <p style={{ margin: '5px 0 0 0', fontSize: '12px', color: '#555' }}>C.C. {cedula !== 'N/A' ? cedula : '______________'}</p>
+          <p style={{ margin: '5px 0 0 0', fontSize: '12px', color: '#555' }}>Firmado digitalmente el: {fechaFirmaStr}</p>
         </div>
 
         <div style={{ marginTop: '40px', fontSize: '10px', color: '#777', textAlign: 'center', borderTop: '1px solid #eee', paddingTop: '10px' }}>

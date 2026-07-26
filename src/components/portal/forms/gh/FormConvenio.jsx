@@ -1,10 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
-import SignatureCanvas from 'react-signature-canvas';
+import React, { useEffect, useState } from 'react';
 
 export const FormConvenio = ({ detalles, setDetalles, tipoTramite }) => {
-  const sigCanvas = useRef({});
   const [consentimiento, setConsentimiento] = useState(detalles.consentimientoLegal || false);
-  const [firmaVacia, setFirmaVacia] = useState(true);
 
   // Inicializar campos base
   useEffect(() => {
@@ -16,7 +13,8 @@ export const FormConvenio = ({ detalles, setDetalles, tipoTramite }) => {
       fechaInicio: prev.fechaInicio || '',
       fechaFin: prev.fechaFin || '',
       consentimientoLegal: prev.consentimientoLegal || false,
-      firmaLegal: prev.firmaLegal || null
+      firmaCedula: prev.firmaCedula || '',
+      firmaClave: prev.firmaClave || ''
     }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -43,27 +41,13 @@ export const FormConvenio = ({ detalles, setDetalles, tipoTramite }) => {
     }
   };
 
-  const handleClearSignature = (e) => {
-    e.preventDefault();
-    if (sigCanvas.current && typeof sigCanvas.current.clear === 'function') {
-      sigCanvas.current.clear();
-      setFirmaVacia(true);
-      handleChange('firmaLegal', null);
-    }
-  };
-
-  const handleEndDrawing = () => {
-    if (sigCanvas.current) {
-      setFirmaVacia(sigCanvas.current.isEmpty());
-      if (!sigCanvas.current.isEmpty()) {
-        handleChange('firmaLegal', sigCanvas.current.getTrimmedCanvas().toDataURL('image/png'));
-      }
-    }
-  };
-
   const handleConsentimiento = (e) => {
     setConsentimiento(e.target.checked);
     handleChange('consentimientoLegal', e.target.checked);
+    if (!e.target.checked) {
+      handleChange('firmaCedula', '');
+      handleChange('firmaClave', '');
+    }
   };
 
   return (
@@ -183,27 +167,46 @@ export const FormConvenio = ({ detalles, setDetalles, tipoTramite }) => {
         </label>
 
         {consentimiento && (
-          <div style={{ animation: 'fadeIn 0.4s' }}>
-            <label className="form-label" style={{ color: 'var(--navy)' }}>Firma del Empleado *</label>
-            <div style={{ background: '#fff', border: '1px solid #ccc', borderRadius: '8px', overflow: 'hidden', height: '150px' }}>
-              <SignatureCanvas 
-                ref={sigCanvas}
-                penColor="blue"
-                canvasProps={{ width: 500, height: 150, className: 'sigCanvas', style: { width: '100%', height: '100%' } }}
-                onEnd={handleEndDrawing}
-              />
+          <div style={{ animation: 'fadeIn 0.4s', padding: '15px', background: '#fff', borderRadius: '8px', border: '1px solid #ccc' }}>
+            <h6 style={{ color: 'var(--navy)', marginBottom: '10px' }}><i className="fa-solid fa-lock"></i> Validación de Identidad</h6>
+            <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '15px' }}>
+              Para procesar esta solicitud con validez legal (Firma Electrónica Simple), por favor confirme su identidad digitando sus credenciales de acceso corporativo.
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+              <div className="form-group">
+                <label className="form-label" style={{ color: 'var(--navy)' }}>Cédula de Ciudadanía *</label>
+                <div style={{ position: 'relative' }}>
+                  <i className="fa-regular fa-id-card" style={{ position: 'absolute', left: '12px', top: '12px', color: 'var(--text-muted)' }}></i>
+                  <input 
+                    type="text" 
+                    className="glass-input" 
+                    style={{ paddingLeft: '35px' }}
+                    required 
+                    placeholder="Ej: 10203040"
+                    value={detalles.firmaCedula || ''} 
+                    onChange={(e) => handleChange('firmaCedula', e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="form-group">
+                <label className="form-label" style={{ color: 'var(--navy)' }}>Contraseña del Portal *</label>
+                <div style={{ position: 'relative' }}>
+                  <i className="fa-solid fa-key" style={{ position: 'absolute', left: '12px', top: '12px', color: 'var(--text-muted)' }}></i>
+                  <input 
+                    type="password" 
+                    className="glass-input" 
+                    style={{ paddingLeft: '35px' }}
+                    required 
+                    placeholder="Contraseña"
+                    value={detalles.firmaClave || ''} 
+                    onChange={(e) => handleChange('firmaClave', e.target.value)}
+                  />
+                </div>
+              </div>
             </div>
-            
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
-              <span style={{ fontSize: '11px', color: firmaVacia ? 'var(--red)' : 'var(--green)' }}>
-                {firmaVacia ? 'Por favor dibuje su firma arriba.' : 'Firma capturada correctamente.'}
-              </span>
-              <button className="btn-secondary" onClick={handleClearSignature} style={{ padding: '4px 10px', fontSize: '11px' }}>
-                <i className="fa-solid fa-eraser"></i> Limpiar Firma
-              </button>
+            <div style={{ marginTop: '10px', fontSize: '11px', color: 'var(--green)', display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <i className="fa-solid fa-shield-check"></i> <span>Mecanismo de firma electrónica avalado.</span>
             </div>
-            {/* Input oculto para validación requerida de HTML5 */}
-            <input type="text" style={{ opacity: 0, width: 0, height: 0, position: 'absolute' }} required value={detalles.firmaLegal || ''} readOnly />
           </div>
         )}
       </div>

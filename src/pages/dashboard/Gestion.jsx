@@ -395,7 +395,7 @@ export const Gestion = () => {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                   <strong style={{ color: 'var(--navy)' }}><i className="fa-solid fa-list-check"></i> Detalles Específicos del Trámite</strong>
                   
-                  {ticketEdit.clasificacion === 'Convenios' && (
+                  {ticketEdit.grupo === 'Convenios' && (
                     <button type="button" className="btn-primary" style={{ padding: '6px 12px', fontSize: '12px', background: 'var(--red)' }} onClick={() => setShowActa(true)}>
                       <i className="fa-solid fa-file-pdf"></i> Generar Acta PDF
                     </button>
@@ -406,12 +406,16 @@ export const Gestion = () => {
                   {Object.entries(ticketEdit.detalles).map(([key, value]) => {
                     if (!value) return null;
                     if (key === 'consentimientoLegal') return null; // No mostrar el boolean raw
+                    if (key === 'firmaClave') return null; // NUNCA mostrar la clave en texto plano
+                    if (key === 'firmaLegal') return null; // Legacy firma con mouse
 
-                    if (key === 'firmaLegal') {
+                    if (key === 'firmaCedula') {
                       return (
-                        <div key={key} style={{ gridColumn: '1 / -1' }}>
-                          <strong style={{ color: 'var(--text-muted)' }}>Firma del Empleado:</strong> 
-                          <img src={value} alt="Firma" style={{ display: 'block', marginTop: '5px', height: '60px', border: '1px solid #ccc', borderRadius: '4px', background: '#fff' }} />
+                        <div key={key} style={{ gridColumn: '1 / -1', background: 'rgba(16, 185, 129, 0.1)', padding: '10px', borderRadius: '4px', border: '1px dashed var(--green)' }}>
+                          <strong style={{ color: 'var(--green)', display: 'block', marginBottom: '4px' }}><i className="fa-solid fa-shield-check"></i> Firma Electrónica Validada</strong> 
+                          <span style={{ color: 'var(--text-color)', fontSize: '12px' }}>
+                            Mecanismo: Credenciales del Sistema + Cédula (<strong>{value}</strong>)
+                          </span>
                         </div>
                       );
                     }
