@@ -44,6 +44,16 @@ export const FormGH = () => {
           showToast('Firma Inválida: La contraseña ingresada es incorrecta.', 'error', 'lock');
           return;
         }
+
+        if (!targetUser.cedula) {
+          showToast('Error: Su perfil de usuario no tiene una cédula registrada. Contacte a Soporte TI.', 'error', 'id-card');
+          return;
+        }
+        
+        if (detalles.firmaCedula.trim() !== targetUser.cedula.trim()) {
+          showToast('Firma Inválida: La cédula ingresada no coincide con sus registros.', 'error', 'id-card');
+          return;
+        }
       }
     }
 
