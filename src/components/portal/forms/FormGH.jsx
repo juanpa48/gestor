@@ -132,10 +132,10 @@ export const FormGH = () => {
         {areaGestion === 'Permisos' && (
            <FormPermiso detalles={detalles} setDetalles={setDetalles} tipoTramite={tipoTramite} />
         )}
-        {areaGestion === 'Auxilios y Convenios' && tipoTramite === 'Convenio' && (
+        {areaGestion === 'Convenios' && (
            <FormConvenio detalles={detalles} setDetalles={setDetalles} tipoTramite={tipoTramite} />
         )}
-        {areaGestion !== 'Permisos' && !(areaGestion === 'Auxilios y Convenios' && tipoTramite === 'Convenio') && tipoTramite !== '' && (
+        {areaGestion !== 'Permisos' && areaGestion !== 'Convenios' && tipoTramite !== '' && (
            <div style={{ color: 'var(--text-muted)', fontSize: '14px', padding: '10px' }}>
              <i className="fa-solid fa-circle-info text-blue"></i> Este trámite utilizará el formulario genérico.
            </div>

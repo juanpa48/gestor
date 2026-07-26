@@ -6,7 +6,6 @@ export const FormConvenio = ({ detalles, setDetalles, tipoTramite }) => {
   useEffect(() => {
     setDetalles(prev => ({
       ...prev,
-      deduccionNomina: prev.deduccionNomina || '',
       valorMontoTotal: prev.valorMontoTotal || '',
       cuotas: prev.cuotas || '',
       periodicidad: prev.periodicidad || 'Quincenal',
@@ -41,29 +40,10 @@ export const FormConvenio = ({ detalles, setDetalles, tipoTramite }) => {
   return (
     <div className="sub-form-container" style={{ padding: '20px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
       <h4 style={{ color: 'var(--navy)', marginBottom: '15px', borderBottom: '1px solid rgba(16, 185, 129, 0.1)', paddingBottom: '8px' }}>
-        <i className="fa-solid fa-handshake"></i> Detalles del Convenio ({tipoTramite})
+        <i className="fa-solid fa-handshake"></i> Convenio: {tipoTramite}
       </h4>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-        <div className="form-group">
-          <label className="form-label">Deducción de Nómina (Convenio) *</label>
-          <select 
-            className="glass-input" 
-            required 
-            value={detalles.deduccionNomina || ''} 
-            onChange={(e) => handleChange('deduccionNomina', e.target.value)}
-          >
-            <option value="" disabled>Seleccione el convenio...</option>
-            <option value="Servicio">Servicio</option>
-            <option value="Smartfit">Smartfit</option>
-            <option value="Gafas">Gafas</option>
-            <option value="Psicologia">Psicología</option>
-            <option value="Prestamo personal">Préstamo personal</option>
-            <option value="Bolsos">Bolsos</option>
-            <option value="Comfama cursos">Comfama cursos</option>
-          </select>
-        </div>
-
+      <div style={{ marginBottom: '15px' }}>
         <div className="form-group">
           <label className="form-label">Valor Monto Total *</label>
           <div style={{ position: 'relative' }}>

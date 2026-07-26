@@ -53,8 +53,8 @@ const defaultTramitesGH = [
     tramites: ["Solicitud cesantías"]
   },
   {
-    nombre: 'Auxilios y Convenios',
-    tramites: ["Auxilio educativo", "Convenio"]
+    nombre: 'Convenios',
+    tramites: ["Servicio", "Smartfit", "Gafas", "Psicología", "Préstamo personal", "Bolsos", "Comfama cursos"]
   },
   {
     nombre: 'Certificados y Reportes',
