@@ -220,3 +220,59 @@
 /* Control Alertas Sistemas - grupo_mensaje ya no se oculta por defecto */
 
 /* Panel de Control Estado Sistemas (ahora manejado por React y permisos) */
+
+/* ==========================================================================
+   ACTA DEDUCCIÓN (PRINT STYLES)
+   ========================================================================== */
+.acta-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #f0f2f5;
+  z-index: 99999;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.acta-controls {
+  max-width: 800px;
+  margin: 0 auto 20px auto;
+  display: flex;
+  justify-content: space-between;
+}
+
+@media print {
+  /* Ocultar todo el body por defecto */
+  body * {
+    visibility: hidden;
+  }
+  
+  /* Mostrar solo el acta */
+  .acta-overlay, .acta-overlay * {
+    visibility: visible;
+  }
+  
+  .acta-overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    padding: 0;
+    margin: 0;
+  }
+
+  .acta-printable {
+    width: 100% !important;
+    max-width: none !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}

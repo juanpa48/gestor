@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useActiveArea } from '../../shared/contexts/ActiveAreaContext';
 import { getAreaSettings } from '../../shared/services/SettingsManager';
 import { calculateSlaBadge } from '../../shared/utils/timeHelpers';
+import { ActaDeduccion } from './modals/ActaDeduccion';
 
 export const Gestion = () => {
   const { ctx, config, area } = useActiveArea();
@@ -31,6 +32,7 @@ export const Gestion = () => {
     adjuntos: []
   });
   const [archivosVistos, setArchivosVistos] = useState(new Set());
+  const [showActa, setShowActa] = useState(false);
 
   // Escuchar el evento de busqueda global del Topbar
   useEffect(() => {
@@ -390,10 +392,30 @@ export const Gestion = () => {
             {/* RENDERIZADOR DINÁMICO DE DETALLES (GH JSON) */}
             {ticketEdit.detalles && typeof ticketEdit.detalles === 'object' && Object.keys(ticketEdit.detalles).length > 0 && (
               <div className="kanban-desc-box" style={{ marginTop: '10px', background: 'rgba(59, 130, 246, 0.05)', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
-                <strong style={{ display: 'block', marginBottom: '12px', color: 'var(--navy)' }}><i className="fa-solid fa-list-check"></i> Detalles Específicos del Trámite</strong>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                  <strong style={{ color: 'var(--navy)' }}><i className="fa-solid fa-list-check"></i> Detalles Específicos del Trámite</strong>
+                  
+                  {ticketEdit.clasificacion === 'Convenios' && (
+                    <button type="button" className="btn-primary" style={{ padding: '6px 12px', fontSize: '12px', background: 'var(--red)' }} onClick={() => setShowActa(true)}>
+                      <i className="fa-solid fa-file-pdf"></i> Generar Acta PDF
+                    </button>
+                  )}
+                </div>
+
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', fontSize: '13px' }}>
                   {Object.entries(ticketEdit.detalles).map(([key, value]) => {
                     if (!value) return null;
+                    if (key === 'consentimientoLegal') return null; // No mostrar el boolean raw
+
+                    if (key === 'firmaLegal') {
+                      return (
+                        <div key={key} style={{ gridColumn: '1 / -1' }}>
+                          <strong style={{ color: 'var(--text-muted)' }}>Firma del Empleado:</strong> 
+                          <img src={value} alt="Firma" style={{ display: 'block', marginTop: '5px', height: '60px', border: '1px solid #ccc', borderRadius: '4px', background: '#fff' }} />
+                        </div>
+                      );
+                    }
+
                     // Capitalizar CamelCase de forma bonita
                     const formattedKey = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
                     return (
@@ -600,6 +622,12 @@ export const Gestion = () => {
           </div>
         </div>
       )}
+
+      {/* RENDER ACTA DE DEDUCCIÓN (PRINTABLE) */}
+      {showActa && ticketEdit && (
+        <ActaDeduccion ticket={ticketEdit} onClose={() => setShowActa(false)} />
+      )}
+
     </section>
   );
 };
