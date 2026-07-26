@@ -16,6 +16,7 @@ export const ActaDeduccion = ({ ticket, onClose }) => {
   const dateObj = ticket.fechaISO ? new Date(ticket.fechaISO) : new Date(ticket.fechaCreacion);
   const fechaSolicitudStr = !isNaN(dateObj) ? dateObj.toLocaleDateString() : ticket.fechaCreacion;
   const fechaFirmaStr = !isNaN(dateObj) ? dateObj.toLocaleString() : ticket.fechaCreacion;
+  const traceTime = !isNaN(dateObj) ? dateObj.getTime() : Date.now();
 
   return (
     <div className="acta-overlay">
@@ -108,7 +109,7 @@ export const ActaDeduccion = ({ ticket, onClose }) => {
             <div style={{ marginBottom: '10px', padding: '15px', border: '2px solid #ccc', borderRadius: '4px', background: '#f9f9f9', width: '350px' }}>
               <p style={{ margin: '0 0 5px 0', fontSize: '13px', color: '#333' }}><strong>DOCUMENTO FIRMADO ELECTRÓNICAMENTE</strong></p>
               <p style={{ margin: '0 0 5px 0', fontSize: '12px', color: '#555' }}>Mecanismo: Validación por Credenciales y Cédula</p>
-              <p style={{ margin: '0 0 5px 0', fontSize: '12px', color: '#555' }}>ID Trazabilidad: {ticket.id}-{new Date(ticket.fechaISO || ticket.fechaCreacion).getTime()}</p>
+              <p style={{ margin: '0 0 5px 0', fontSize: '12px', color: '#555' }}>ID Trazabilidad: {ticket.id}-{traceTime}</p>
             </div>
           ) : (
             <div style={{ height: '80px', borderBottom: '1px solid #000', width: '250px', marginBottom: '10px' }}></div>
