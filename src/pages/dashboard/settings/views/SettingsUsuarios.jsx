@@ -105,6 +105,16 @@ export const SettingsUsuarios = () => {
         db[userIndex].area = (role === 'solicitante') ? null : area;
         
         localStorage.setItem('db_usuarios', JSON.stringify(db));
+        
+        // Si el usuario editado es el mismo que está logueado, actualizar su sesión
+        if (currentUser && currentUser.username === editingUsername) {
+          const session = JSON.parse(localStorage.getItem('session_token'));
+          if (session) {
+            session.user = db[userIndex];
+            localStorage.setItem('session_token', JSON.stringify(session));
+          }
+        }
+
         setUsers(db);
         showToast(`Usuario ${editingUsername} actualizado.`);
         closeModal();

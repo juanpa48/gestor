@@ -6,11 +6,15 @@ export const FormPermiso = ({ detalles, setDetalles, tipoTramite }) => {
 
   // Inyectar datos del perfil del usuario al montar el componente
   useEffect(() => {
+    // Obtener datos frescos de la BD para evitar datos de sesión antiguos
+    const db = JSON.parse(localStorage.getItem('db_usuarios') || '[]');
+    const freshUser = db.find(u => u.username === currentUser?.username) || currentUser;
+
     setDetalles(prev => ({
       ...prev,
-      cedula: currentUser?.cedula || 'No registrada',
-      celular: currentUser?.celular || 'No registrado',
-      jefeInmediato: currentUser?.jefeInmediato || 'No registrado',
+      cedula: freshUser?.cedula || 'No registrada',
+      celular: freshUser?.celular || 'No registrado',
+      jefeInmediato: freshUser?.jefeInmediato || 'No registrado',
       fechaPermiso: prev.fechaPermiso || '',
       horaInicio: prev.horaInicio || '',
       horaFin: prev.horaFin || '',
