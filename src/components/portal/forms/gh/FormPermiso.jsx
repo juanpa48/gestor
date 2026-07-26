@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useAuth } from '../../../../shared/contexts/AuthContext';
 
-export const FormPermiso = ({ detalles, setDetalles }) => {
+export const FormPermiso = ({ detalles, setDetalles, tipoTramite }) => {
   const { currentUser } = useAuth();
 
   // Inyectar datos del perfil del usuario al montar el componente
@@ -11,7 +11,6 @@ export const FormPermiso = ({ detalles, setDetalles }) => {
       cedula: currentUser?.cedula || 'No registrada',
       celular: currentUser?.celular || 'No registrado',
       jefeInmediato: currentUser?.jefeInmediato || 'No registrado',
-      subTipo: prev.subTipo || '',
       fechaPermiso: prev.fechaPermiso || '',
       horaInicio: prev.horaInicio || '',
       horaFin: prev.horaFin || '',
@@ -20,6 +19,29 @@ export const FormPermiso = ({ detalles, setDetalles }) => {
     }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Calcular horas dinámicamente
+  useEffect(() => {
+    if (detalles.horaInicio && detalles.horaFin) {
+      const [h1, m1] = detalles.horaInicio.split(':').map(Number);
+      const [h2, m2] = detalles.horaFin.split(':').map(Number);
+      
+      let totalMinutos = (h2 * 60 + m2) - (h1 * 60 + m1);
+      
+      if (totalMinutos > 0) {
+        const horas = Math.floor(totalMinutos / 60);
+        const minutos = totalMinutos % 60;
+        const calculo = `${horas} hora(s) ${minutos > 0 ? `y ${minutos} minuto(s)` : ''}`;
+        if (detalles.tiempoAproximado !== calculo) {
+          setDetalles(prev => ({ ...prev, tiempoAproximado: calculo }));
+        }
+      } else {
+        if (detalles.tiempoAproximado !== 'Hora fin debe ser mayor a inicio') {
+          setDetalles(prev => ({ ...prev, tiempoAproximado: 'Hora fin debe ser mayor a inicio' }));
+        }
+      }
+    }
+  }, [detalles.horaInicio, detalles.horaFin, setDetalles]);
 
   const handleChange = (campo, valor) => {
     setDetalles(prev => ({
@@ -41,22 +63,6 @@ export const FormPermiso = ({ detalles, setDetalles }) => {
         <div><strong>Jefe Inmediato:</strong> {detalles.jefeInmediato}</div>
       </div>
 
-      <div className="form-group">
-        <label className="form-label">Subtipo de Permiso *</label>
-        <select 
-          className="glass-input" 
-          required 
-          value={detalles.subTipo || ''} 
-          onChange={(e) => handleChange('subTipo', e.target.value)}
-        >
-          <option value="" disabled>Seleccione una opción...</option>
-          <option value="Personal">Personal</option>
-          <option value="Salud">Salud</option>
-          <option value="Educativa">Educativa</option>
-          <option value="ELNR">ELNR (Enfermedad Laboral No Reconocida)</option>
-        </select>
-      </div>
-
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
         <div className="form-group">
           <label className="form-label">Fecha del Permiso *</label>
@@ -69,15 +75,17 @@ export const FormPermiso = ({ detalles, setDetalles }) => {
           />
         </div>
         <div className="form-group">
-          <label className="form-label">Tiempo Aproximado *</label>
+          <label className="form-label" style={{ color: 'var(--navy)' }}>Tiempo Total Ausente</label>
           <input 
             type="text" 
             className="glass-input" 
-            placeholder="Ej: 4 horas, 2 días..." 
-            required 
-            value={detalles.tiempoAproximado || ''} 
-            onChange={(e) => handleChange('tiempoAproximado', e.target.value)}
+            disabled 
+            style={{ opacity: 0.8, cursor: 'not-allowed', background: 'rgba(59, 130, 246, 0.1)', color: 'var(--navy)', fontWeight: 'bold' }}
+            value={detalles.tiempoAproximado || 'Seleccione inicio y fin'} 
           />
+          <small style={{ color: 'var(--text-muted)', marginTop: '4px', display: 'block', fontStyle: 'italic' }}>
+            <i className="fa-solid fa-circle-info"></i> Nota: El tiempo aproximado se calcula automáticamente.
+          </small>
         </div>
       </div>
 
@@ -104,7 +112,7 @@ export const FormPermiso = ({ detalles, setDetalles }) => {
         </div>
       </div>
 
-      {detalles.subTipo === 'Personal' && (
+      {tipoTramite === 'Personal' && (
         <div className="form-group" style={{ animation: 'fadeIn 0.3s' }}>
           <label className="form-label" style={{ color: '#f59e0b' }}>
             <i className="fa-solid fa-triangle-exclamation"></i> ¿Cómo va a compensar el tiempo? *

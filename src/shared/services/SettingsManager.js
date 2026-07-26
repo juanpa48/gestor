@@ -41,18 +41,24 @@ const defaultTramitesGE = [
 
 const defaultTramitesGH = [
   {
-    nombre: 'Trámites de Personal',
-    tramites: [
-      "Permiso",
-      "Convenio",
-      "Disfrute vacaciones",
-      "Vacaciones compensadas",
-      "Cesantías",
-      "Auxilio educativo",
-      "Certificado laboral",
-      "SG",
-      "Reportes"
-    ]
+    nombre: 'Permisos',
+    tramites: ["Personal", "Salud", "Educativo", "Licencia no remunerada"]
+  },
+  {
+    nombre: 'Vacaciones',
+    tramites: ["Disfrute vacaciones", "Vacaciones compensadas"]
+  },
+  {
+    nombre: 'Cesantías',
+    tramites: ["Solicitud cesantías"]
+  },
+  {
+    nombre: 'Auxilios y Convenios',
+    tramites: ["Auxilio educativo", "Convenio"]
+  },
+  {
+    nombre: 'Certificados y Reportes',
+    tramites: ["Certificado laboral", "SG", "Reportes"]
   }
 ];
 
@@ -67,20 +73,29 @@ const defaultTramitesTI = [
 
 export const initSettingsDB = () => {
   let settings = localStorage.getItem('db_settings');
+  const defaultSlas = {
+    Urgente: 2,
+    Alta: 8,
+    Media: 24,
+    Baja: 48
+  };
+  
   if (!settings) {
-    const defaultSlas = {
-      Urgente: 2,
-      Alta: 8,
-      Media: 24,
-      Baja: 48
-    };
     settings = {
       ge: { grupos: defaultTramitesGE, slas: { ...defaultSlas } },
       gh: { grupos: defaultTramitesGH, slas: { ...defaultSlas } },
       ti: { grupos: defaultTramitesTI, slas: { ...defaultSlas } }
     };
-    localStorage.setItem('db_settings', JSON.stringify(settings));
+  } else {
+    settings = JSON.parse(settings);
+    // Forzar siempre la estructura estricta de GH
+    if (!settings.gh) {
+      settings.gh = { grupos: defaultTramitesGH, slas: { ...defaultSlas } };
+    } else {
+      settings.gh.grupos = defaultTramitesGH;
+    }
   }
+  localStorage.setItem('db_settings', JSON.stringify(settings));
 };
 
 export const getAreaSettings = (areaId) => {

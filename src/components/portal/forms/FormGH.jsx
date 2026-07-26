@@ -128,10 +128,10 @@ export const FormGH = () => {
 
       {/* RENDERIZADO DINÁMICO (CONTROLADOR) */}
       <div className="dynamic-form-area" style={{ padding: '15px 0', borderTop: '1px dashed var(--card-border)', borderBottom: '1px dashed var(--card-border)', margin: '15px 0' }}>
-        {tipoTramite === 'Permiso' && (
-           <FormPermiso detalles={detalles} setDetalles={setDetalles} />
+        {areaGestion === 'Permisos' && (
+           <FormPermiso detalles={detalles} setDetalles={setDetalles} tipoTramite={tipoTramite} />
         )}
-        {tipoTramite !== 'Permiso' && tipoTramite !== '' && (
+        {areaGestion !== 'Permisos' && tipoTramite !== '' && (
            <div style={{ color: 'var(--text-muted)', fontSize: '14px', padding: '10px' }}>
              <i className="fa-solid fa-circle-info text-blue"></i> Este trámite utilizará el formulario genérico.
            </div>

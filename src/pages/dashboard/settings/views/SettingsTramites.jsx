@@ -72,14 +72,25 @@ export const SettingsTramites = () => {
 
   return (
     <div className="settings-container glass-panel" style={{ padding: '24px', margin: 0 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(30,58,95,0.1)', paddingBottom: '16px', marginBottom: '24px' }}>
-        <h2 style={{ fontSize: '18px', color: 'var(--navy)' }}>
-          <i className="fa-solid fa-list-check"></i> Gestión de Trámites
-        </h2>
-        <button className="btn-secondary" onClick={handleAddGrupo} style={{ padding: '8px 12px', fontSize: '13px' }}>
-          <i className="fa-solid fa-folder-plus"></i> Añadir Grupo
-        </button>
-      </div>
+      {area === 'gh' ? (
+        <div style={{ textAlign: 'center', padding: '40px 20px' }}>
+          <i className="fa-solid fa-lock" style={{ fontSize: '48px', color: 'var(--primary)', marginBottom: '20px', opacity: 0.8 }}></i>
+          <h2 style={{ color: 'var(--navy)', marginBottom: '10px' }}>Trámites de Gestión Humana Protegidos</h2>
+          <p style={{ color: 'var(--text-muted)', maxWidth: '500px', margin: '0 auto', lineHeight: '1.6' }}>
+            Los trámites de Gestión Humana están configurados con formularios dinámicos y lógicas de cálculo especializadas (Permisos, Vacaciones, Cesantías). 
+            Por seguridad, esta estructura se gestiona automáticamente por el sistema y no puede ser modificada manualmente.
+          </p>
+        </div>
+      ) : (
+        <>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(30,58,95,0.1)', paddingBottom: '16px', marginBottom: '24px' }}>
+            <h2 style={{ fontSize: '18px', color: 'var(--navy)' }}>
+              <i className="fa-solid fa-list-check"></i> Gestión de Trámites
+            </h2>
+            <button className="btn-secondary" onClick={handleAddGrupo} style={{ padding: '8px 12px', fontSize: '13px' }}>
+              <i className="fa-solid fa-folder-plus"></i> Añadir Grupo
+            </button>
+          </div>
 
       {grupos.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
@@ -134,11 +145,13 @@ export const SettingsTramites = () => {
         </div>
       )}
 
-      <div style={{ marginTop: '20px', borderTop: '1px solid rgba(30,58,95,0.1)', paddingTop: '20px', textAlign: 'right' }}>
-        <button className="btn-primary" onClick={handleSave} disabled={isSaving}>
-          {isSaving ? <><i className="fa-solid fa-spinner fa-spin"></i> Guardando...</> : <><i className="fa-solid fa-save"></i> Guardar Trámites</>}
-        </button>
-      </div>
+          <div style={{ marginTop: '20px', borderTop: '1px solid rgba(30,58,95,0.1)', paddingTop: '20px', textAlign: 'right' }}>
+            <button className="btn-primary" onClick={handleSave} disabled={isSaving}>
+              {isSaving ? <><i className="fa-solid fa-spinner fa-spin"></i> Guardando...</> : <><i className="fa-solid fa-save"></i> Guardar Trámites</>}
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 };
