@@ -16,6 +16,13 @@
 
 ## Julio 2026
 
+### [2026-07-26] — Refactorización Panel Ajustes y Especialización GH ⚙️
+- **Archivos:** `SettingsLayout.jsx`, `SettingsUsuarios.jsx`, `SettingsSLA.jsx`, `SettingsFestivos.jsx`, `SettingsTramites.jsx`, `App.jsx`, `FormGH.jsx`, `AreaDatabase.jsx`.
+- **Especialización Gestión Humana:** Se eliminó la dependencia de "Prioridad" y "Tipo" para el área de Gestión Humana en todas sus interfaces (Portal, Dashboard, Base de Datos). Se implementó un límite estricto de SLA de 9 horas inamovible y se introdujo la validación booleana `Novedad de Nómina` exclusiva para esta área.
+- **Refactorización Settings:** El archivo gigante `Settings.jsx` fue eliminado y dividido en un sistema modular usando sub-rutas anidadas de `react-router-dom`. La nueva arquitectura mejora radicalmente el rendimiento al renderizar solo la configuración activa.
+- **Consolidación Módulo de Usuarios:** La gestión de usuarios se centralizó en una única tabla inteligente con sistema de pestañas (Resolutores vs Empleados) y creación vía ventana modal (Modal), eliminando el problema de scroll infinito.
+- **Blindaje de Seguridad TI:** El módulo de Gestión de Usuarios ahora cuenta con blindaje y enrutamiento protegido que garantiza que únicamente los administradores de TI (`admin_ti`) puedan visualizar y operar estas opciones.
+
 ### [2026-07-25] — Motor SLA Inteligente, Pausas Dinámicas y Módulo de Festivos ⏱️
 - **Archivos:** `businessHours.js`, `timeHelpers.jsx`, `DbService.js`, `WidgetMiEstado.jsx`, `Settings.jsx`, `Actividades.jsx`, `PortalLayout.jsx`.
 - **Motor SLA ITIL:** Se implementó `businessHours.js` para calcular el consumo del SLA respetando estrictamente el horario laboral configurado (ej. L-J 7:30 a 17:00, V 7:00 a 16:00). Ignora noches y fines de semana.

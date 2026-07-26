@@ -135,16 +135,23 @@
 **Fecha:** 2026-07-25
 **Problema:** Gestión Humana no utiliza los conceptos de "Tipo de Ticket" ni "Prioridad", y su SLA siempre es de 9 horas. Mantener estos campos generaba fricción.
 **Decisión:** 
-- En el Portal, GH tiene su propio formulario (`FormGH.jsx`) 100% independiente donde se eliminaron los campos.
-- En el Dashboard (código compartido), se implementó renderizado condicional (`area !== 'gh'`) en columnas, filtros, modales y configuración SLA.
+- En el Portal, GH tiene su propio formulario (`FormGH.jsx`) 100% independiente donde se eliminaron los campos y se inyectó el flag booleano de `Novedad de Nómina`.
+- En el Dashboard (código compartido), se implementó renderizado condicional (`area !== 'gh'`) en columnas, filtros, modales y configuración SLA para ocultar la prioridad/tipo e incluir la columna de "Nómina".
 - Inyección de SLA duro de 9 horas en `timeHelpers.jsx` para tickets `GH-`.
 - Limpieza en caliente: `DbService.js` mapea la base de datos `db_actividades_gh` al arrancar y elimina los atributos deprecados.
-**Justificación:** Se preserva el principio DRY en el Dashboard administrativo (un solo código base) pero se otorga total independencia funcional y visual a cada área. en el UI.
+- **Acceso Denegado:** Se bloqueó el panel visual de SLA en Ajustes para el área de GH.
+**Justificación:** Se preserva el principio DRY en el Dashboard administrativo (un solo código base) pero se otorga total independencia funcional y visual a cada área en el UI.
 
 ---
 
-## DEC-011: Configuración Dinámica de Trámites
+## DEC-011: Configuración Dinámica de Trámites y Refactor Modular del Panel Ajustes
 - **Estado:** ✅ Vigente
 - **Fecha:** Julio 2026
-- **Contexto:** Requerir intervención de un programador para cambiar los trámites (`tramitesData.js`) era ineficiente.
-- **Decisión:** Se creó el `SettingsManager.js` y el componente visual `Settings.jsx`. Los trámites y sus grupos ahora viven en `db_settings` (`localStorage`). Los menús del portal se nutren automáticamente de esta llave en tiempo real.
+- **Contexto:** Requerir intervención de un programador para cambiar los trámites (`tramitesData.js`) era ineficiente, y posteriormente el archivo unificado de `Settings.jsx` se volvió un cuello de botella de rendimiento por tener la gestión de 50+ usuarios renderizados.
+- **Decisión:** 
+  1. Se creó el `SettingsManager.js` que persiste la configuración de cada área en `db_settings`.
+  2. El archivo gigante de Configuración se reestructuró en sub-rutas dinámicas (`react-router-dom`) usando `SettingsLayout.jsx` como shell y sub-componentes atómicos (`SettingsUsuarios.jsx`, `SettingsSLA.jsx`, etc.) que cargan a demanda.
+- **Consecuencias:**
+  - ✅ Rendimiento óptimo sin renderizados innecesarios.
+  - ✅ La UI de creación/edición de usuarios pasó de obligar a hacer *scroll* a usar un Modal inteligente.
+  - ✅ Blindaje de rutas robusto (las vistas de usuarios están programadas para devolver `Acceso Denegado` si se fuerza la navegación sin el rol correcto).

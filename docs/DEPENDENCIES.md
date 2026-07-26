@@ -90,8 +90,15 @@ flowchart TD
 - Toggle de vistas Tabla y Kanban.
 - **Modal de edición complejo:** Inyecta un `<div className="modal-overlay">` controlado por estado de React.
 - Muta los tickets llamando a `updateTicket()` del context.
+- **Especialización GH:** La tabla y el modal ocultan dinámicamente los campos "Prioridad" y "Tipo" y activan la columna "Novedad de Nómina" si `area === 'gh'`.
 
----
+#### 📄 `src/pages/dashboard/settings/SettingsLayout.jsx` (Ruta `/dashboard/:area/settings`)
+- Shell estructural del módulo de configuración que inyecta la barra de navegación lateral y los botones globales de área (solo para `admin_ti`).
+- Renderiza las vistas hijas anidadas a través de `<Outlet />`:
+  - `SettingsUsuarios.jsx`: Gestión de acceso. Cuenta con protección a nivel de componente impidiendo el acceso a toda área que no sea `ti`.
+  - `SettingsTramites.jsx`, `SettingsFestivos.jsx` y `SettingsSLA.jsx`.
+- **Especialización GH:** Oculta el botón SLA a nivel visual para GH.
+
 
 ### 📄 CSS Modular (`src/styles/`)
 - Mantenido exactamente igual que en la versión Vanilla.

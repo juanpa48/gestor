@@ -133,16 +133,17 @@ Responsabilidades:
 - Consumo dinámico de `useActiveArea` para aislar `responsables` y `actividades` por área.
 - Ruta: `/database/:area` (fuera del DashboardLayout y restringida solo para admin_ti).
 
-### 4.7 Configuración Global (`Settings.jsx` y `SettingsManager.js`)
+### 4.7 Configuración Global (`SettingsLayout.jsx` y Vistas Anidadas)
 Responsabilidades:
-- Reemplaza la antigua configuración en código duro (`tramitesData.js`).
-- Permite a las áreas agregar/quitar grupos y trámites dinámicamente (`db_settings`).
-- Incluye el **Módulo de Administración de Cuentas** exclusivo para TI (desbloqueos y reseteo de contraseñas).
+- Reemplaza el antiguo componente monolítico `Settings.jsx` por una arquitectura modular usando sub-rutas anidadas (`/settings/usuarios`, `/settings/tramites`, etc.).
+- `SettingsTramites`: Permite agregar/quitar grupos y trámites dinámicamente (`db_settings`).
+- `SettingsSLA`: Configura los tiempos máximos de respuesta (Urgente, Alta, Media, Baja).
+- `SettingsFestivos`: Panel para gestión de días festivos que afectan al motor SLA global.
+- `SettingsUsuarios`: **Módulo de Administración de Cuentas** exclusivo para TI (`admin_ti`). Cuenta con protección de ruta, tabla unificada con pestañas (Resolutores vs Empleados), y formularios modales (desbloqueos, edición y reseteo de contraseñas).
 
-### 4.7 Notificaciones (`NotificationCenter.jsx` + `NotificationHelper.js`)
+### 4.8 Notificaciones (`NotificationCenter.jsx` + `NotificationHelper.js`)
 Responsabilidades:
 - Panel desplegable de notificaciones integrado en el `Topbar`.
-- `NotificationHelper.js`: Utilidad de servicio que encapsula alertas sonoras (`AudioContext`) y notificaciones del navegador (Browser Notifications API).
 
 ## 5. Mapeo de Archivos Clave
 

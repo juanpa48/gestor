@@ -56,5 +56,6 @@ Lee `docs/TECHNICAL_SPECS.md` → Patrones, riesgos, modelo de datos y reglas op
 - ✅ **Métricas de Tiempo**: Cálculo automático de duración de tickets en formato `HH:mm:ss`.
 - ✅ **Fase 0 y 1 Completadas**: Reestructuración multi-área y creación de `createAreaContext.jsx`.
 - ✅ **Fase 2, 3 y 4 Completadas**: Portales dinámicos, Dashboards adaptables por área y Base de Datos Multi-Área.
-- 🟨 **EN CURSO**: Puliendo detalles específicos por área (ej. Fase 5 Pospuesta) y optimizaciones de UI.
-- 🔲 Migración a backend real (futuro). Actualmente sigue usando `localStorage` encapsulado en `DbService`.
+- ✅ **Especialización por Área (GH)**: Implementado SLA fijo y validaciones exclusivas de Nómina.
+- ✅ **Panel de Configuración Refactorizado**: Arquitectura modular con sub-rutas, tablas paginadas y blindaje de seguridad para gestión de usuarios.
+- 🔲 **EN CURSO**: Migración a backend real (futuro). Actualmente sigue usando `localStorage` encapsulado en `DbService`.
