@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useGHContext as useTickets } from '../../../areas/gestion-humana/context/GHContext';
 import { getAreaSettings } from '../../../shared/services/SettingsManager';
 import { UploadService } from '../../../shared/services/UploadService';
-import { useAuth } from '../../../shared/contexts/AuthContext';
+import { useAuth, hashPassword } from '../../../shared/contexts/AuthContext';
 import { FormPermiso } from './gh/FormPermiso';
 import { FormConvenio } from './gh/FormConvenio';
 
@@ -35,6 +35,18 @@ export const FormGH = () => {
       return;
     }
 
+    if (areaGestion === 'Convenios' && detalles.consentimientoLegal) {
+      const users = JSON.parse(localStorage.getItem('db_usuarios') || '[]');
+      const targetUser = users.find(u => u.username === currentUser?.username);
+      if (targetUser) {
+        const inputHash = await hashPassword(detalles.firmaClave || '');
+        if (inputHash !== targetUser.passwordHash) {
+          showToast('Firma Inválida: La contraseña ingresada es incorrecta.', 'error', 'lock');
+          return;
+        }
+      }
+    }
+
     setLoadingSubmit(true);
 
     // 1. Generar el ID del ticket primero
@@ -56,6 +68,10 @@ export const FormGH = () => {
 
     // 3. Crear el ticket
     try {
+      // Limpiar datos sensibles antes de guardar en la "BD"
+      const sanitizedDetalles = { ...detalles };
+      delete sanitizedDetalles.firmaClave;
+
       const nuevoTicket = {
         id: newId,
         fechaISO: new Date().toISOString(),
@@ -70,7 +86,7 @@ export const FormGH = () => {
         grupoExtra: tipoTramite,
         clasificacion: tipoTramite,
         novedadNomina: false,
-        detalles: detalles, // Guarda todo el JSON dinámico
+        detalles: sanitizedDetalles,
         adjuntos: adjuntosUrls
       };
 
