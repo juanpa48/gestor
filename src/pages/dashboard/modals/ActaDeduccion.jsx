@@ -15,7 +15,9 @@ export const ActaDeduccion = ({ ticket, onClose }) => {
   // Usar fechaISO si existe, sino intentar parsear la creación
   const dateObj = ticket.fechaISO ? new Date(ticket.fechaISO) : new Date(ticket.fechaCreacion);
   const fechaSolicitudStr = !isNaN(dateObj) ? dateObj.toLocaleDateString() : ticket.fechaCreacion;
-  const fechaFirmaStr = !isNaN(dateObj) ? dateObj.toLocaleString() : ticket.fechaCreacion;
+  const fechaFirmaStr = !isNaN(dateObj) ? dateObj.toLocaleString('es-CO', { 
+    year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true 
+  }) : ticket.fechaCreacion;
   const traceTime = !isNaN(dateObj) ? dateObj.getTime() : Date.now();
 
   return (
@@ -54,6 +56,14 @@ export const ActaDeduccion = ({ ticket, onClose }) => {
               <tr>
                 <td style={{ padding: '8px 0' }}><strong>Cargo:</strong></td>
                 <td>{cargo}</td>
+              </tr>
+              <tr>
+                <td style={{ padding: '8px 0', width: '200px' }}><strong>Trámite:</strong></td>
+                <td>{ticket.clasificacion}</td>
+              </tr>
+              <tr>
+                <td style={{ padding: '8px 0' }}><strong>Fecha y Hora de Autorización:</strong></td>
+                <td>{fechaFirmaStr}</td>
               </tr>
             </tbody>
           </table>
@@ -132,9 +142,10 @@ export const ActaDeduccion = ({ ticket, onClose }) => {
         {/* Firmas */}
         <div style={{ marginTop: '50px' }}>
           {d.firmaCedula ? (
-            <div style={{ marginBottom: '10px', padding: '15px', border: '2px solid #ccc', borderRadius: '4px', background: '#f9f9f9', width: '350px' }}>
+            <div style={{ marginBottom: '10px', padding: '15px', border: '2px solid #ccc', borderRadius: '4px', background: '#f9f9f9', width: '380px' }}>
               <p style={{ margin: '0 0 5px 0', fontSize: '13px', color: '#333' }}><strong>DOCUMENTO FIRMADO ELECTRÓNICAMENTE</strong></p>
               <p style={{ margin: '0 0 5px 0', fontSize: '12px', color: '#555' }}>Mecanismo: Validación por Credenciales y Cédula</p>
+              <p style={{ margin: '0 0 5px 0', fontSize: '12px', color: '#555' }}>Timestamp: {fechaFirmaStr}</p>
               <p style={{ margin: '0 0 5px 0', fontSize: '12px', color: '#555' }}>ID Trazabilidad: {ticket.id}-{traceTime}</p>
             </div>
           ) : (

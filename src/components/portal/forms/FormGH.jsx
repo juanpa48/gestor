@@ -30,7 +30,7 @@ export const FormGH = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!nombre || !tipoTramite || !solicitud) {
+    if (!nombre || !tipoTramite || (!solicitud && areaGestion !== 'Convenios')) {
       showToast('Por favor, complete todos los campos obligatorios.', 'error', 'triangle-exclamation');
       return;
     }
@@ -89,7 +89,7 @@ export const FormGH = () => {
         nombre: nombre,
         solicitante: nombre,
         cargo: currentUser?.cargo || 'Usuario del Sistema',
-        solicitud: solicitud,
+        solicitud: solicitud || (areaGestion === 'Convenios' ? `Solicitud de Convenio de Nómina: ${tipoTramite}` : ''),
         estado: 'Pendiente',
         responsable: '',
         grupo: areaGestion || 'Trámites de Personal',
@@ -168,16 +168,18 @@ export const FormGH = () => {
         )}
       </div>
 
-      <div className="form-group">
-        <label className="form-label">DESCRIPCIÓN DE LA SOLICITUD</label>
-        <textarea 
-          className="glass-input" 
-          placeholder="Describa el requerimiento para Gestión Humana..." 
-          required 
-          value={solicitud} 
-          onChange={(e) => setSolicitud(e.target.value)}
-        ></textarea>
-      </div>
+      {areaGestion !== 'Convenios' && (
+        <div className="form-group">
+          <label className="form-label">DESCRIPCIÓN DE LA SOLICITUD</label>
+          <textarea 
+            className="glass-input" 
+            placeholder="Describa el requerimiento para Gestión Humana..." 
+            required 
+            value={solicitud} 
+            onChange={(e) => setSolicitud(e.target.value)}
+          ></textarea>
+        </div>
+      )}
 
       <div className="form-group">
         <label className="form-label">EVIDENCIAS / ARCHIVOS ADJUNTOS (Opcional)</label>
