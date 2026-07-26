@@ -3,52 +3,34 @@
 ## Últimos Objetivos Completados
 - **Gestión de Usuarios (CRUD):** Se implementaron botones de "Editar", "Suspender" (Soft Delete) y "Eliminar" (Hard Delete) en el panel de Ajustes (`Settings.jsx`).
 - **Unificación de Roles:** El sistema centraliza la creación de perfiles (Solicitantes, Gestores, Admins) en la base `db_usuarios`, alimentando automáticamente los Dashboards dinámicamente por área.
+- **Gestión de SLAs y Tipificación ITIL:** Configuración de SLAs, tipificación, semáforos, pausas de SLA implementados en Dashboard y Portal.
+- **Reactivación de Widget de Estado de Sistemas:** Habilitado para rol `admin_ti` en Panel Principal.
+- **Módulo de Gestión Humana (Especialización):** Eliminación de Tipo y Prioridad para GH, límite estricto de SLA a 9h, y adición del flag `Novedad de Nómina`.
 
 ---
 
-## Nuevo Objetivo: Gestión de SLAs y Tipificación ITIL
+## Nuevo Objetivo: Refactorización Panel Ajustes (Settings)
 
-**Contexto:** Se requiere implementar métricas de tiempos de resolución de ITIL. Se debe poder clasificar tickets como "Incidente" o "Requerimiento", y añadir estados de "Revisado" y "Suspendido" que afecten el cálculo del tiempo SLA configurable por el Administrador.
+**Contexto:** El archivo `Settings.jsx` es actualmente un componente monolítico muy grande que obliga a hacer scroll infinito. Al tener más de 50 usuarios, el renderizado se vuelve pesado. Se requiere dividir este módulo en sub-rutas anidadas (react-router-dom) y un menú lateral de navegación, agrupando la "Gestión de Usuarios" de forma centralizada y paginada.
 
 ### Fases de Implementación:
 
-- [x] **Fase 1: Configuración de SLAs en Ajustes (`Settings.jsx`)**
-  - [x] Añadir sección en Ajustes usando clases `.glass-panel` y `.glass-input`.
-  - [x] Definir horas límite de SLA por cada prioridad (Urgente, Alta, Media, Baja).
-  - [x] Guardar configuración en `localStorage` (vía `SettingsManager`).
-- [x] **Fase 2: Tipificación del Ticket (Incidente vs Requerimiento)**
-  - [x] Portal: Añadir selector de tipo (radio buttons con diseño de tarjetas seleccionables y efectos hover en `forms.css`).
-  - [x] Dashboard: Crear clases `.tipo-badge.incidente` y `.tipo-badge.requerimiento` en `widgets.css` y renderizar el tipo en `Gestion.jsx`.
-- [x] **Fase 3: Nuevos Estados (Revisado y Suspendido) y SLA Tracker**
-  - [x] Modal: Añadir botones con íconos para "Revisado" (ojo) y "Suspender" (pausa) respetando la grilla `.modal-footer`.
-  - [x] Lógica: En `createAreaContext.jsx`, implementar la matemática (`fechaPausa`, `tiempoPausadoTotal`) para pausar el SLA de Resolución.
-- [x] **Fase 4: Semáforos SLA Visuales (`Actividades.jsx`)**
-  - [x] Calcular porcentaje consumido del SLA.
-  - [x] Crear clases `.sla-ok` (Verde), `.sla-warning` (Amarillo) y `.sla-danger` (Rojo) en `widgets.css`.
-  - [x] Mostrar la insignia de tiempo restante en las tablas del Dashboard.
-- [x] **Fase 5: Auditoría Visual y de Estilos (QA)**
-  - [x] Verificación estricta de contrastes (modo oscuro y modo portal).
-  - [x] Comprobación de que no haya estilos `inline` prohibidos.
-  - [x] Ajustes de `flexbox` y `gap` para que los nuevos botones no rompan la UI móvil ni de escritorio.
-  - [x] Mostrar insignias de colores (Verde, Amarillo, Rojo) según el estado del SLA (A tiempo, Por Vencer, Vencido).
-
----
-
-## Nuevo Objetivo: Reactivación de Widget de Estado de Sistemas
-- [x] Habilitar la visibilidad en CSS retirando `display: none` de `#panelControlSistemas`.
-- [x] Implementar renderizado condicional en `PanelPrincipal.jsx` para mostrar el Widget únicamente si el usuario está en el área `ti` y posee el rol `admin_ti`.
-- [x] Ajustar el campo de "Mensaje a Empleados" cambiando de `<input>` temporal a un `<textarea>` permanente para mejor detalle.
-
----
-
-## Nuevo Objetivo: Módulo de Gestión Humana (Especialización - Fase 1)
-- [x] Eliminación visual y de estado de "Tipo de Ticket" en `FormGH.jsx`.
-- [x] Eliminación de bloque de "Prioridad" en `FormGH.jsx`.
-- [x] Ocultamiento condicional de Tipo y Prioridad en tablas y modales del Dashboard (`Gestion.jsx`, `Actividades.jsx`, `RegistroActividadForm.jsx`) para `area === 'gh'`.
-- [x] Ocultamiento de campos Tipo y Prioridad en `AreaDatabase.jsx` para GH.
-- [x] Ocultamiento del configurador de SLA en `Settings.jsx` para GH.
-- [x] Forzado de límite SLA estricto de 9 horas para tickets `GH-` en `timeHelpers.jsx`.
-- [x] Script de migración automática en `DbService.js` para limpiar Tipo/Prioridad de la base de datos histórica de GH.
+- [x] **Fase 1: Configuración de Sub-Rutas en `App.jsx` y Creación de `SettingsLayout.jsx`**
+  - [x] Crear carpeta `src/pages/dashboard/settings/`.
+  - [x] Crear componente `SettingsLayout.jsx` con el diseño de navegación lateral (Sidebar).
+  - [x] Actualizar `App.jsx` para definir las rutas anidadas (`/settings/usuarios`, `/settings/sla`, etc.).
+- [x] **Fase 2: Extracción del Módulo de Festivos y Trámites**
+  - [x] Crear `SettingsFestivos.jsx` migrando la lógica desde `Settings.jsx`.
+  - [x] Crear `SettingsTramites.jsx` migrando la lógica (Grupos y Tipos).
+- [x] **Fase 3: Extracción de SLA y Especialización**
+  - [x] Crear `SettingsSLA.jsx`.
+  - [x] Asegurar que `SettingsSLA` respeta la validación de `area !== 'gh'`.
+- [x] **Fase 4: El Módulo de Usuarios (Consolidación y Optimización)**
+  - [x] Crear `SettingsUsuarios.jsx`.
+  - [x] Integrar tanto el listado/gestión de resolutores como la creación de nuevas cuentas en una tabla limpia con modal.
+- [x] **Fase 5: Testing, Limpieza y Re-vinculación**
+  - [x] Comprobar que todas las pestañas guarden correctamente a través de `SettingsManager`.
+  - [x] Eliminar el viejo `Settings.jsx` y comprobar links en `DashboardLayout.jsx` (Sidebar principal).
 
 ---
 

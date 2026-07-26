@@ -3,7 +3,11 @@ import { DashboardLayout } from './shared/components/layout/DashboardLayout'
 import { PanelPrincipal } from './pages/dashboard/PanelPrincipal'
 import { Actividades } from './pages/dashboard/Actividades'
 import { Gestion } from './pages/dashboard/Gestion'
-import { Settings } from './pages/dashboard/Settings'
+import { SettingsLayout } from './pages/dashboard/settings/SettingsLayout'
+import { SettingsFestivos } from './pages/dashboard/settings/views/SettingsFestivos'
+import { SettingsTramites } from './pages/dashboard/settings/views/SettingsTramites'
+import { SettingsSLA } from './pages/dashboard/settings/views/SettingsSLA'
+import { SettingsUsuarios } from './pages/dashboard/settings/views/SettingsUsuarios'
 import { Portal } from './pages/Portal'
 
 import { ActiveAreaProvider } from './shared/contexts/ActiveAreaContext'
@@ -32,7 +36,13 @@ function App() {
           <Route index element={<PanelPrincipal />} />
           <Route path="actividades" element={<Actividades />} />
           <Route path="gestion" element={<Gestion />} />
-          <Route path="settings" element={<Settings />} />
+          <Route path="settings" element={<SettingsLayout />}>
+            <Route index element={<Navigate to="tramites" replace />} />
+            <Route path="usuarios" element={<SettingsUsuarios />} />
+            <Route path="tramites" element={<SettingsTramites />} />
+            <Route path="sla" element={<SettingsSLA />} />
+            <Route path="festivos" element={<SettingsFestivos />} />
+          </Route>
         </Route>
         
         <Route path="/portal/login" element={<PortalLogin />} />
