@@ -405,9 +405,11 @@ export const Gestion = () => {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', fontSize: '13px' }}>
                   {Object.entries(ticketEdit.detalles).map(([key, value]) => {
                     if (!value) return null;
-                    if (key === 'consentimientoLegal') return null; // No mostrar el boolean raw
-                    if (key === 'firmaClave') return null; // NUNCA mostrar la clave en texto plano
-                    if (key === 'firmaLegal') return null; // Legacy firma con mouse
+                    if (key === 'consentimientoLegal') return null;
+                    if (key === 'firmaClave') return null;
+                    if (key === 'firmaLegal') return null;
+                    if (key === 'proyeccion') return null; // Renderizado especial
+                    if (key === 'fechaInicioCorte') return null; // Ignorar el campo base
 
                     if (key === 'firmaCedula') {
                       return (
@@ -430,8 +432,39 @@ export const Gestion = () => {
                     );
                   })}
                 </div>
+                
+                {ticketEdit.detalles.proyeccion && ticketEdit.detalles.proyeccion.length > 0 && (
+                  <div style={{ marginTop: '20px', background: 'var(--card-bg)', borderRadius: '8px', border: '1px solid var(--card-border)', overflow: 'hidden' }}>
+                    <h5 style={{ background: 'var(--navy)', color: '#fff', margin: 0, padding: '10px 15px', fontSize: '13px' }}>
+                      <i className="fa-solid fa-table"></i> Tabla de Amortización Autorizada
+                    </h5>
+                    <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px', color: 'var(--text-color)' }}>
+                        <thead style={{ background: 'rgba(0,0,0,0.05)', position: 'sticky', top: 0 }}>
+                          <tr>
+                            <th style={{ padding: '8px', textAlign: 'center', borderBottom: '1px solid var(--card-border)' }}># Cuota</th>
+                            <th style={{ padding: '8px', textAlign: 'left', borderBottom: '1px solid var(--card-border)' }}>Corte de Nómina</th>
+                            <th style={{ padding: '8px', textAlign: 'right', borderBottom: '1px solid var(--card-border)' }}>Valor a Descontar</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {ticketEdit.detalles.proyeccion.map((p, idx) => (
+                            <tr key={idx} style={{ borderBottom: '1px solid var(--card-border)' }}>
+                              <td style={{ padding: '8px', textAlign: 'center' }}>{p.cuota}</td>
+                              <td style={{ padding: '8px', textAlign: 'left' }}>{new Date(p.fecha).toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' })}</td>
+                              <td style={{ padding: '8px', textAlign: 'right', fontWeight: 'bold', color: 'var(--red)' }}>
+                                {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(p.valor)}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
+
 
             <div className="form-grid form-grid-2">
               <div className="form-group">

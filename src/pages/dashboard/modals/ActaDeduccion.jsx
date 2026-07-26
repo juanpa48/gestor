@@ -82,15 +82,41 @@ export const ActaDeduccion = ({ ticket, onClose }) => {
               </tr>
               <tr>
                 <td style={{ padding: '8px 0' }}><strong>Fecha Inicio Deducción:</strong></td>
-                <td>{d.fechaInicio}</td>
+                <td>{new Date(d.fechaInicio).toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' })}</td>
               </tr>
               <tr>
                 <td style={{ padding: '8px 0' }}><strong>Fecha Fin Deducción:</strong></td>
-                <td>{d.fechaFin}</td>
+                <td>{new Date(d.fechaFin).toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' })}</td>
               </tr>
             </tbody>
           </table>
         </div>
+
+        {d.proyeccion && d.proyeccion.length > 0 && (
+          <div style={{ marginBottom: '30px', pageBreakInside: 'avoid' }}>
+            <h3 style={{ fontSize: '15px', borderBottom: '1px solid #ccc', paddingBottom: '5px', marginBottom: '10px' }}>2.1. Tabla de Amortización Autorizada</h3>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+              <thead style={{ background: '#f5f5f5' }}>
+                <tr>
+                  <th style={{ border: '1px solid #ccc', padding: '6px', textAlign: 'center' }}>Cuota #</th>
+                  <th style={{ border: '1px solid #ccc', padding: '6px', textAlign: 'left' }}>Fecha de Corte Nómina</th>
+                  <th style={{ border: '1px solid #ccc', padding: '6px', textAlign: 'right' }}>Valor a Descontar</th>
+                </tr>
+              </thead>
+              <tbody>
+                {d.proyeccion.map((p, idx) => (
+                  <tr key={idx}>
+                    <td style={{ border: '1px solid #ccc', padding: '6px', textAlign: 'center' }}>{p.cuota}</td>
+                    <td style={{ border: '1px solid #ccc', padding: '6px', textAlign: 'left' }}>{new Date(p.fecha).toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' })}</td>
+                    <td style={{ border: '1px solid #ccc', padding: '6px', textAlign: 'right', fontWeight: 'bold' }}>
+                      {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(p.valor)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
 
         {/* Texto Legal */}
         <div style={{ marginBottom: '40px', fontSize: '14px', textAlign: 'justify' }}>

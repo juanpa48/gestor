@@ -10,6 +10,8 @@ export const FormConvenio = ({ detalles, setDetalles, tipoTramite }) => {
       valorMontoTotal: prev.valorMontoTotal || '',
       cuotas: prev.cuotas || '',
       periodicidad: prev.periodicidad || 'Quincenal',
+      fechaInicioCorte: prev.fechaInicioCorte || '',
+      proyeccion: prev.proyeccion || [],
       fechaInicio: prev.fechaInicio || '',
       fechaFin: prev.fechaFin || '',
       consentimientoLegal: prev.consentimientoLegal || false,
@@ -48,6 +50,87 @@ export const FormConvenio = ({ detalles, setDetalles, tipoTramite }) => {
       handleChange('firmaCedula', '');
       handleChange('firmaClave', '');
     }
+  };
+
+  const getNextPayPeriods = (count = 6) => {
+    let dates = [];
+    let d = new Date();
+    while (dates.length < count) {
+      let d15 = new Date(d.getFullYear(), d.getMonth(), 15);
+      if (d15 > new Date()) dates.push(d15.toISOString());
+      let eom = new Date(d.getFullYear(), d.getMonth() + 1, 0);
+      if (eom > new Date()) dates.push(eom.toISOString());
+      d = new Date(d.getFullYear(), d.getMonth() + 1, 1);
+    }
+    return dates.slice(0, count);
+  };
+
+  const [opcionesCorte, setOpcionesCorte] = useState([]);
+
+  useEffect(() => {
+    const cortes = getNextPayPeriods(6);
+    setOpcionesCorte(cortes);
+    if (!detalles.fechaInicioCorte) {
+      handleChange('fechaInicioCorte', cortes[0]);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    generarProyeccion();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [detalles.valorMontoTotal, detalles.cuotas, detalles.periodicidad, detalles.fechaInicioCorte]);
+
+  const generarProyeccion = () => {
+    if (!detalles.valorMontoTotal || !detalles.cuotas || !detalles.fechaInicioCorte) {
+      handleChange('proyeccion', []);
+      return;
+    }
+    
+    let total = parseInt(detalles.valorMontoTotal.toString().replace(/[^0-9]/g, ''), 10) || 0;
+    let cuotasNum = parseInt(detalles.cuotas, 10) || 0;
+    if (total <= 0 || cuotasNum <= 0) {
+      handleChange('proyeccion', []);
+      return;
+    }
+
+    let baseAmount = Math.floor(total / cuotasNum);
+    let remainder = total - (baseAmount * cuotasNum);
+
+    let fechas = [];
+    let current = new Date(detalles.fechaInicioCorte);
+    let isQuincenal = detalles.periodicidad === 'Quincenal';
+
+    for (let i = 0; i < cuotasNum; i++) {
+       fechas.push(new Date(current));
+       if (isQuincenal) {
+         if (current.getDate() === 15) {
+           current = new Date(current.getFullYear(), current.getMonth() + 1, 0); // Fin de mes
+         } else {
+           current = new Date(current.getFullYear(), current.getMonth() + 1, 15); // Quince
+         }
+       } else {
+         if (current.getDate() === 15) {
+           current = new Date(current.getFullYear(), current.getMonth() + 1, 15);
+         } else {
+           current = new Date(current.getFullYear(), current.getMonth() + 2, 0);
+         }
+       }
+    }
+
+    let proy = fechas.map((f, i) => {
+       let monto = baseAmount;
+       if (i === cuotasNum - 1) monto += remainder; // Ajuste contable en la última cuota
+       return {
+         cuota: i + 1,
+         fecha: f.toISOString(),
+         valor: monto
+       };
+    });
+
+    handleChange('proyeccion', proy);
+    handleChange('fechaInicio', proy[0].fecha);
+    handleChange('fechaFin', proy[proy.length - 1].fecha);
   };
 
   return (
@@ -116,28 +199,58 @@ export const FormConvenio = ({ detalles, setDetalles, tipoTramite }) => {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px', marginTop: '15px' }}>
         <div className="form-group">
-          <label className="form-label">Fecha Inicio Deducción *</label>
-          <input 
-            type="date" 
-            className="glass-input" 
-            required 
-            value={detalles.fechaInicio || ''} 
-            onChange={(e) => handleChange('fechaInicio', e.target.value)}
-          />
-        </div>
-        <div className="form-group">
-          <label className="form-label">Fecha Fin Deducción *</label>
-          <input 
-            type="date" 
-            className="glass-input" 
-            required 
-            value={detalles.fechaFin || ''} 
-            onChange={(e) => handleChange('fechaFin', e.target.value)}
-          />
+          <label className="form-label">Primera Cuota (Corte de Nómina) *</label>
+          <div style={{ position: 'relative' }}>
+            <i className="fa-regular fa-calendar-check" style={{ position: 'absolute', left: '12px', top: '12px', color: 'var(--text-muted)' }}></i>
+            <select 
+              className="glass-input" 
+              style={{ paddingLeft: '35px' }}
+              required 
+              value={detalles.fechaInicioCorte || ''} 
+              onChange={(e) => handleChange('fechaInicioCorte', e.target.value)}
+            >
+              {opcionesCorte.map((isoStr, idx) => {
+                const d = new Date(isoStr);
+                const is15 = d.getDate() === 15;
+                const label = is15 ? `Quincena (15 de ${d.toLocaleString('es-CO', {month: 'long'})})` : `Fin de mes (${d.getDate()} de ${d.toLocaleString('es-CO', {month: 'long'})})`;
+                return <option key={idx} value={isoStr}>{label} - {d.getFullYear()}</option>;
+              })}
+            </select>
+          </div>
         </div>
       </div>
+
+      {detalles.proyeccion && detalles.proyeccion.length > 0 && (
+        <div style={{ marginTop: '20px', background: '#fff', borderRadius: '8px', border: '1px solid #ccc', overflow: 'hidden' }}>
+          <h5 style={{ background: 'var(--navy)', color: '#fff', margin: 0, padding: '10px 15px', fontSize: '13px' }}>
+            <i className="fa-solid fa-table"></i> Tabla de Amortización (Proyección)
+          </h5>
+          <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+              <thead style={{ background: '#f5f5f5', position: 'sticky', top: 0 }}>
+                <tr>
+                  <th style={{ padding: '8px', textAlign: 'center', borderBottom: '1px solid #ccc' }}># Cuota</th>
+                  <th style={{ padding: '8px', textAlign: 'left', borderBottom: '1px solid #ccc' }}>Corte de Nómina</th>
+                  <th style={{ padding: '8px', textAlign: 'right', borderBottom: '1px solid #ccc' }}>Valor a Descontar</th>
+                </tr>
+              </thead>
+              <tbody>
+                {detalles.proyeccion.map((p, idx) => (
+                  <tr key={idx} style={{ borderBottom: '1px solid #eee' }}>
+                    <td style={{ padding: '8px', textAlign: 'center' }}>{p.cuota}</td>
+                    <td style={{ padding: '8px', textAlign: 'left' }}>{new Date(p.fecha).toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' })}</td>
+                    <td style={{ padding: '8px', textAlign: 'right', fontWeight: 'bold' }}>
+                      {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(p.valor)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       <div style={{ marginTop: '25px', padding: '15px', background: 'rgba(239, 68, 68, 0.05)', border: '1px dashed var(--red)', borderRadius: '8px' }}>
         <h5 style={{ color: 'var(--red)', marginBottom: '10px', fontSize: '14px' }}>
