@@ -3,6 +3,7 @@ import { useGHContext as useTickets } from '../../../areas/gestion-humana/contex
 import { getAreaSettings } from '../../../shared/services/SettingsManager';
 import { UploadService } from '../../../shared/services/UploadService';
 import { useAuth } from '../../../shared/contexts/AuthContext';
+import { FormPermiso } from './gh/FormPermiso';
 
 export const FormGH = () => {
   const { currentUser } = useAuth();
@@ -14,6 +15,7 @@ export const FormGH = () => {
   const grupos = settings.grupos || [];
   const [solicitud, setSolicitud] = useState('');
   const [archivos, setArchivos] = useState([]);
+  const [detalles, setDetalles] = useState({}); // Estado dinámico inyectado por sub-componentes
   const [loadingSubmit, setLoadingSubmit] = useState(false);
 
   const showToast = (message, type = 'success', icon = 'check') => {
@@ -67,7 +69,7 @@ export const FormGH = () => {
         grupoExtra: tipoTramite,
         clasificacion: tipoTramite,
         novedadNomina: false,
-        detalles: '',
+        detalles: detalles, // Guarda todo el JSON dinámico
         adjuntos: adjuntosUrls
       };
 
@@ -76,6 +78,7 @@ export const FormGH = () => {
       setSolicitud('');
       setAreaGestion('');
       setTipoTramite('');
+      setDetalles({});
       setArchivos([]);
       
       showToast(`¡Solicitud <strong>${newId}</strong> enviada a Gestión Humana!`, 'success', 'check');
@@ -123,6 +126,17 @@ export const FormGH = () => {
         </div>
       </div>
 
+      {/* RENDERIZADO DINÁMICO (CONTROLADOR) */}
+      <div className="dynamic-form-area" style={{ padding: '15px 0', borderTop: '1px dashed var(--card-border)', borderBottom: '1px dashed var(--card-border)', margin: '15px 0' }}>
+        {tipoTramite === 'Permiso' && (
+           <FormPermiso detalles={detalles} setDetalles={setDetalles} />
+        )}
+        {tipoTramite !== 'Permiso' && tipoTramite !== '' && (
+           <div style={{ color: 'var(--text-muted)', fontSize: '14px', padding: '10px' }}>
+             <i className="fa-solid fa-circle-info text-blue"></i> Este trámite utilizará el formulario genérico.
+           </div>
+        )}
+      </div>
 
       <div className="form-group">
         <label className="form-label">DESCRIPCIÓN DE LA SOLICITUD</label>

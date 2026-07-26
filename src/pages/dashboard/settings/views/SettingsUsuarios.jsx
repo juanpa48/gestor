@@ -15,6 +15,9 @@ export const SettingsUsuarios = () => {
   const [nombreReal, setNombreReal] = useState('');
   const [username, setUsername] = useState('');
   const [cargo, setCargo] = useState('');
+  const [cedula, setCedula] = useState('');
+  const [celular, setCelular] = useState('');
+  const [jefeInmediato, setJefeInmediato] = useState('');
   const [role, setRole] = useState('solicitante');
   const [area, setArea] = useState('');
   const [activeTab, setActiveTab] = useState('resolutores'); // resolutores | solicitantes
@@ -54,6 +57,9 @@ export const SettingsUsuarios = () => {
       setNombreReal(user.nombreReal || '');
       setUsername(user.username);
       setCargo(user.cargo || '');
+      setCedula(user.cedula || '');
+      setCelular(user.celular || '');
+      setJefeInmediato(user.jefeInmediato || '');
       setRole(user.role || 'solicitante');
       setArea(user.area || '');
     } else {
@@ -61,6 +67,9 @@ export const SettingsUsuarios = () => {
       setNombreReal('');
       setUsername('');
       setCargo('');
+      setCedula('');
+      setCelular('');
+      setJefeInmediato('');
       setRole('solicitante');
       setArea('');
     }
@@ -89,6 +98,9 @@ export const SettingsUsuarios = () => {
       if (userIndex !== -1) {
         db[userIndex].nombreReal = nombreReal.trim();
         db[userIndex].cargo = cargo.trim() || ((role === 'solicitante') ? 'Empleado' : 'Gestor');
+        db[userIndex].cedula = cedula.trim();
+        db[userIndex].celular = celular.trim();
+        db[userIndex].jefeInmediato = jefeInmediato.trim();
         db[userIndex].role = role;
         db[userIndex].area = (role === 'solicitante') ? null : area;
         
@@ -112,6 +124,9 @@ export const SettingsUsuarios = () => {
         role: role,
         area: (role === 'solicitante') ? null : area,
         cargo: cargo.trim() || ((role === 'solicitante') ? 'Empleado' : 'Gestor'),
+        cedula: cedula.trim(),
+        celular: celular.trim(),
+        jefeInmediato: jefeInmediato.trim(),
         bloqueado: false,
         intentosFallidos: 0
       };
@@ -217,7 +232,10 @@ export const SettingsUsuarios = () => {
             ) : (
               displayedUsers.map(u => (
                 <tr key={u.username} style={{ borderBottom: '1px solid rgba(30,58,95,0.05)', transition: 'background 0.2s' }} className="table-row-hover">
-                  <td style={{ padding: '16px', fontWeight: '600', color: 'var(--navy)' }}>{u.nombreReal || '-'}</td>
+                  <td style={{ padding: '16px' }}>
+                    <div style={{ fontWeight: '600', color: 'var(--navy)' }}>{u.nombreReal || '-'}</div>
+                    {u.cedula && <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}><i className="fa-regular fa-id-card"></i> {u.cedula}</div>}
+                  </td>
                   <td style={{ padding: '16px', color: 'var(--text-muted)' }}>{u.username}</td>
                   <td style={{ padding: '16px' }}>
                     <span style={{ display: 'block', padding: '4px 8px', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold', width: 'fit-content' }}>
@@ -297,6 +315,22 @@ export const SettingsUsuarios = () => {
               <div className="form-group">
                 <label className="form-label">Cargo (Ej: Analista)</label>
                 <input type="text" className="glass-input" value={cargo} onChange={e => setCargo(e.target.value)} />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                <div className="form-group">
+                  <label className="form-label">Cédula</label>
+                  <input type="text" className="glass-input" value={cedula} onChange={e => setCedula(e.target.value)} />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Celular</label>
+                  <input type="text" className="glass-input" value={celular} onChange={e => setCelular(e.target.value)} />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Jefe Inmediato</label>
+                <input type="text" className="glass-input" value={jefeInmediato} onChange={e => setJefeInmediato(e.target.value)} />
               </div>
 
               <div className="form-group">

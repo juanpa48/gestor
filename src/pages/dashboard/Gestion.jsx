@@ -387,6 +387,26 @@ export const Gestion = () => {
               {ticketEdit.solicitud} {ticketEdit.solicitante ? `- Solicitante: ${ticketEdit.solicitante}` : ''}
             </div>
 
+            {/* RENDERIZADOR DINÁMICO DE DETALLES (GH JSON) */}
+            {ticketEdit.detalles && typeof ticketEdit.detalles === 'object' && Object.keys(ticketEdit.detalles).length > 0 && (
+              <div className="kanban-desc-box" style={{ marginTop: '10px', background: 'rgba(59, 130, 246, 0.05)', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+                <strong style={{ display: 'block', marginBottom: '12px', color: 'var(--navy)' }}><i className="fa-solid fa-list-check"></i> Detalles Específicos del Trámite</strong>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', fontSize: '13px' }}>
+                  {Object.entries(ticketEdit.detalles).map(([key, value]) => {
+                    if (!value) return null;
+                    // Capitalizar CamelCase de forma bonita
+                    const formattedKey = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+                    return (
+                      <div key={key}>
+                        <strong style={{ color: 'var(--text-muted)' }}>{formattedKey}:</strong> 
+                        <span style={{ color: 'var(--text-color)', display: 'block', marginTop: '2px' }}>{value}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             <div className="form-grid form-grid-2">
               <div className="form-group">
                 <label className="form-label">Estado</label>

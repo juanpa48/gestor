@@ -43,12 +43,15 @@ const defaultTramitesGH = [
   {
     nombre: 'Trámites de Personal',
     tramites: [
-      "Vinculación de personal",
-      "Desvinculación de personal",
-      "Permiso ausentismo",
-      "Solicitud cesantías",
-      "Solicitud carta laboral",
-      "Solicitud vacaciones"
+      "Permiso",
+      "Convenio",
+      "Disfrute vacaciones",
+      "Vacaciones compensadas",
+      "Cesantías",
+      "Auxilio educativo",
+      "Certificado laboral",
+      "SG",
+      "Reportes"
     ]
   }
 ];

@@ -9,28 +9,21 @@
 
 ---
 
-## Nuevo Objetivo: Refactorización Panel Ajustes (Settings)
+## 🚀 Bitácora de Progreso (Gestión Empresarial)
 
-**Contexto:** El archivo `Settings.jsx` es actualmente un componente monolítico muy grande que obliga a hacer scroll infinito. Al tener más de 50 usuarios, el renderizado se vuelve pesado. Se requiere dividir este módulo en sub-rutas anidadas (react-router-dom) y un menú lateral de navegación, agrupando la "Gestión de Usuarios" de forma centralizada y paginada.
+## Nuevo Objetivo: Formularios Dinámicos de Gestión Humana (GH)
+> **Contexto:** GH requiere 9 trámites altamente especializados. Cada trámite transforma el formulario añadiendo campos condicionales (ej. Fecha de Permiso, Hora Inicio/Fin, Cómo Compensa). Se implementará un patrón de Controlador Modular que empaqueta estos campos en un objeto JSON (`detalles`) en la tabla única.
 
-### Fases de Implementación:
-
-- [x] **Fase 1: Configuración de Sub-Rutas en `App.jsx` y Creación de `SettingsLayout.jsx`**
-  - [x] Crear carpeta `src/pages/dashboard/settings/`.
-  - [x] Crear componente `SettingsLayout.jsx` con el diseño de navegación lateral (Sidebar).
-  - [x] Actualizar `App.jsx` para definir las rutas anidadas (`/settings/usuarios`, `/settings/sla`, etc.).
-- [x] **Fase 2: Extracción del Módulo de Festivos y Trámites**
-  - [x] Crear `SettingsFestivos.jsx` migrando la lógica desde `Settings.jsx`.
-  - [x] Crear `SettingsTramites.jsx` migrando la lógica (Grupos y Tipos).
-- [x] **Fase 3: Extracción de SLA y Especialización**
-  - [x] Crear `SettingsSLA.jsx`.
-  - [x] Asegurar que `SettingsSLA` respeta la validación de `area !== 'gh'`.
-- [x] **Fase 4: El Módulo de Usuarios (Consolidación y Optimización)**
-  - [x] Crear `SettingsUsuarios.jsx`.
-  - [x] Integrar tanto el listado/gestión de resolutores como la creación de nuevas cuentas en una tabla limpia con modal.
-- [x] **Fase 5: Testing, Limpieza y Re-vinculación**
-  - [x] Comprobar que todas las pestañas guarden correctamente a través de `SettingsManager`.
-  - [x] Eliminar el viejo `Settings.jsx` y comprobar links en `DashboardLayout.jsx` (Sidebar principal).
+- [x] **Fase 1: Arquitectura Base y Preparación del Controlador**
+  - [x] Refactorizar `FormGH.jsx` para despachar componentes basados en `tipoTramite`.
+  - [x] Preparar `handleSubmit` para recibir el objeto `detalles`.
+- [x] **Fase 2: Componente Dinámico Piloto (`FormPermiso.jsx`)**
+  - [x] Crear el formulario especializado de permisos.
+  - [x] Consumir `cedula`, `celular`, `jefeInmediato` del usuario actual.
+- [x] **Fase 3: Adaptación del Dashboard del Gestor**
+  - [x] Modificar `Gestion.jsx` para imprimir el JSON `detalles` dinámicamente.
+- [x] **Fase 4: Limpieza de Base de Datos**
+  - [x] Limpiar sub-trámites en la UI de Ajustes.
 
 ---
 
