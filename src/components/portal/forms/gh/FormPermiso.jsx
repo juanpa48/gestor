@@ -4,17 +4,10 @@ import { useAuth } from '../../../../shared/contexts/AuthContext';
 export const FormPermiso = ({ detalles, setDetalles, tipoTramite }) => {
   const { currentUser } = useAuth();
 
-  // Inyectar datos del perfil del usuario al montar el componente
+  // Inyectar datos del perfil del usuario al montar el componente (removidos datos innecesarios para Permisos)
   useEffect(() => {
-    // Obtener datos frescos de la BD para evitar datos de sesión antiguos
-    const db = JSON.parse(localStorage.getItem('db_usuarios') || '[]');
-    const freshUser = db.find(u => u.username === currentUser?.username) || currentUser;
-
     setDetalles(prev => ({
       ...prev,
-      cedula: freshUser?.cedula || 'No registrada',
-      celular: freshUser?.celular || 'No registrado',
-      jefeInmediato: freshUser?.jefeInmediato || 'No registrado',
       fechaPermiso: prev.fechaPermiso || '',
       horaInicio: prev.horaInicio || '',
       horaFin: prev.horaFin || '',
@@ -59,13 +52,6 @@ export const FormPermiso = ({ detalles, setDetalles, tipoTramite }) => {
       <h4 style={{ color: 'var(--navy)', marginBottom: '15px', borderBottom: '1px solid rgba(30,58,95,0.1)', paddingBottom: '8px' }}>
         <i className="fa-solid fa-clock"></i> Detalles del Permiso
       </h4>
-
-      {/* Datos precargados del perfil */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginBottom: '20px', fontSize: '13px', background: 'rgba(30,58,95,0.05)', padding: '10px', borderRadius: '6px' }}>
-        <div><strong>Cédula:</strong> {detalles.cedula}</div>
-        <div><strong>Celular:</strong> {detalles.celular}</div>
-        <div><strong>Jefe Inmediato:</strong> {detalles.jefeInmediato}</div>
-      </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
         <div className="form-group">

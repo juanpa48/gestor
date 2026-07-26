@@ -42,7 +42,7 @@ const defaultTramitesGE = [
 const defaultTramitesGH = [
   {
     nombre: 'Permisos',
-    tramites: ["Personal", "Salud", "Educativo", "Licencia no remunerada"]
+    tramites: ["Personal", "Salud", "Educativo", "Licencia no remunerada (LNR)"]
   },
   {
     nombre: 'Vacaciones',
