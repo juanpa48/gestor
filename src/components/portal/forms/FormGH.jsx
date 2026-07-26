@@ -4,6 +4,7 @@ import { getAreaSettings } from '../../../shared/services/SettingsManager';
 import { UploadService } from '../../../shared/services/UploadService';
 import { useAuth } from '../../../shared/contexts/AuthContext';
 import { FormPermiso } from './gh/FormPermiso';
+import { FormConvenio } from './gh/FormConvenio';
 
 export const FormGH = () => {
   const { currentUser } = useAuth();
@@ -131,7 +132,10 @@ export const FormGH = () => {
         {areaGestion === 'Permisos' && (
            <FormPermiso detalles={detalles} setDetalles={setDetalles} tipoTramite={tipoTramite} />
         )}
-        {areaGestion !== 'Permisos' && tipoTramite !== '' && (
+        {areaGestion === 'Auxilios y Convenios' && tipoTramite === 'Convenio' && (
+           <FormConvenio detalles={detalles} setDetalles={setDetalles} tipoTramite={tipoTramite} />
+        )}
+        {areaGestion !== 'Permisos' && !(areaGestion === 'Auxilios y Convenios' && tipoTramite === 'Convenio') && tipoTramite !== '' && (
            <div style={{ color: 'var(--text-muted)', fontSize: '14px', padding: '10px' }}>
              <i className="fa-solid fa-circle-info text-blue"></i> Este trámite utilizará el formulario genérico.
            </div>
