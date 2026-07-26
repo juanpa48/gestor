@@ -12,13 +12,29 @@ export const ActaDeduccion = ({ ticket, onClose }) => {
   const cedula = d.cedula || userObj.cedula || ticket.solicitante?.cedula || 'N/A';
   const cargo = userObj.cargo || ticket.solicitante?.cargo || 'N/A';
 
-  // Usar fechaISO si existe, sino intentar parsear la creación
-  const dateObj = ticket.fechaISO ? new Date(ticket.fechaISO) : new Date(ticket.fechaCreacion);
-  const fechaSolicitudStr = !isNaN(dateObj) ? dateObj.toLocaleDateString() : ticket.fechaCreacion;
-  const fechaFirmaStr = !isNaN(dateObj) ? dateObj.toLocaleString('es-CO', { 
-    year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true 
-  }) : ticket.fechaCreacion;
-  const traceTime = !isNaN(dateObj) ? dateObj.getTime() : Date.now();
+  let fechaSolicitudStr = ticket.fechaCreacion || 'Fecha no disponible';
+  let fechaFirmaStr = ticket.fechaCreacion || 'Fecha no disponible';
+  let traceTime = Date.now();
+
+  try {
+    const rawDateStr = ticket.fechaISO || ticket.fechaCreacion;
+    if (rawDateStr) {
+      // Intentar limpiar la cadena si viene de toLocaleString
+      const cleanDateStr = rawDateStr.replace(/, /g, ' ').replace(/\./g, '');
+      const dateObj = new Date(ticket.fechaISO || cleanDateStr);
+      
+      if (!isNaN(dateObj.getTime())) {
+        fechaSolicitudStr = dateObj.toLocaleDateString('es-CO');
+        fechaFirmaStr = dateObj.toLocaleString('es-CO', { 
+          year: 'numeric', month: 'long', day: 'numeric', 
+          hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true 
+        });
+        traceTime = dateObj.getTime();
+      }
+    }
+  } catch (e) {
+    console.error("Error parseando fecha", e);
+  }
 
   return (
     <div className="acta-overlay">
