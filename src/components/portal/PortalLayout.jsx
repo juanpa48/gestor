@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../shared/contexts/AuthContext';
+import { ActaDeduccion } from '../../pages/dashboard/modals/ActaDeduccion';
 
 export const PortalLayout = ({ areaConfig, areaContext, onBack, children, nombre, setNombre }) => {
   const { actividades, solicitantes, responsables } = areaContext();
   const { logout } = useAuth();
   const [sistemas, setSistemas] = useState({});
   const [personalTI, setPersonalTI] = useState({});
+  const [actaTicket, setActaTicket] = useState(null);
   // Sync systems & IT staff from localStorage
   useEffect(() => {
     const handleStorage = () => {
@@ -184,6 +186,7 @@ export const PortalLayout = ({ areaConfig, areaContext, onBack, children, nombre
                   else if (estadoTxt.includes('esuelto') || estadoTxt.includes('errado')) bqClass = 'resuelto';
 
                   const truncar = t.solicitud ? (t.solicitud.length > 40 ? t.solicitud.substring(0, 40) + '...' : t.solicitud) : 'Sin detalles';
+                  const isConvenio = t.tipoSolicitud === 'Convenios' || (t.solicitud && t.solicitud.includes('Convenio de Nómina'));
 
                   return (
                     <div key={t.id} className="history-ticket">
@@ -193,9 +196,21 @@ export const PortalLayout = ({ areaConfig, areaContext, onBack, children, nombre
                           <i className="fa-solid fa-user-check" style={{ color: '#3b82f6' }}></i> Asignado a: <strong>{t.responsable}</strong>
                         </div>
                       )}
-                      <div className="ht-meta">
-                        <span className={`badge ${bqClass}`}>{estadoTxt}</span>
-                        <span className="ht-date">{t.id || '--'}</span>
+                      <div className="ht-meta" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                          <span className={`badge ${bqClass}`}>{estadoTxt}</span>
+                          <span className="ht-date" style={{ marginLeft: '6px' }}>{t.id || '--'}</span>
+                        </div>
+                        {isConvenio && (
+                          <button 
+                            className="btn-secondary" 
+                            style={{ fontSize: '11px', padding: '3px 8px', margin: 0, borderRadius: '4px', cursor: 'pointer' }}
+                            title="Descargar o imprimir copia del Acta PDF"
+                            onClick={(e) => { e.stopPropagation(); setActaTicket(t); }}
+                          >
+                            <i className="fa-solid fa-file-pdf" style={{ color: '#ef4444' }}></i> Ver Acta
+                          </button>
+                        )}
                       </div>
                     </div>
                   );
@@ -247,6 +262,8 @@ export const PortalLayout = ({ areaConfig, areaContext, onBack, children, nombre
         </aside>
       </div>
       <div id="toast" className="toast"></div>
+
+      {actaTicket && <ActaDeduccion ticket={actaTicket} onClose={() => setActaTicket(null)} />}
     </div>
   );
 };
