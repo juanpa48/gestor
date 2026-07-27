@@ -82,6 +82,11 @@ export const FormGH = () => {
       const sanitizedDetalles = { ...detalles };
       delete sanitizedDetalles.firmaClave;
 
+      if (areaGestion === 'Convenios' && sanitizedDetalles.consentimientoLegal) {
+        sanitizedDetalles.firmaISO = new Date().toISOString();
+        sanitizedDetalles.firmaTimestamp = Date.now();
+      }
+
       const nuevoTicket = {
         id: newId,
         fechaISO: new Date().toISOString(),

@@ -12,43 +12,36 @@ export const ActaDeduccion = ({ ticket, onClose }) => {
   const cedula = d.cedula || userObj.cedula || ticket.solicitante?.cedula || 'N/A';
   const cargo = userObj.cargo || ticket.solicitante?.cargo || 'N/A';
 
-  let fechaSolicitudStr = new Date().toLocaleDateString('es-CO');
-  let fechaFirmaStr = new Date().toLocaleString('es-CO', { 
+  // 1. Intentar usar la estampa de tiempo exacta de la firma (la más precisa)
+  // 2. Si no existe (tickets antiguos), usar la del ticket general
+  const rawIso = d.firmaISO || ticket.fechaISO;
+  const rawTimestamp = d.firmaTimestamp || (ticket.fechaInicioTimestamp); 
+  
+  let fechaFirmaDate = null;
+
+  if (rawIso) {
+    fechaFirmaDate = new Date(rawIso);
+  } else if (rawTimestamp) {
+    fechaFirmaDate = new Date(rawTimestamp);
+  } else if (ticket.fechaCreacion) {
+    const parts = ticket.fechaCreacion.split(',')[0].split('/');
+    if (parts.length === 3) {
+      fechaFirmaDate = new Date(parts[2], parts[1] - 1, parts[0]);
+    }
+  }
+
+  // Si a pesar de todo no hay fecha válida (ticket corrupto), usar una fecha estática
+  // para evitar que se actualice cada vez que se abre el modal.
+  if (!fechaFirmaDate || isNaN(fechaFirmaDate.getTime())) {
+    fechaFirmaDate = new Date("2026-07-26T00:00:00"); // Fallback estático
+  }
+
+  const fechaSolicitudStr = fechaFirmaDate.toLocaleDateString('es-CO');
+  const fechaFirmaStr = fechaFirmaDate.toLocaleString('es-CO', { 
     year: 'numeric', month: 'long', day: 'numeric', 
     hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true 
   });
-  let traceTime = Date.now();
-
-  try {
-    if (ticket.fechaISO) {
-      const dateObj = new Date(ticket.fechaISO);
-      if (!isNaN(dateObj.getTime())) {
-        fechaSolicitudStr = dateObj.toLocaleDateString('es-CO');
-        fechaFirmaStr = dateObj.toLocaleString('es-CO', { 
-          year: 'numeric', month: 'long', day: 'numeric', 
-          hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true 
-        });
-        traceTime = dateObj.getTime();
-      }
-    } else if (ticket.fechaCreacion) {
-      // Intentar parsear el string "26/7/2026, 18:55:00"
-      const parts = ticket.fechaCreacion.split(',')[0].split('/');
-      if (parts.length === 3) {
-        // Asume DD/MM/YYYY
-        const day = parseInt(parts[0], 10);
-        const month = parseInt(parts[1], 10) - 1;
-        const year = parseInt(parts[2], 10);
-        const dateObj = new Date(year, month, day);
-        if (!isNaN(dateObj.getTime())) {
-          fechaSolicitudStr = dateObj.toLocaleDateString('es-CO');
-          // No tenemos la hora fácil de parsear de la cadena localizada, mejor dejamos la cadena original para firma
-          fechaFirmaStr = ticket.fechaCreacion;
-        }
-      }
-    }
-  } catch (e) {
-    console.error("Error parseando fecha", e);
-  }
+  const traceTime = d.firmaTimestamp || fechaFirmaDate.getTime();
 
   return (
     <div className="acta-overlay">
