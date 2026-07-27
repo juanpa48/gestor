@@ -99,7 +99,7 @@ export const FormCesantias = ({ detalles, setDetalles, tipoTramite }) => {
             />
           </div>
           <div className="form-group">
-            <label className="form-label">Adjunto: Documento Compraventa *</label>
+            <label className="form-label">Adjunto: Promesa de compraventa *</label>
             <input 
               type="file" 
               className="glass-input" 
