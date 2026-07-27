@@ -45,20 +45,8 @@ const defaultTramitesGH = [
     tramites: ["Personal", "Salud", "Educativo", "Licencia no remunerada (LNR)"]
   },
   {
-    nombre: 'Vacaciones',
-    tramites: ["Disfrute vacaciones", "Vacaciones compensadas"]
-  },
-  {
-    nombre: 'Cesantías',
-    tramites: ["Solicitud cesantías"]
-  },
-  {
     nombre: 'Convenios',
     tramites: ["Servicio", "Smartfit", "Gafas", "Psicología", "Préstamo personal", "Bolsos", "Comfama cursos"]
-  },
-  {
-    nombre: 'Certificados y Reportes',
-    tramites: ["Certificado laboral", "SG", "Reportes"]
   }
 ];
 
