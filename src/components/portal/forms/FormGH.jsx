@@ -5,6 +5,7 @@ import { UploadService } from '../../../shared/services/UploadService';
 import { useAuth, hashPassword } from '../../../shared/contexts/AuthContext';
 import { FormPermiso } from './gh/FormPermiso';
 import { FormConvenio } from './gh/FormConvenio';
+import { FormVacaciones } from './gh/FormVacaciones';
 
 export const FormGH = () => {
   const { currentUser } = useAuth();
@@ -30,7 +31,7 @@ export const FormGH = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!nombre || !tipoTramite || (!solicitud && tipoSolicitud !== 'Convenios')) {
+    if (!nombre || !tipoTramite || (!solicitud && tipoSolicitud !== 'Convenios' && tipoSolicitud !== 'Vacaciones')) {
       showToast('Por favor, complete todos los campos obligatorios.', 'error', 'triangle-exclamation');
       return;
     }
@@ -94,7 +95,7 @@ export const FormGH = () => {
         nombre: nombre,
         solicitante: nombre,
         cargo: currentUser?.cargo || 'Usuario del Sistema',
-        solicitud: solicitud || (tipoSolicitud === 'Convenios' ? `Solicitud de Convenio de Nómina: ${tipoTramite}` : ''),
+        solicitud: solicitud || (tipoSolicitud === 'Convenios' ? `Solicitud de Convenio de Nómina: ${tipoTramite}` : tipoSolicitud === 'Vacaciones' ? `Solicitud de Vacaciones: ${tipoTramite}` : ''),
         estado: 'Pendiente',
         responsable: '',
         tipoSolicitud: tipoSolicitud || 'Trámites de Personal',
@@ -166,14 +167,17 @@ export const FormGH = () => {
         {tipoSolicitud === 'Convenios' && (
            <FormConvenio detalles={detalles} setDetalles={setDetalles} tipoTramite={tipoTramite} />
         )}
-        {tipoSolicitud !== 'Permisos' && tipoSolicitud !== 'Convenios' && tipoTramite !== '' && (
+        {tipoSolicitud === 'Vacaciones' && (
+           <FormVacaciones detalles={detalles} setDetalles={setDetalles} tipoTramite={tipoTramite} />
+        )}
+        {tipoSolicitud !== 'Permisos' && tipoSolicitud !== 'Convenios' && tipoSolicitud !== 'Vacaciones' && tipoTramite !== '' && (
            <div style={{ color: 'var(--text-muted)', fontSize: '14px', padding: '10px' }}>
              <i className="fa-solid fa-circle-info text-blue"></i> Este trámite utilizará el formulario genérico.
            </div>
         )}
       </div>
 
-      {tipoSolicitud !== 'Convenios' && (
+      {tipoSolicitud !== 'Convenios' && tipoSolicitud !== 'Vacaciones' && (
         <div className="form-group">
           <label className="form-label">DESCRIPCIÓN DE LA SOLICITUD</label>
           <textarea 

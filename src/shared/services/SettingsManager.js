@@ -47,6 +47,10 @@ const defaultTiposSolicitudGH = [
   {
     nombre: 'Convenios',
     tramites: ["Servicio", "Smartfit", "Gafas", "Psicología", "Préstamo personal", "Bolsos", "Comfama cursos"]
+  },
+  {
+    nombre: 'Vacaciones',
+    tramites: ["Disfrute de Vacaciones"]
   }
 ];
 
