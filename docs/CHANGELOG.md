@@ -16,6 +16,12 @@
 
 ## Julio 2026
 
+### [2026-07-27] — Refactorización Global "Tipo de Solicitud" y Módulo de Convenios 📄
+- **Refactorización Terminológica:** Se realizó un cambio masivo en todo el frontend y la base de datos (localStorage) reemplazando la terminología "Área de Gestión / Grupo" por "Tipo de Solicitud" y "Tipo de Trámite" por "Trámite Específico". Esto afectó a `SettingsManager.js`, `DbService.js`, todos los formularios de solicitante (`FormGH`, `FormGE`, `FormTI`), los archivos de configuración (`config.js`) y todos los paneles del Gestor (`Gestion.jsx`, `RegistroActividadForm.jsx`, Estadísticas).
+- **Módulo Especializado de Convenios (GH):** Implementado el componente dinámico `FormConvenio.jsx` que calcula automáticamente proyecciones de deducción de nómina según monto, cuotas y fechas de corte (quincenal/mensual).
+- **Firma Electrónica Legal:** En lugar de canvas, se implementó un sistema de "Firma Electrónica Avanzada" exigiendo re-autenticación con contraseña (hasheada en SHA-256) y validación del documento de identidad (Cédula) del usuario logueado para generar estampas de tiempo (`firmaTimestamp`) de no repudio.
+- **Generación de Acta PDF:** Se creó el componente `ActaDeduccion.jsx` en el Kanban del gestor que permite generar un documento legal imprimible/PDF con la tabla de amortización detallada, texto de consentimiento legal y trazabilidad de la firma electrónica del empleado.
+
 ### [2026-07-26] — Refactorización Panel Ajustes y Especialización GH ⚙️
 - **Archivos:** `SettingsLayout.jsx`, `SettingsUsuarios.jsx`, `SettingsSLA.jsx`, `SettingsFestivos.jsx`, `SettingsTramites.jsx`, `App.jsx`, `FormGH.jsx`, `AreaDatabase.jsx`.
 - **Especialización Gestión Humana:** Se eliminó la dependencia de "Prioridad" y "Tipo" para el área de Gestión Humana en todas sus interfaces (Portal, Dashboard, Base de Datos). Se implementó un límite estricto de SLA de 9 horas inamovible y se introdujo la validación booleana `Novedad de Nómina` exclusiva para esta área.

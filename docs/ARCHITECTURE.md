@@ -136,7 +136,7 @@ Responsabilidades:
 ### 4.7 Configuración Global (`SettingsLayout.jsx` y Vistas Anidadas)
 Responsabilidades:
 - Reemplaza el antiguo componente monolítico `Settings.jsx` por una arquitectura modular usando sub-rutas anidadas (`/settings/usuarios`, `/settings/tramites`, etc.).
-- `SettingsTramites`: Permite agregar/quitar grupos y trámites dinámicamente (`db_settings`).
+- `SettingsTramites`: Permite agregar/quitar tipos de solicitud y trámites dinámicamente (`db_settings`).
 - `SettingsSLA`: Configura los tiempos máximos de respuesta (Urgente, Alta, Media, Baja).
 - `SettingsFestivos`: Panel para gestión de días festivos que afectan al motor SLA global.
 - `SettingsUsuarios`: **Módulo de Administración de Cuentas** exclusivo para TI (`admin_ti`). Cuenta con protección de ruta, tabla unificada con pestañas (Resolutores vs Empleados), y formularios modales (desbloqueos, edición y reseteo de contraseñas).

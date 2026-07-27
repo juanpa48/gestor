@@ -14,18 +14,27 @@
 ## Nuevo Objetivo: Módulo de Convenios y Firma Digital
 > **Contexto:** Se requiere construir el segundo formulario altamente especializado de GH ("Convenios") el cual involucra deducciones de nómina. Para dar respaldo legal, se implementará un componente de Firma Digital Canvas en el formulario del empleado y un Generador de Acta PDF en el Dashboard del Gestor.
 
-- [ ] **Fase 1: Construcción del Formulario de Convenios (`FormConvenio.jsx`)**
-  - [ ] Crear campos: Deducción de nómina, Valor, Cuotas, Periodicidad, Fechas.
-  - [ ] Implementar formateo automático de moneda ($ COP) en el campo Valor.
-  - [ ] Conectar `FormConvenio` al controlador `FormGH.jsx`.
-- [ ] **Fase 2: Implementación de la Firma Digital Legal**
-  - [ ] Instalar e integrar `react-signature-canvas`.
-  - [ ] Agregar el texto de consentimiento legal en el formulario.
-  - [ ] Codificar la firma como imagen Base64 dentro del objeto `detalles`.
-- [ ] **Fase 3: Generador de Evidencia en Dashboard**
-  - [ ] Diseñar el componente `ActaDeduccion.jsx` (Vista estilo documento legal).
-  - [ ] Modificar el Modal de `Gestion.jsx` para mostrar el botón "Generar Acta PDF" si el ticket es de convenio.
-  - [ ] Integrar ventana de impresión (`window.print()`) para descargar el PDF.
+- [x] **Fase 1: Construcción del Formulario de Convenios (`FormConvenio.jsx`)**
+  - [x] Crear campos: Deducción de nómina, Valor, Cuotas, Periodicidad, Fechas.
+  - [x] Implementar formateo automático de moneda ($ COP) en el campo Valor.
+  - [x] Conectar `FormConvenio` al controlador `FormGH.jsx`.
+- [x] **Fase 2: Implementación de la Firma Digital Legal**
+  - [x] Integrar validación legal vía credenciales de login (password y cédula) como firma electrónica de alta seguridad.
+  - [x] Agregar el texto de consentimiento legal en el formulario.
+  - [x] Guardar estampas de tiempo (`firmaTimestamp` y `firmaISO`) para validación de no repudio.
+- [x] **Fase 3: Generador de Evidencia en Dashboard**
+  - [x] Diseñar el componente `ActaDeduccion.jsx` (Vista estilo documento legal).
+  - [x] Modificar el Modal de `Gestion.jsx` para mostrar el botón "Generar Acta PDF" si el ticket es de convenio.
+  - [x] Integrar ventana de impresión (`window.print()`) para descargar el PDF.
+
+---
+
+## Objetivo Completado: Refactorización "Área de Gestión / Grupo" a "Tipo de Solicitud"
+> **Contexto:** Se detectó confusión en la terminología en la base de datos y la interfaz de usuario. Se solicitó el cambio masivo del término "Área de Gestión / Grupo" a "Tipo de Solicitud" garantizando la integridad de datos.
+- [x] Modificar `SettingsManager.js` y `DbService.js`.
+- [x] Modificar Formularios de Portal de Solicitante (`FormGH`, `FormGE`, `FormTI`).
+- [x] Modificar componentes de Gestión, Actividades, Estadísticas y Dashboard Charts.
+- [x] Conectar correctamente `tiposSolicitud` a los archivos `config.js` de las áreas.
 
 ---
 

@@ -37,7 +37,7 @@ Este documento desglosa la implementación actual del proyecto desde una perspec
 - `PanelPrincipal.jsx`: Gestión de métricas, tickets recientes y widgets rápidos.
 - `Actividades.jsx`: Tabla detallada con sistema de filtrado.
 - `Gestion.jsx`: Ciclo de vida de solicitudes: edición, vista KanBan y modal.
-- `Settings.jsx`: Panel de control dinámico para editar trámites, grupos y administrar cuentas (solo TI).
+- `Settings.jsx`: Panel de control dinámico para editar tipos de solicitud, y administrar cuentas (solo TI).
 
 ### Portal de Colaboradores (`/portal/:area`)
 - `Portal.jsx`: Lógica reactiva de la interfaz del formulario y renderizado dinámico de trámites (consumiendo `SettingsManager.js`).
@@ -80,8 +80,8 @@ Este documento desglosa la implementación actual del proyecto desde una perspec
 | `estado` | Fijo | "Pendiente" por defecto. |
 | `prioridad` | Formulario | Bajo, Media, Alta. |
 | `responsable` | Dashboard | Asignado por gestora TI. |
-| `grupo` | Formulario | Área de gestión (SSOT). |
-| `grupoExtra` | Formulario | Tipo de trámite específico (SSOT). |
+| `tipoSolicitud` | Formulario | Tipo de Solicitud (anteriormente Área de Gestión). |
+| `clasificacion` | Formulario | Tipo de trámite específico (SSOT) (también referenciado como `grupoExtra` o `clasificacion`). |
 | `clasificacion`| Dashboard | Categorización técnica adicional. |
 | `fechaInicio` | Dashboard | Timestamp y fecha capturada automáticamente al pasar a "En progreso". |
 | `fechaFin` | Dashboard | Timestamp y fecha capturada automáticamente al resolver. |
@@ -99,7 +99,7 @@ Este documento desglosa la implementación actual del proyecto desde una perspec
 ## 7. Buenas Prácticas Recomendadas
 
 - **Componentes Atómicos:** Si un componente pasa de 300 líneas, considerar extraer lógica a hooks personalizados o subdividirlo en subcomponentes funcionales.
-- **No Mutar el Estado Directamente:** Siempre usar las funciones set (`setTickets`, `setGrupos`) expuestas por los Contexts.
+- **No Mutar el Estado Directamente:** Siempre usar las funciones set (`setTickets`, `setTiposSolicitud`) expuestas por los Contexts.
 - **Limpieza de Hooks:** Todo `useEffect` que añada un event listener debe retornar una función de limpieza para evitar fugas de memoria.
 
 ## 8. Recomendaciones para IAs Futuras
