@@ -4,14 +4,8 @@ Este documento contiene las sugerencias arquitectónicas de alto nivel para llev
 
 ---
 
-## 1. Gestión de SLAs (Acuerdos de Nivel de Servicio) ⏱️
-Actualmente, el sistema rastrea la duración del ticket, pero no compara esa duración contra un "límite" pactado.
-
-**Propuesta de implementación:**
-- Definir tiempos límite por prioridad (Ej: Urgente = 2 horas, Alta = 8 horas, Media = 24 horas, Baja = 48 horas).
-- Añadir un temporizador visual (semáforo o barra de progreso) en el Dashboard de los Gestores.
-- Si el ticket supera el tiempo límite sin ser resuelto, cambia a un estado de **SLA Incumplido (Breach)**, destacándose en rojo.
-- **Beneficio:** Permite a la gerencia sacar reportes reales sobre el cumplimiento de tiempos del equipo de resolutores.
+## 1. ~~Gestión de SLAs (Acuerdos de Nivel de Servicio)~~ ✅ IMPLEMENTADO
+Actualmente, el sistema cuenta con un poderoso motor SLA (ITIL) que descuenta horas no laborales, fines de semana y festivos, además de contar con pausas dinámicas cuando el gestor cambia su estado personal. Los límites son configurables por prioridad, y específicos por área (ej. 9 horas para GH).
 
 ---
 
@@ -26,14 +20,8 @@ Transformar el ticket de un formulario estático a una "historia viva".
 
 ---
 
-## 3. Diferenciación: Incidente vs. Requerimiento 🔀
-ITIL exige separar los flujos de trabajo dependiendo de la naturaleza de la solicitud.
-
-**Propuesta de implementación:**
-- En el Portal, antes de mostrar el formulario completo, preguntar al usuario:
-  - **Opción A (Incidente):** "Tengo un problema / Algo se rompió" (Flujo crítico, requiere solución inmediata).
-  - **Opción B (Requerimiento):** "Necesito algo nuevo" (Flujo estándar, puede requerir aprobaciones previas).
-- **Beneficio:** Ayuda a los gestores a priorizar automáticamente. Un incidente ("El servidor de base de datos se cayó") siempre tendrá más prioridad que un requerimiento ("Necesito una licencia de Adobe Illustrator").
+## 3. ~~Diferenciación: Incidente vs. Requerimiento~~ ✅ IMPLEMENTADO
+El sistema soporta la categorización ITIL (Incidente / Problema vs Requerimiento / Solicitud) a través del registro rápido en el Dashboard, forzando la asignación de prioridad (Alta para incidentes, Media para requerimientos). Faltaría expandirlo al portal de colaboradores.
 
 ---
 
