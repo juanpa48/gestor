@@ -145,7 +145,7 @@ export const FormCesantias = ({ detalles, setDetalles, tipoTramite }) => {
             />
           </div>
           <div className="form-group">
-            <label className="form-label">Adjunto: Certificado *</label>
+            <label className="form-label">Adjunto: Certificado de libertad y tradición no mayor a 30 días *</label>
             <input 
               type="file" 
               className="glass-input" 
