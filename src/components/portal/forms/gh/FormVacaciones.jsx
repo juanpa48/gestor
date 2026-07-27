@@ -9,8 +9,8 @@ export const FormVacaciones = ({ detalles, setDetalles, tipoTramite }) => {
       ...prev,
       cedula: prev.cedula || currentUser?.cedula || '',
       cargo: prev.cargo || currentUser?.cargo || '',
-      celular: prev.celular || '',
-      jefeInmediato: prev.jefeInmediato || '',
+      celular: prev.celular || currentUser?.celular || '',
+      jefeInmediato: prev.jefeInmediato || currentUser?.jefeInmediato || '',
       fechaInicio: prev.fechaInicio || '',
       fechaFin: prev.fechaFin || '',
       fechaPresentacion: prev.fechaPresentacion || ''
@@ -56,25 +56,23 @@ export const FormVacaciones = ({ detalles, setDetalles, tipoTramite }) => {
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }}>
         <div className="form-group">
-          <label className="form-label">Celular *</label>
+          <label className="form-label">Celular</label>
           <input 
             type="tel" 
             className="glass-input" 
-            required 
-            placeholder="Ej: 3001234567"
+            disabled
+            style={{ opacity: 0.8, cursor: 'not-allowed' }}
             value={detalles.celular || ''} 
-            onChange={(e) => handleChange('celular', e.target.value)}
           />
         </div>
         <div className="form-group">
-          <label className="form-label">Jefe Inmediato *</label>
+          <label className="form-label">Jefe Inmediato</label>
           <input 
             type="text" 
             className="glass-input" 
-            required 
-            placeholder="Nombre de tu líder directo"
+            disabled
+            style={{ opacity: 0.8, cursor: 'not-allowed' }}
             value={detalles.jefeInmediato || ''} 
-            onChange={(e) => handleChange('jefeInmediato', e.target.value)}
           />
         </div>
       </div>
