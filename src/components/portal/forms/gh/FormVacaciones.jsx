@@ -11,9 +11,12 @@ export const FormVacaciones = ({ detalles, setDetalles, tipoTramite }) => {
       cargo: prev.cargo || currentUser?.cargo || '',
       celular: prev.celular || currentUser?.celular || '',
       jefeInmediato: prev.jefeInmediato || currentUser?.jefeInmediato || '',
+      // Campos para Disfrute
       fechaInicio: prev.fechaInicio || '',
       fechaFin: prev.fechaFin || '',
-      fechaPresentacion: prev.fechaPresentacion || ''
+      fechaPresentacion: prev.fechaPresentacion || '',
+      // Campos para Compensadas
+      diasCompensados: prev.diasCompensados || ''
     }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -79,39 +82,57 @@ export const FormVacaciones = ({ detalles, setDetalles, tipoTramite }) => {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px' }}>
-        <div className="form-group">
-          <label className="form-label">Fecha Inicio *</label>
-          <input 
-            type="date" 
-            className="glass-input" 
-            required 
-            value={detalles.fechaInicio || ''} 
-            onChange={(e) => handleChange('fechaInicio', e.target.value)}
-          />
+      {tipoTramite === 'Vacaciones compensadas' ? (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px' }}>
+          <div className="form-group">
+            <label className="form-label">Días a Compensar *</label>
+            <input 
+              type="number" 
+              className="glass-input" 
+              required 
+              min="1"
+              max="15"
+              placeholder="Ej: 5"
+              value={detalles.diasCompensados || ''} 
+              onChange={(e) => handleChange('diasCompensados', e.target.value)}
+            />
+          </div>
         </div>
-        <div className="form-group">
-          <label className="form-label">Fecha Fin *</label>
-          <input 
-            type="date" 
-            className="glass-input" 
-            required 
-            value={detalles.fechaFin || ''} 
-            onChange={(e) => handleChange('fechaFin', e.target.value)}
-          />
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px' }}>
+          <div className="form-group">
+            <label className="form-label">Fecha Inicio *</label>
+            <input 
+              type="date" 
+              className="glass-input" 
+              required 
+              value={detalles.fechaInicio || ''} 
+              onChange={(e) => handleChange('fechaInicio', e.target.value)}
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Fecha Fin *</label>
+            <input 
+              type="date" 
+              className="glass-input" 
+              required 
+              value={detalles.fechaFin || ''} 
+              onChange={(e) => handleChange('fechaFin', e.target.value)}
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Fecha a Laborar *</label>
+            <input 
+              type="date" 
+              className="glass-input" 
+              required 
+              title="Fecha en la que debe presentarse nuevamente a trabajar"
+              value={detalles.fechaPresentacion || ''} 
+              onChange={(e) => handleChange('fechaPresentacion', e.target.value)}
+            />
+          </div>
         </div>
-        <div className="form-group">
-          <label className="form-label">Fecha a Laborar *</label>
-          <input 
-            type="date" 
-            className="glass-input" 
-            required 
-            title="Fecha en la que debe presentarse nuevamente a trabajar"
-            value={detalles.fechaPresentacion || ''} 
-            onChange={(e) => handleChange('fechaPresentacion', e.target.value)}
-          />
-        </div>
-      </div>
+      )}
     </div>
   );
 };
