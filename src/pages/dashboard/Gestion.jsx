@@ -404,7 +404,6 @@ export const Gestion = () => {
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', fontSize: '13px' }}>
                   {Object.entries(ticketEdit.detalles).map(([key, value]) => {
-                    if (!value) return null;
                     if (key === 'consentimientoLegal') return null;
                     if (key === 'firmaClave') return null;
                     if (key === 'firmaLegal') return null;
@@ -412,6 +411,8 @@ export const Gestion = () => {
                     if (key === 'fechaInicioCorte') return null; // Ignorar el campo base
                     if (key === 'firmaISO') return null; // Metadata de auditoría oculta
                     if (key === 'firmaTimestamp') return null; // Metadata de auditoría oculta
+
+                    const displayValue = value || <span style={{ fontStyle: 'italic', color: 'var(--text-muted)' }}>No registrado</span>;
 
                     if (key === 'firmaCedula') {
                       return (
@@ -429,7 +430,7 @@ export const Gestion = () => {
                     return (
                       <div key={key}>
                         <strong style={{ color: 'var(--text-muted)' }}>{formattedKey}:</strong> 
-                        <span style={{ color: 'var(--text-color)', display: 'block', marginTop: '2px' }}>{value}</span>
+                        <span style={{ color: 'var(--text-color)', display: 'block', marginTop: '2px' }}>{displayValue}</span>
                       </div>
                     );
                   })}

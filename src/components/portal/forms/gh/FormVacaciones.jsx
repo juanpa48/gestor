@@ -37,8 +37,8 @@ export const FormVacaciones = ({ detalles, setDetalles, tipoTramite }) => {
           <input 
             type="text" 
             className="glass-input" 
-            disabled
-            style={{ opacity: 0.8, cursor: 'not-allowed' }}
+            readOnly
+            style={{ opacity: 0.9, cursor: 'not-allowed', background: 'rgba(255,255,255,0.02)' }}
             value={detalles.cedula || ''} 
           />
         </div>
@@ -47,8 +47,8 @@ export const FormVacaciones = ({ detalles, setDetalles, tipoTramite }) => {
           <input 
             type="text" 
             className="glass-input" 
-            disabled
-            style={{ opacity: 0.8, cursor: 'not-allowed' }}
+            readOnly
+            style={{ opacity: 0.9, cursor: 'not-allowed', background: 'rgba(255,255,255,0.02)' }}
             value={detalles.cargo || ''} 
           />
         </div>
@@ -60,8 +60,8 @@ export const FormVacaciones = ({ detalles, setDetalles, tipoTramite }) => {
           <input 
             type="tel" 
             className="glass-input" 
-            disabled
-            style={{ opacity: 0.8, cursor: 'not-allowed' }}
+            readOnly
+            style={{ opacity: 0.9, cursor: 'not-allowed', background: 'rgba(255,255,255,0.02)' }}
             value={detalles.celular || ''} 
           />
         </div>
@@ -70,8 +70,8 @@ export const FormVacaciones = ({ detalles, setDetalles, tipoTramite }) => {
           <input 
             type="text" 
             className="glass-input" 
-            disabled
-            style={{ opacity: 0.8, cursor: 'not-allowed' }}
+            readOnly
+            style={{ opacity: 0.9, cursor: 'not-allowed', background: 'rgba(255,255,255,0.02)' }}
             value={detalles.jefeInmediato || ''} 
           />
         </div>
