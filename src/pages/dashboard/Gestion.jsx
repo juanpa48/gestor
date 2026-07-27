@@ -412,7 +412,17 @@ export const Gestion = () => {
                     if (key === 'firmaISO') return null; // Metadata de auditoría oculta
                     if (key === 'firmaTimestamp') return null; // Metadata de auditoría oculta
 
-                    const displayValue = value || <span style={{ fontStyle: 'italic', color: 'var(--text-muted)' }}>No registrado</span>;
+                    // Fallback para tickets viejos: Si el campo está vacío, intentar buscarlo en la BD de usuarios actual
+                    let finalValue = value;
+                    if (!finalValue) {
+                      try {
+                        const users = JSON.parse(localStorage.getItem('db_usuarios') || '[]');
+                        const userProfile = users.find(u => u.nombreReal === ticketEdit.nombre) || {};
+                        if (userProfile[key]) finalValue = userProfile[key];
+                      } catch (e) {}
+                    }
+
+                    const displayValue = finalValue || <span style={{ fontStyle: 'italic', color: 'var(--text-muted)' }}>No registrado</span>;
 
                     if (key === 'firmaCedula') {
                       return (

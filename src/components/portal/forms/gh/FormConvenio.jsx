@@ -1,12 +1,18 @@
 import React, { useEffect, useState } from 'react';
+import { useAuth } from '../../../../shared/contexts/AuthContext';
 
 export const FormConvenio = ({ detalles, setDetalles, tipoTramite }) => {
+  const { currentUser } = useAuth();
   const [consentimiento, setConsentimiento] = useState(detalles.consentimientoLegal || false);
 
   // Inicializar campos base
   useEffect(() => {
     setDetalles(prev => ({
       ...prev,
+      cedula: prev.cedula || currentUser?.cedula || '',
+      cargo: prev.cargo || currentUser?.cargo || '',
+      celular: prev.celular || currentUser?.celular || '',
+      jefeInmediato: prev.jefeInmediato || currentUser?.jefeInmediato || '',
       valorMontoTotal: prev.valorMontoTotal || '',
       cuotas: prev.cuotas || '',
       periodicidad: prev.periodicidad || 'Quincenal',

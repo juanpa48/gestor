@@ -158,7 +158,7 @@ export const FormGH = () => {
       <div className="form-group form-group-full">
         <label className="form-label">TIPO DE SOLICITUD</label>
         <div className="select-wrapper">
-          <select className="glass-input" required value={tipoSolicitud} onChange={(e) => { setTipoSolicitud(e.target.value); setTipoTramite(''); }}>
+          <select className="glass-input" required value={tipoSolicitud} onChange={(e) => { setTipoSolicitud(e.target.value); setTipoTramite(''); setDetalles({}); }}>
             <option value="" disabled>Seleccione el Tipo de Solicitud...</option>
             {tiposSolicitud.map(g => <option key={g.nombre} value={g.nombre}>{g.nombre}</option>)}
           </select>
