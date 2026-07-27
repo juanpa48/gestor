@@ -60,9 +60,10 @@ export const FormVacaciones = ({ detalles, setDetalles, tipoTramite }) => {
           <input 
             type="tel" 
             className="glass-input" 
-            readOnly
-            style={{ opacity: 0.9, cursor: 'not-allowed', background: 'rgba(255,255,255,0.02)' }}
+            required 
+            placeholder="Ej: 3001234567"
             value={detalles.celular || ''} 
+            onChange={(e) => handleChange('celular', e.target.value)}
           />
         </div>
         <div className="form-group">
@@ -70,9 +71,10 @@ export const FormVacaciones = ({ detalles, setDetalles, tipoTramite }) => {
           <input 
             type="text" 
             className="glass-input" 
-            readOnly
-            style={{ opacity: 0.9, cursor: 'not-allowed', background: 'rgba(255,255,255,0.02)' }}
+            required 
+            placeholder="Nombre de tu líder directo"
             value={detalles.jefeInmediato || ''} 
+            onChange={(e) => handleChange('jefeInmediato', e.target.value)}
           />
         </div>
       </div>

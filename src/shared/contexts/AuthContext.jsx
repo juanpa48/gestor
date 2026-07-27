@@ -49,7 +49,20 @@ export const AuthProvider = ({ children }) => {
           localStorage.removeItem('session_token');
           setCurrentUser(null);
         } else {
-          setCurrentUser(session.user);
+          // Obtener datos frescos de la BD para evitar datos de sesión desactualizados (ej. cambio de celular)
+          const freshUsers = JSON.parse(localStorage.getItem('db_usuarios')) || [];
+          const freshUser = freshUsers.find(u => u.username === session.user.username);
+          
+          if (freshUser) {
+            setCurrentUser(freshUser);
+            // Actualizar la sesión en background con los datos frescos
+            localStorage.setItem('session_token', JSON.stringify({
+              ...session,
+              user: freshUser
+            }));
+          } else {
+            setCurrentUser(session.user);
+          }
         }
       }
       setLoading(false);
