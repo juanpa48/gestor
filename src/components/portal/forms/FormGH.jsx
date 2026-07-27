@@ -6,6 +6,7 @@ import { useAuth, hashPassword } from '../../../shared/contexts/AuthContext';
 import { FormPermiso } from './gh/FormPermiso';
 import { FormConvenio } from './gh/FormConvenio';
 import { FormVacaciones } from './gh/FormVacaciones';
+import { FormCesantias } from './gh/FormCesantias';
 
 export const FormGH = () => {
   const { currentUser } = useAuth();
@@ -65,11 +66,26 @@ export const FormGH = () => {
     const numReq = rawActs.filter(t => (t.id || '').startsWith('GH-')).length + 1;
     const newId = `GH-${String(numReq).padStart(3, '0')}`;
 
+    // 1.5. Limpiar datos y extraer archivos especiales (ej. Cesantías)
+    const sanitizedDetalles = { ...detalles };
+    const archivosEspeciales = [];
+    
+    Object.keys(sanitizedDetalles).forEach(key => {
+      if (key.endsWith('File')) {
+        if (sanitizedDetalles[key] instanceof File) {
+          archivosEspeciales.push(sanitizedDetalles[key]);
+        }
+        delete sanitizedDetalles[key];
+      }
+    });
+    
+    const allFiles = [...archivos, ...archivosEspeciales];
+
     // 2. Subir archivos pasando el ID para la carpeta
     let adjuntosUrls = [];
     try {
-      if (archivos && archivos.length > 0) {
-        adjuntosUrls = await UploadService.uploadFiles(archivos, newId, 'gh');
+      if (allFiles.length > 0) {
+        adjuntosUrls = await UploadService.uploadFiles(allFiles, newId, 'gh');
       }
     } catch (err) {
       setLoadingSubmit(false);
@@ -79,8 +95,6 @@ export const FormGH = () => {
 
     // 3. Crear el ticket
     try {
-      // Limpiar datos sensibles antes de guardar en la "BD"
-      const sanitizedDetalles = { ...detalles };
       delete sanitizedDetalles.firmaClave;
 
       if (tipoSolicitud === 'Convenios' && sanitizedDetalles.consentimientoLegal) {
@@ -95,7 +109,11 @@ export const FormGH = () => {
         nombre: nombre,
         solicitante: nombre,
         cargo: currentUser?.cargo || 'Usuario del Sistema',
-        solicitud: solicitud || (tipoSolicitud === 'Convenios' ? `Solicitud de Convenio de Nómina: ${tipoTramite}` : tipoSolicitud === 'Vacaciones' ? `Solicitud de Vacaciones: ${tipoTramite}` : ''),
+        solicitud: solicitud || (
+          tipoSolicitud === 'Convenios' ? `Solicitud de Convenio de Nómina: ${tipoTramite}` : 
+          tipoSolicitud === 'Vacaciones' ? `Solicitud de Vacaciones: ${tipoTramite}` : 
+          (tipoSolicitud === 'Cesantías' || tipoSolicitud === 'Cesantias') ? `Solicitud de Cesantías: ${tipoTramite}` : ''
+        ),
         estado: 'Pendiente',
         responsable: '',
         tipoSolicitud: tipoSolicitud || 'Trámites de Personal',
@@ -170,14 +188,17 @@ export const FormGH = () => {
         {tipoSolicitud === 'Vacaciones' && (
            <FormVacaciones detalles={detalles} setDetalles={setDetalles} tipoTramite={tipoTramite} />
         )}
-        {tipoSolicitud !== 'Permisos' && tipoSolicitud !== 'Convenios' && tipoSolicitud !== 'Vacaciones' && tipoTramite !== '' && (
+        {(tipoSolicitud === 'Cesantías' || tipoSolicitud === 'Cesantias') && (
+           <FormCesantias detalles={detalles} setDetalles={setDetalles} tipoTramite={tipoTramite} />
+        )}
+        {tipoSolicitud !== 'Permisos' && tipoSolicitud !== 'Convenios' && tipoSolicitud !== 'Vacaciones' && tipoSolicitud !== 'Cesantías' && tipoSolicitud !== 'Cesantias' && tipoTramite !== '' && (
            <div style={{ color: 'var(--text-muted)', fontSize: '14px', padding: '10px' }}>
              <i className="fa-solid fa-circle-info text-blue"></i> Este trámite utilizará el formulario genérico.
            </div>
         )}
       </div>
 
-      {tipoSolicitud !== 'Convenios' && tipoSolicitud !== 'Vacaciones' && (
+      {tipoSolicitud !== 'Convenios' && tipoSolicitud !== 'Vacaciones' && tipoSolicitud !== 'Cesantías' && tipoSolicitud !== 'Cesantias' && (
         <div className="form-group">
           <label className="form-label">DESCRIPCIÓN DE LA SOLICITUD</label>
           <textarea 

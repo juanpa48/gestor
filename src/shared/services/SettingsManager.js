@@ -51,6 +51,10 @@ const defaultTiposSolicitudGH = [
   {
     nombre: 'Vacaciones',
     tramites: ["Disfrute de Vacaciones", "Vacaciones compensadas"]
+  },
+  {
+    nombre: 'Cesantías',
+    tramites: ["Estudio", "Compra de vivienda", "Modificación de vivienda"]
   }
 ];
 
