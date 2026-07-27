@@ -257,7 +257,7 @@ export const FormConvenio = ({ detalles, setDetalles, tipoTramite }) => {
           <i className="fa-solid fa-scale-balanced"></i> Autorización de Descuento (Consentimiento Legal)
         </h5>
         
-        <div style={{ fontSize: '12px', color: 'var(--text-muted)', lineHeight: '1.6', marginBottom: '15px', textAlign: 'justify' }}>
+        <div style={{ fontSize: '13px', color: '#111', fontWeight: 'bold', lineHeight: '1.6', marginBottom: '15px', textAlign: 'justify' }}>
           <p>
             Autorizo de manera expresa, voluntaria e irrevocable a mi Empleador, para que deduzca de mis salarios, prestaciones sociales, vacaciones, bonificaciones y liquidación final de contrato (si a ello hubiere lugar), el valor total del monto aquí detallado bajo el concepto de "Convenio {tipoTramite}".
           </p>
