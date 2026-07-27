@@ -12,17 +12,13 @@ export const ActaDeduccion = ({ ticket, onClose }) => {
   const cedula = d.cedula || userObj.cedula || ticket.solicitante?.cedula || 'N/A';
   const cargo = userObj.cargo || ticket.solicitante?.cargo || 'N/A';
 
-  let fechaSolicitudStr = ticket.fechaCreacion || 'Fecha no disponible';
-  let fechaFirmaStr = ticket.fechaCreacion || 'Fecha no disponible';
+  let fechaSolicitudStr = ticket.fechaCreacion || 'Fecha no registrada';
+  let fechaFirmaStr = ticket.fechaCreacion || 'Fecha no registrada';
   let traceTime = Date.now();
 
   try {
-    const rawDateStr = ticket.fechaISO || ticket.fechaCreacion;
-    if (rawDateStr) {
-      // Intentar limpiar la cadena si viene de toLocaleString
-      const cleanDateStr = rawDateStr.replace(/, /g, ' ').replace(/\./g, '');
-      const dateObj = new Date(ticket.fechaISO || cleanDateStr);
-      
+    if (ticket.fechaISO) {
+      const dateObj = new Date(ticket.fechaISO);
       if (!isNaN(dateObj.getTime())) {
         fechaSolicitudStr = dateObj.toLocaleDateString('es-CO');
         fechaFirmaStr = dateObj.toLocaleString('es-CO', { 
@@ -30,6 +26,21 @@ export const ActaDeduccion = ({ ticket, onClose }) => {
           hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true 
         });
         traceTime = dateObj.getTime();
+      }
+    } else if (ticket.fechaCreacion) {
+      // Intentar parsear el string "26/7/2026, 18:55:00"
+      const parts = ticket.fechaCreacion.split(',')[0].split('/');
+      if (parts.length === 3) {
+        // Asume DD/MM/YYYY
+        const day = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1;
+        const year = parseInt(parts[2], 10);
+        const dateObj = new Date(year, month, day);
+        if (!isNaN(dateObj.getTime())) {
+          fechaSolicitudStr = dateObj.toLocaleDateString('es-CO');
+          // No tenemos la hora fácil de parsear de la cadena localizada, mejor dejamos la cadena original para firma
+          fechaFirmaStr = ticket.fechaCreacion;
+        }
       }
     }
   } catch (e) {
