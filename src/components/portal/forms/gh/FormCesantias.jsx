@@ -181,7 +181,7 @@ export const FormCesantias = ({ detalles, setDetalles, tipoTramite }) => {
               <i className="fa-solid fa-triangle-exclamation"></i> Importante
             </strong>
             <p style={{ fontSize: '13px', margin: '5px 0 0 0', color: 'var(--text-color)' }}>
-              Revisar que después de finalizar el arreglo debe enviar una foto que deje evidencia del arreglo realizado.
+              Después de finalizar la reparación locativa por favor enviar una fotografía de la reparación realizada.
             </p>
           </div>
         </div>
