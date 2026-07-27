@@ -410,6 +410,8 @@ export const Gestion = () => {
                     if (key === 'firmaLegal') return null;
                     if (key === 'proyeccion') return null; // Renderizado especial
                     if (key === 'fechaInicioCorte') return null; // Ignorar el campo base
+                    if (key === 'firmaISO') return null; // Metadata de auditoría oculta
+                    if (key === 'firmaTimestamp') return null; // Metadata de auditoría oculta
 
                     if (key === 'firmaCedula') {
                       return (

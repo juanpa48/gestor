@@ -129,8 +129,8 @@ export const FormConvenio = ({ detalles, setDetalles, tipoTramite }) => {
     });
 
     handleChange('proyeccion', proy);
-    handleChange('fechaInicio', proy[0].fecha);
-    handleChange('fechaFin', proy[proy.length - 1].fecha);
+    handleChange('fechaInicio', new Date(proy[0].fecha).toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' }));
+    handleChange('fechaFin', new Date(proy[proy.length - 1].fecha).toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' }));
   };
 
   return (
