@@ -12,8 +12,11 @@ export const ActaDeduccion = ({ ticket, onClose }) => {
   const cedula = d.cedula || userObj.cedula || ticket.solicitante?.cedula || 'N/A';
   const cargo = userObj.cargo || ticket.solicitante?.cargo || 'N/A';
 
-  let fechaSolicitudStr = ticket.fechaCreacion || 'Fecha no registrada';
-  let fechaFirmaStr = ticket.fechaCreacion || 'Fecha no registrada';
+  let fechaSolicitudStr = new Date().toLocaleDateString('es-CO');
+  let fechaFirmaStr = new Date().toLocaleString('es-CO', { 
+    year: 'numeric', month: 'long', day: 'numeric', 
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true 
+  });
   let traceTime = Date.now();
 
   try {
