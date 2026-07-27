@@ -8,10 +8,10 @@ export const FormTI = () => {
   const { currentUser } = useAuth();
   const nombre = currentUser?.nombreReal || currentUser?.username || '';
   const { addTicket } = useTickets();
-  const [areaGestion, setAreaGestion] = useState('');
+  const [tipoSolicitud, setTipoSolicitud] = useState('');
   const [tipoTramite, setTipoTramite] = useState('');
   const settings = getAreaSettings('ti');
-  const grupos = settings.grupos || [];
+  const tiposSolicitud = settings.tiposSolicitud || [];
   const [tipo, setTipo] = useState('Incidente');
   const [solicitud, setSolicitud] = useState('');
   const [prioridad, setPrioridad] = useState('Media');
@@ -66,7 +66,7 @@ export const FormTI = () => {
         estado: 'Pendiente',
         prioridad: prioridad,
         responsable: '',
-        grupo: areaGestion || 'Soporte Técnico',
+        tipoSolicitud: tipoSolicitud || 'Soporte Técnico',
         grupoExtra: tipoTramite,
         clasificacion: tipoTramite,
         tipo: tipo,
@@ -77,7 +77,7 @@ export const FormTI = () => {
       await addTicket(nuevoTicket);
       
       setSolicitud('');
-      setAreaGestion('');
+      setTipoSolicitud('');
       setTipoTramite('');
       setPrioridad('Media');
       setArchivos([]);
@@ -106,21 +106,21 @@ export const FormTI = () => {
       </div>
 
       <div className="form-group form-group-full">
-        <label className="form-label">ÁREA DE GESTIÓN (GRUPO)</label>
+        <label className="form-label">TIPO DE SOLICITUD</label>
         <div className="select-wrapper">
-          <select className="glass-input" required value={areaGestion} onChange={(e) => { setAreaGestion(e.target.value); setTipoTramite(''); }}>
-            <option value="" disabled>Seleccione el Grupo...</option>
-            {grupos.map(g => <option key={g.nombre} value={g.nombre}>{g.nombre}</option>)}
+          <select className="glass-input" required value={tipoSolicitud} onChange={(e) => { setTipoSolicitud(e.target.value); setTipoTramite(''); }}>
+            <option value="" disabled>Seleccione el Tipo de Solicitud...</option>
+            {tiposSolicitud.map(g => <option key={g.nombre} value={g.nombre}>{g.nombre}</option>)}
           </select>
         </div>
       </div>
 
       <div className="form-group form-group-full">
-        <label className="form-label">TIPO DE TRÁMITE (TI)</label>
+        <label className="form-label">TRÁMITE ESPECÍFICO (TI)</label>
         <div className="select-wrapper">
-          <select className="glass-input" required value={tipoTramite} onChange={(e) => setTipoTramite(e.target.value)} disabled={!areaGestion}>
+          <select className="glass-input" required value={tipoTramite} onChange={(e) => setTipoTramite(e.target.value)} disabled={!tipoSolicitud}>
             <option value="" disabled>Seleccione el Trámite...</option>
-            {areaGestion && (grupos.find(g => g.nombre === areaGestion)?.tramites || []).map(t => (
+            {tipoSolicitud && (tiposSolicitud.find(g => g.nombre === tipoSolicitud)?.tramites || []).map(t => (
               <option key={t} value={t}>{t}</option>
             ))}
           </select>

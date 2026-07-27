@@ -4,12 +4,12 @@ import { useActiveArea } from '../../../../shared/contexts/ActiveAreaContext';
 
 export const SettingsTramites = () => {
   const { area } = useActiveArea();
-  const [grupos, setGrupos] = useState([]);
+  const [tiposSolicitud, setTiposSolicitud] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     const settings = getAreaSettings(area);
-    setGrupos(settings.grupos || []);
+    setTiposSolicitud(settings.tiposSolicitud || settings.grupos || []);
   }, [area]);
 
   const showToast = (message, type = 'success') => {
@@ -24,49 +24,49 @@ export const SettingsTramites = () => {
   };
 
   const handleAddGrupo = () => {
-    setGrupos([...grupos, { nombre: 'Nuevo Grupo', tramites: [] }]);
+    setTiposSolicitud([...tiposSolicitud, { nombre: 'Nuevo Tipo de Solicitud', tramites: [] }]);
   };
 
   const handleRemoveGrupo = (gIdx) => {
-    if (window.confirm('¿Eliminar este grupo de trámites?')) {
-      const newGrupos = [...grupos];
+    if (window.confirm('¿Eliminar este tipo de solicitud?')) {
+      const newGrupos = [...tiposSolicitud];
       newGrupos.splice(gIdx, 1);
-      setGrupos(newGrupos);
+      setTiposSolicitud(newGrupos);
     }
   };
 
   const handleChangeGrupoNombre = (gIdx, value) => {
-    const newGrupos = [...grupos];
+    const newGrupos = [...tiposSolicitud];
     newGrupos[gIdx].nombre = value;
-    setGrupos(newGrupos);
+    setTiposSolicitud(newGrupos);
   };
 
   const handleAddTramite = (gIdx) => {
-    const newGrupos = [...grupos];
+    const newGrupos = [...tiposSolicitud];
     newGrupos[gIdx].tramites.push('Nuevo Trámite');
-    setGrupos(newGrupos);
+    setTiposSolicitud(newGrupos);
   };
 
   const handleRemoveTramite = (gIdx, tIdx) => {
-    const newGrupos = [...grupos];
+    const newGrupos = [...tiposSolicitud];
     newGrupos[gIdx].tramites.splice(tIdx, 1);
-    setGrupos(newGrupos);
+    setTiposSolicitud(newGrupos);
   };
 
   const handleChangeTramite = (gIdx, tIdx, value) => {
-    const newGrupos = [...grupos];
+    const newGrupos = [...tiposSolicitud];
     newGrupos[gIdx].tramites[tIdx] = value;
-    setGrupos(newGrupos);
+    setTiposSolicitud(newGrupos);
   };
 
   const handleSave = () => {
     setIsSaving(true);
     // Preservar SLAs si existen para esta área
     const currentSettings = getAreaSettings(area);
-    saveAreaSettings(area, grupos, currentSettings.slas);
+    saveAreaSettings(area, tiposSolicitud, currentSettings.slas);
     setTimeout(() => {
       setIsSaving(false);
-      showToast('Grupos y trámites guardados exitosamente');
+      showToast('Tipos de solicitud guardados exitosamente');
     }, 400);
   };
 
@@ -85,21 +85,21 @@ export const SettingsTramites = () => {
         <>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(30,58,95,0.1)', paddingBottom: '16px', marginBottom: '24px' }}>
             <h2 style={{ fontSize: '18px', color: 'var(--navy)' }}>
-              <i className="fa-solid fa-list-check"></i> Gestión de Trámites
+              <i className="fa-solid fa-list-check"></i> Gestión de Tipos de Solicitud
             </h2>
             <button className="btn-secondary" onClick={handleAddGrupo} style={{ padding: '8px 12px', fontSize: '13px' }}>
-              <i className="fa-solid fa-folder-plus"></i> Añadir Grupo
+              <i className="fa-solid fa-folder-plus"></i> Añadir Tipo
             </button>
           </div>
 
-      {grupos.length === 0 ? (
+      {tiposSolicitud.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
           <i className="fa-solid fa-folder-open" style={{ fontSize: '32px', opacity: 0.5, marginBottom: '12px' }}></i>
-          <p>No hay grupos de trámites configurados.</p>
+          <p>No hay tipos de solicitud configurados.</p>
         </div>
       ) : (
         <div className="settings-grupos-list">
-          {grupos.map((grupo, gIdx) => (
+          {tiposSolicitud.map((grupo, gIdx) => (
             <div key={gIdx} className="settings-grupo-card" style={{ background: 'rgba(255,255,255,0.5)', border: '1px solid var(--card-border)', borderRadius: '12px', padding: '20px', marginBottom: '20px' }}>
               <div style={{ display: 'flex', gap: '12px', marginBottom: '16px', alignItems: 'center' }}>
                 <input 
@@ -108,9 +108,9 @@ export const SettingsTramites = () => {
                   value={grupo.nombre} 
                   onChange={(e) => handleChangeGrupoNombre(gIdx, e.target.value)}
                   style={{ flex: 1, fontWeight: 'bold', fontSize: '15px' }}
-                  placeholder="Nombre del grupo..."
+                  placeholder="Nombre del tipo de solicitud..."
                 />
-                <button className="icon-btn" style={{ color: 'var(--red)' }} onClick={() => handleRemoveGrupo(gIdx)} title="Eliminar grupo">
+                <button className="icon-btn" style={{ color: 'var(--red)' }} onClick={() => handleRemoveGrupo(gIdx)} title="Eliminar tipo">
                   <i className="fa-solid fa-trash"></i>
                 </button>
               </div>

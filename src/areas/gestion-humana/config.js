@@ -3,7 +3,8 @@ import { getAreaSettings } from '../../shared/services/SettingsManager';
 
 export const GH_CONFIG = {
   ...AREAS.gh,
-  get grupos() {
-    return getAreaSettings('gh').grupos;
+  get tiposSolicitud() {
+    const s = getAreaSettings('gh');
+    return s.tiposSolicitud || s.grupos || [];
   }
 };

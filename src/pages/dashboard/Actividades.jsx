@@ -248,7 +248,7 @@ export const Actividades = () => {
                   {area !== 'gh' && <th>Prioridad</th>}
                   {area === 'gh' && <th>Nómina</th>}
                   <th>SLA (Restante)</th>
-                  <th>Grupo</th>
+                  <th>Tipo de Solicitud</th>
                   <th>Responsable</th>
                   <th>Fecha</th>
                 </tr>
@@ -282,7 +282,7 @@ export const Actividades = () => {
                         <td style={{textAlign: 'center'}}>{r.novedadNomina ? <i className="fa-solid fa-check" style={{color: 'var(--success)'}}></i> : <i className="fa-solid fa-xmark" style={{color: 'var(--text-muted)'}}></i>}</td>
                       )}
                       <td>{slaBadge}</td>
-                      <td>{r.grupo || ''}</td>
+                      <td>{r.tipoSolicitud || ''}</td>
                       <td>{r.responsable || 'Sin asignar'}</td>
                       <td className="col-fecha">{r.fechaCreacion || ''}</td>
                     </tr>

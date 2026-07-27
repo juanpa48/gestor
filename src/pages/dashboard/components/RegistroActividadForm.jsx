@@ -18,7 +18,7 @@ export const RegistroActividadForm = () => {
     solicitud: '',
     estado: 'Pendiente',
     prioridad: '',
-    grupo: '',
+    tipoSolicitud: '',
     clasificacion: '',
     tipo: 'Incidente',
     fechaInicio: '',
@@ -56,7 +56,7 @@ export const RegistroActividadForm = () => {
     const val = type === 'checkbox' ? checked : value;
     setFormData(prev => {
       const newData = { ...prev, [name]: val };
-      if (name === 'grupo') {
+      if (name === 'tipoSolicitud') {
         newData.clasificacion = ''; // Reset clasificacion when group changes
       }
       return newData;
@@ -126,7 +126,7 @@ export const RegistroActividadForm = () => {
         estado: formData.estado,
         prioridad: formData.prioridad,
         responsable: formData.responsable,
-        grupo: formData.grupo,
+        tipoSolicitud: formData.tipoSolicitud,
         grupoExtra: formData.clasificacion,
         clasificacion: formData.clasificacion,
         tipo: formData.tipo,
@@ -145,7 +145,7 @@ export const RegistroActividadForm = () => {
       // Reset form
       setFormData({
         solicitante: '', responsable: '', solicitud: '', estado: 'Pendiente', 
-        prioridad: '', grupo: '', clasificacion: '', tipo: 'Incidente', fechaInicio: '', 
+        prioridad: '', tipoSolicitud: '', clasificacion: '', tipo: 'Incidente', fechaInicio: '', 
         fechaFin: '', fechaProgramada: '', detalles: ''
       });
       setArchivos([]);
@@ -185,7 +185,7 @@ export const RegistroActividadForm = () => {
         tipo: quickFormData.qr_tipo,
         prioridad: quickFormData.qr_prioridad || 'Baja',
         responsable: quickFormData.qr_responsable || '',
-        grupo: '',
+        tipoSolicitud: '',
         grupoExtra: '',
         clasificacion: '',
         novedadNomina: quickFormData.qr_novedadNomina,
@@ -210,11 +210,11 @@ export const RegistroActividadForm = () => {
   };
 
   const renderTramites = () => {
-    const grupoEncontrado = config.grupos.find(g => formData.grupo === g.nombre);
+    const grupoEncontrado = config.tiposSolicitud?.find(g => formData.tipoSolicitud === g.nombre) || config.grupos?.find(g => formData.tipoSolicitud === g.nombre);
     if (grupoEncontrado) {
       return grupoEncontrado.tramites.map(t => <option key={t} value={t}>{t}</option>);
     }
-    return <option value="" disabled>Primero seleccione un Área...</option>;
+    return <option value="" disabled>Primero seleccione un Tipo de Solicitud...</option>;
   };
 
   return (
@@ -320,12 +320,12 @@ export const RegistroActividadForm = () => {
 
           {/* Fila 5 */}
           <div className="form-group">
-            <label className="form-label" htmlFor="grupo">Área de Gestión</label>
+            <label className="form-label" htmlFor="tipoSolicitud">Tipo de Solicitud</label>
             <div className="select-wrapper">
               <i className="fa-solid fa-users-gear select-icon-left"></i>
-              <select id="grupo" name="grupo" className="form-select padded-left" required value={formData.grupo} onChange={handleInputChange}>
-                <option value="" disabled>Seleccione el Área...</option>
-                {config.grupos.map((g, idx) => (
+              <select id="tipoSolicitud" name="tipoSolicitud" className="form-select padded-left" required value={formData.tipoSolicitud} onChange={handleInputChange}>
+                <option value="" disabled>Seleccione el Tipo...</option>
+                {(config.tiposSolicitud || config.grupos || []).map((g, idx) => (
                   <option key={idx} value={g.nombre}>{g.nombre}</option>
                 ))}
               </select>
@@ -337,8 +337,8 @@ export const RegistroActividadForm = () => {
             <div className="select-wrapper">
               <i className="fa-solid fa-layer-group select-icon-left"></i>
               <select id="clasificacion" name="clasificacion" className="form-select padded-left" required value={formData.clasificacion} onChange={handleInputChange}>
-                {formData.grupo === '' && <option value="" disabled>Primero seleccione un Área...</option>}
-                {formData.grupo !== '' && <option value="" disabled>Seleccione un Trámite...</option>}
+                {formData.tipoSolicitud === '' && <option value="" disabled>Primero seleccione un Tipo de Solicitud...</option>}
+                {formData.tipoSolicitud !== '' && <option value="" disabled>Seleccione un Trámite...</option>}
                 {renderTramites()}
               </select>
               <i className="fa-solid fa-chevron-down select-arrow"></i>
@@ -422,7 +422,7 @@ export const RegistroActividadForm = () => {
 
         {/* FORM ACTIONS */}
         <div className="form-actions">
-          <button type="button" className="btn-cancel" onClick={() => setFormData({solicitante: '', responsable: '', solicitud: '', estado: 'Pendiente', prioridad: '', grupo: '', clasificacion: '', fechaInicio: '', fechaFin: '', fechaProgramada: '', detalles: ''})}>Cancelar</button>
+          <button type="button" className="btn-cancel" onClick={() => setFormData({solicitante: '', responsable: '', solicitud: '', estado: 'Pendiente', prioridad: '', tipoSolicitud: '', clasificacion: '', fechaInicio: '', fechaFin: '', fechaProgramada: '', detalles: ''})}>Cancelar</button>
           <button type="submit" className="btn-save">
             <span className={loading ? 'hidden' : ''}>Guardar Actividad</span>
             <span className={`btn-loader ${loading ? '' : 'hidden'}`}><i className="fa-solid fa-spinner fa-spin"></i></span>

@@ -1,7 +1,7 @@
 import { AREAS } from '../../data/areasConfig';
 
 // Default Data
-const defaultTramitesGE = [
+const defaultTiposSolicitudGE = [
   {
     nombre: 'Estructurales y Legales',
     tramites: [
@@ -39,7 +39,7 @@ const defaultTramitesGE = [
   }
 ];
 
-const defaultTramitesGH = [
+const defaultTiposSolicitudGH = [
   {
     nombre: 'Permisos',
     tramites: ["Personal", "Salud", "Educativo", "Licencia no remunerada (LNR)"]
@@ -50,7 +50,7 @@ const defaultTramitesGH = [
   }
 ];
 
-const defaultTramitesTI = [
+const defaultTiposSolicitudTI = [
   {
     nombre: 'Soporte Técnico',
     tramites: [
@@ -70,17 +70,17 @@ export const initSettingsDB = () => {
   
   if (!settings) {
     settings = {
-      ge: { grupos: defaultTramitesGE, slas: { ...defaultSlas } },
-      gh: { grupos: defaultTramitesGH, slas: { ...defaultSlas } },
-      ti: { grupos: defaultTramitesTI, slas: { ...defaultSlas } }
+      ge: { tiposSolicitud: defaultTiposSolicitudGE, slas: { ...defaultSlas } },
+      gh: { tiposSolicitud: defaultTiposSolicitudGH, slas: { ...defaultSlas } },
+      ti: { tiposSolicitud: defaultTiposSolicitudTI, slas: { ...defaultSlas } }
     };
   } else {
     settings = JSON.parse(settings);
     // Forzar siempre la estructura estricta de GH
     if (!settings.gh) {
-      settings.gh = { grupos: defaultTramitesGH, slas: { ...defaultSlas } };
+      settings.gh = { tiposSolicitud: defaultTiposSolicitudGH, slas: { ...defaultSlas } };
     } else {
-      settings.gh.grupos = defaultTramitesGH;
+      settings.gh.tiposSolicitud = defaultTiposSolicitudGH;
     }
   }
   localStorage.setItem('db_settings', JSON.stringify(settings));

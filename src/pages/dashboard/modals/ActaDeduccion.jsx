@@ -30,11 +30,18 @@ export const ActaDeduccion = ({ ticket, onClose }) => {
     }
   }
 
-  // Si a pesar de todo no hay fecha válida (ticket corrupto), usar una fecha estática
-  // para evitar que se actualice cada vez que se abre el modal.
+  // Si a pesar de todo no hay fecha válida (ticket corrupto)
   if (!fechaFirmaDate || isNaN(fechaFirmaDate.getTime())) {
     fechaFirmaDate = new Date("2026-07-26T00:00:00"); // Fallback estático
   }
+
+  const formatSafeDate = (val) => {
+    if (!val) return 'N/A';
+    if (String(val).includes(' de ')) return val;
+    const dt = new Date(val);
+    if (isNaN(dt.getTime())) return 'Fecha Inválida';
+    return dt.toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' });
+  };
 
   const fechaSolicitudStr = fechaFirmaDate.toLocaleDateString('es-CO');
   const fechaFirmaStr = fechaFirmaDate.toLocaleString('es-CO', { 
@@ -115,11 +122,11 @@ export const ActaDeduccion = ({ ticket, onClose }) => {
               </tr>
               <tr>
                 <td style={{ padding: '8px 0' }}><strong>Fecha Inicio Deducción:</strong></td>
-                <td>{new Date(d.fechaInicio).toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' })}</td>
+                <td>{formatSafeDate(d.fechaInicio)}</td>
               </tr>
               <tr>
                 <td style={{ padding: '8px 0' }}><strong>Fecha Fin Deducción:</strong></td>
-                <td>{new Date(d.fechaFin).toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' })}</td>
+                <td>{formatSafeDate(d.fechaFin)}</td>
               </tr>
             </tbody>
           </table>

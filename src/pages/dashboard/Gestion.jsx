@@ -25,7 +25,7 @@ export const Gestion = () => {
     estado: 'Pendiente',
     responsable: '',
     prioridad: 'Baja',
-    grupo: '',
+    tipoSolicitud: '',
     clasificacion: '',
     detalles: '',
     novedadNomina: false,
@@ -107,7 +107,7 @@ export const Gestion = () => {
       estado: t.estado || 'Pendiente',
       responsable: t.responsable || '',
       prioridad: t.prioridad || 'Baja',
-      grupo: t.grupo || 'Soporte Tecnico',
+      tipoSolicitud: t.tipoSolicitud || 'Soporte Tecnico',
       clasificacion: t.grupoExtra || t.clasificacion || '',
       detalles: t.detalles || '',
       fechaProgramada: t.fechaProgramada || '',
@@ -125,7 +125,7 @@ export const Gestion = () => {
     const val = type === 'checkbox' ? checked : value;
     setTicketEdit(prev => {
       const next = { ...prev, [field]: val };
-      if (field === 'grupo') {
+      if (field === 'tipoSolicitud') {
         next.clasificacion = ''; // Reset when group changes
       }
       return next;
@@ -133,7 +133,7 @@ export const Gestion = () => {
   };
 
   const renderTramites = () => {
-    const grupoEncontrado = config.grupos.find(g => ticketEdit.grupo.includes(g.nombre) || g.nombre.includes(ticketEdit.grupo));
+    const grupoEncontrado = config.tiposSolicitud?.find(g => ticketEdit.tipoSolicitud.includes(g.nombre) || g.nombre.includes(ticketEdit.tipoSolicitud)) || config.grupos?.find(g => ticketEdit.tipoSolicitud.includes(g.nombre) || g.nombre.includes(ticketEdit.tipoSolicitud));
     if (grupoEncontrado) {
       return grupoEncontrado.tramites.map(t => <option key={t} value={t}>{t}</option>);
     }
@@ -147,7 +147,7 @@ export const Gestion = () => {
         estado: ticketEdit.estado,
         responsable: ticketEdit.responsable,
         prioridad: ticketEdit.prioridad,
-        grupo: ticketEdit.grupo,
+        tipoSolicitud: ticketEdit.tipoSolicitud,
         grupoExtra: ticketEdit.clasificacion,
         clasificacion: ticketEdit.clasificacion,
         novedadNomina: ticketEdit.novedadNomina,
@@ -395,7 +395,7 @@ export const Gestion = () => {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                   <strong style={{ color: 'var(--navy)' }}><i className="fa-solid fa-list-check"></i> Detalles Específicos del Trámite</strong>
                   
-                  {ticketEdit.grupo === 'Convenios' && (
+                  {ticketEdit.tipoSolicitud === 'Convenios' && (
                     <button type="button" className="btn-primary" style={{ padding: '6px 12px', fontSize: '12px', background: 'var(--red)' }} onClick={() => setShowActa(true)}>
                       <i className="fa-solid fa-file-pdf"></i> Generar Acta PDF
                     </button>
@@ -516,12 +516,12 @@ export const Gestion = () => {
               )}
 
               <div className="form-group">
-                <label className="form-label">Área de Gestión</label>
+                <label className="form-label">Tipo de Solicitud</label>
                 <div className="select-wrapper">
                   <i className="fa-solid fa-users-gear select-icon-left"></i>
-                  <select id="m_grupo" className="form-select padded-left" value={ticketEdit.grupo} onChange={handleModalChange}>
-                    <option value="" disabled>Seleccione el Área...</option>
-                    {config.grupos.map((g, idx) => (
+                  <select id="m_tipoSolicitud" className="form-select padded-left" value={ticketEdit.tipoSolicitud} onChange={handleModalChange}>
+                    <option value="" disabled>Seleccione el Tipo...</option>
+                    {(config.tiposSolicitud || config.grupos || []).map((g, idx) => (
                       <option key={idx} value={g.nombre}>{g.nombre}</option>
                     ))}
                   </select>

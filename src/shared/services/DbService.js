@@ -112,7 +112,7 @@ export const DbService = {
         formObj.fechaISO = new Date().toISOString();
         formObj.fechaCreacion = new Date().toLocaleString();
         formObj.nombre = formObj.solicitante;
-        formObj.area = formObj.grupo || formObj.clasificacion || 'General';
+        formObj.area = formObj.tipoSolicitud || formObj.clasificacion || 'General';
         acts.push(formObj);
         localStorage.setItem(key, JSON.stringify(acts));
         

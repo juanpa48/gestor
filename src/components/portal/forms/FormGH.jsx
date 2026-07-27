@@ -10,10 +10,10 @@ export const FormGH = () => {
   const { currentUser } = useAuth();
   const nombre = currentUser?.nombreReal || currentUser?.username || '';
   const { addTicket } = useTickets();
-  const [areaGestion, setAreaGestion] = useState('');
+  const [tipoSolicitud, setTipoSolicitud] = useState('');
   const [tipoTramite, setTipoTramite] = useState('');
   const settings = getAreaSettings('gh');
-  const grupos = settings.grupos || [];
+  const tiposSolicitud = settings.tiposSolicitud || [];
   const [solicitud, setSolicitud] = useState('');
   const [archivos, setArchivos] = useState([]);
   const [detalles, setDetalles] = useState({}); // Estado dinámico inyectado por sub-componentes
@@ -30,12 +30,12 @@ export const FormGH = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!nombre || !tipoTramite || (!solicitud && areaGestion !== 'Convenios')) {
+    if (!nombre || !tipoTramite || (!solicitud && tipoSolicitud !== 'Convenios')) {
       showToast('Por favor, complete todos los campos obligatorios.', 'error', 'triangle-exclamation');
       return;
     }
 
-    if (areaGestion === 'Convenios' && detalles.consentimientoLegal) {
+    if (tipoSolicitud === 'Convenios' && detalles.consentimientoLegal) {
       const users = JSON.parse(localStorage.getItem('db_usuarios') || '[]');
       const targetUser = users.find(u => u.username === currentUser?.username);
       if (targetUser) {
@@ -82,7 +82,7 @@ export const FormGH = () => {
       const sanitizedDetalles = { ...detalles };
       delete sanitizedDetalles.firmaClave;
 
-      if (areaGestion === 'Convenios' && sanitizedDetalles.consentimientoLegal) {
+      if (tipoSolicitud === 'Convenios' && sanitizedDetalles.consentimientoLegal) {
         sanitizedDetalles.firmaISO = new Date().toISOString();
         sanitizedDetalles.firmaTimestamp = Date.now();
       }
@@ -94,10 +94,10 @@ export const FormGH = () => {
         nombre: nombre,
         solicitante: nombre,
         cargo: currentUser?.cargo || 'Usuario del Sistema',
-        solicitud: solicitud || (areaGestion === 'Convenios' ? `Solicitud de Convenio de Nómina: ${tipoTramite}` : ''),
+        solicitud: solicitud || (tipoSolicitud === 'Convenios' ? `Solicitud de Convenio de Nómina: ${tipoTramite}` : ''),
         estado: 'Pendiente',
         responsable: '',
-        grupo: areaGestion || 'Trámites de Personal',
+        tipoSolicitud: tipoSolicitud || 'Trámites de Personal',
         grupoExtra: tipoTramite,
         clasificacion: tipoTramite,
         novedadNomina: false,
@@ -108,7 +108,7 @@ export const FormGH = () => {
       await addTicket(nuevoTicket);
       
       setSolicitud('');
-      setAreaGestion('');
+      setTipoSolicitud('');
       setTipoTramite('');
       setDetalles({});
       setArchivos([]);
@@ -137,21 +137,21 @@ export const FormGH = () => {
       </div>
 
       <div className="form-group form-group-full">
-        <label className="form-label">ÁREA DE GESTIÓN (GRUPO)</label>
+        <label className="form-label">TIPO DE SOLICITUD</label>
         <div className="select-wrapper">
-          <select className="glass-input" required value={areaGestion} onChange={(e) => { setAreaGestion(e.target.value); setTipoTramite(''); }}>
-            <option value="" disabled>Seleccione el Grupo...</option>
-            {grupos.map(g => <option key={g.nombre} value={g.nombre}>{g.nombre}</option>)}
+          <select className="glass-input" required value={tipoSolicitud} onChange={(e) => { setTipoSolicitud(e.target.value); setTipoTramite(''); }}>
+            <option value="" disabled>Seleccione el Tipo de Solicitud...</option>
+            {tiposSolicitud.map(g => <option key={g.nombre} value={g.nombre}>{g.nombre}</option>)}
           </select>
         </div>
       </div>
 
       <div className="form-group form-group-full">
-        <label className="form-label">TIPO DE TRÁMITE (GH)</label>
+        <label className="form-label">TRÁMITE ESPECÍFICO (GH)</label>
         <div className="select-wrapper">
-          <select className="glass-input" required value={tipoTramite} onChange={(e) => setTipoTramite(e.target.value)} disabled={!areaGestion}>
+          <select className="glass-input" required value={tipoTramite} onChange={(e) => setTipoTramite(e.target.value)} disabled={!tipoSolicitud}>
             <option value="" disabled>Seleccione el Trámite...</option>
-            {areaGestion && (grupos.find(g => g.nombre === areaGestion)?.tramites || []).map(t => (
+            {tipoSolicitud && (tiposSolicitud.find(g => g.nombre === tipoSolicitud)?.tramites || []).map(t => (
               <option key={t} value={t}>{t}</option>
             ))}
           </select>
@@ -160,20 +160,20 @@ export const FormGH = () => {
 
       {/* RENDERIZADO DINÁMICO (CONTROLADOR) */}
       <div className="dynamic-form-area" style={{ padding: '15px 0', borderTop: '1px dashed var(--card-border)', borderBottom: '1px dashed var(--card-border)', margin: '15px 0' }}>
-        {areaGestion === 'Permisos' && (
+        {tipoSolicitud === 'Permisos' && (
            <FormPermiso detalles={detalles} setDetalles={setDetalles} tipoTramite={tipoTramite} />
         )}
-        {areaGestion === 'Convenios' && (
+        {tipoSolicitud === 'Convenios' && (
            <FormConvenio detalles={detalles} setDetalles={setDetalles} tipoTramite={tipoTramite} />
         )}
-        {areaGestion !== 'Permisos' && areaGestion !== 'Convenios' && tipoTramite !== '' && (
+        {tipoSolicitud !== 'Permisos' && tipoSolicitud !== 'Convenios' && tipoTramite !== '' && (
            <div style={{ color: 'var(--text-muted)', fontSize: '14px', padding: '10px' }}>
              <i className="fa-solid fa-circle-info text-blue"></i> Este trámite utilizará el formulario genérico.
            </div>
         )}
       </div>
 
-      {areaGestion !== 'Convenios' && (
+      {tipoSolicitud !== 'Convenios' && (
         <div className="form-group">
           <label className="form-label">DESCRIPCIÓN DE LA SOLICITUD</label>
           <textarea 

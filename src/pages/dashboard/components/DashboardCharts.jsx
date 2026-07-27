@@ -33,10 +33,10 @@ export const DashboardCharts = () => {
 
     // 4. Volumen por Área dinámica
     const strArea = (grupo) => (grupo || '').toLowerCase();
-    const labels = config.grupos.map(g => g.nombre.substring(0, 10)); // nombre corto
-    const data = config.grupos.map(g => {
+    const labels = (config.tiposSolicitud || config.grupos || []).map(g => g.nombre.substring(0, 10)); // nombre corto
+    const data = (config.tiposSolicitud || config.grupos || []).map(g => {
       const gName = g.nombre.toLowerCase();
-      return acts.filter(a => strArea(a.grupo).includes(gName) || strArea(a.grupoExtra).includes(gName)).length;
+      return acts.filter(a => strArea(a.tipoSolicitud).includes(gName) || strArea(a.grupoExtra).includes(gName)).length;
     });
 
     return {

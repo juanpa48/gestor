@@ -121,10 +121,10 @@ export const StatCards = () => {
     const strArea = (grupo) => (grupo || '').toLowerCase();
     
     // Tomar los primeros 2 o 3 grupos de config.grupos
-    const labels = config.grupos.map(g => g.nombre.substring(0, 10)); // nombre corto
-    const data = config.grupos.map(g => {
+    const labels = (config.tiposSolicitud || config.grupos || []).map(g => g.nombre.substring(0, 10)); // nombre corto
+    const data = (config.tiposSolicitud || config.grupos || []).map(g => {
       const gName = g.nombre.toLowerCase();
-      return actividades.filter(a => strArea(a.grupo).includes(gName) || strArea(a.grupoExtra).includes(gName)).length;
+      return actividades.filter(a => strArea(a.tipoSolicitud).includes(gName) || strArea(a.grupoExtra).includes(gName)).length;
     });
 
     return {
@@ -135,7 +135,7 @@ export const StatCards = () => {
         borderRadius: 4
       }]
     };
-  }, [actividades, config.grupos]);
+  }, [actividades, config.tiposSolicitud, config.grupos]);
 
   const chart3Options = {
     responsive: true,

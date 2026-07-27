@@ -11,7 +11,25 @@
 
 ## 🚀 Bitácora de Progreso (Gestión Empresarial)
 
-## Nuevo Objetivo: Formularios Dinámicos de Gestión Humana (GH)
+## Nuevo Objetivo: Módulo de Convenios y Firma Digital
+> **Contexto:** Se requiere construir el segundo formulario altamente especializado de GH ("Convenios") el cual involucra deducciones de nómina. Para dar respaldo legal, se implementará un componente de Firma Digital Canvas en el formulario del empleado y un Generador de Acta PDF en el Dashboard del Gestor.
+
+- [ ] **Fase 1: Construcción del Formulario de Convenios (`FormConvenio.jsx`)**
+  - [ ] Crear campos: Deducción de nómina, Valor, Cuotas, Periodicidad, Fechas.
+  - [ ] Implementar formateo automático de moneda ($ COP) en el campo Valor.
+  - [ ] Conectar `FormConvenio` al controlador `FormGH.jsx`.
+- [ ] **Fase 2: Implementación de la Firma Digital Legal**
+  - [ ] Instalar e integrar `react-signature-canvas`.
+  - [ ] Agregar el texto de consentimiento legal en el formulario.
+  - [ ] Codificar la firma como imagen Base64 dentro del objeto `detalles`.
+- [ ] **Fase 3: Generador de Evidencia en Dashboard**
+  - [ ] Diseñar el componente `ActaDeduccion.jsx` (Vista estilo documento legal).
+  - [ ] Modificar el Modal de `Gestion.jsx` para mostrar el botón "Generar Acta PDF" si el ticket es de convenio.
+  - [ ] Integrar ventana de impresión (`window.print()`) para descargar el PDF.
+
+---
+
+## Objetivo Completado: Formularios Dinámicos de Gestión Humana (GH)
 > **Contexto:** GH requiere 9 trámites altamente especializados. Cada trámite transforma el formulario añadiendo campos condicionales (ej. Fecha de Permiso, Hora Inicio/Fin, Cómo Compensa). Se implementará un patrón de Controlador Modular que empaqueta estos campos en un objeto JSON (`detalles`) en la tabla única.
 
 - [x] **Fase 1: Arquitectura Base y Preparación del Controlador**
