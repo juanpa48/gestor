@@ -262,16 +262,6 @@ export const ReportesGH = () => {
                       <i className={`fa-solid ${u.ticket?.estado === 'Resuelto' ? 'fa-check' : 'fa-clock'}`}></i> {u.ticket?.estado === 'Resuelto' ? 'Finalizada' : 'En turno'} {timeStr ? `(${timeStr})` : ''}
                     </div>
                   </div>
-                  {u.ticket?.estado !== 'Resuelto' && (
-                    <button 
-                      className="btn-secondary" 
-                      style={{ padding: '4px 8px', fontSize: '10px', margin: 0, color: '#ef4444' }}
-                      onClick={() => updateTicket(u.ticket.id, { estado: 'Resuelto' })}
-                      title="Finalizar Jornada"
-                    >
-                      <i className="fa-solid fa-power-off"></i>
-                    </button>
-                  )}
                 </div>
               )})}
             </div>
