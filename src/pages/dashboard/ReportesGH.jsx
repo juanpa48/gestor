@@ -369,59 +369,61 @@ export const ReportesGH = () => {
             </div>
           </div>
 
-          <table className="data-table" style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--card-border)' }}>
-                <th style={{ padding: '12px', color: 'var(--text-muted)' }}>Colaborador</th>
-                <th style={{ padding: '12px', color: 'var(--text-muted)' }}>Cargo</th>
-                <th style={{ padding: '12px', color: 'var(--text-muted)' }}>Ubicación de Hoy</th>
-                <th style={{ padding: '12px', color: 'var(--text-muted)' }}>Estado de Jornada</th>
-                <th style={{ padding: '12px', color: 'var(--text-muted)' }}>Hora Inicio</th>
-                <th style={{ padding: '12px', color: 'var(--text-muted)' }}>Hora Fin</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredTableUsers.map(u => {
-                const t = u.ticket;
-                return (
-                  <tr key={u.username} style={{ borderBottom: '1px solid var(--card-border)' }}>
-                    <td style={{ padding: '12px', fontWeight: 'bold' }}>{u.displayName}</td>
-                    <td style={{ padding: '12px' }}>{u.cargo || 'N/A'}</td>
-                    <td style={{ padding: '12px' }}>
-                      {t ? (
-                        <div>
-                          <span className={`badge ${u.ubicacion === 'Oficina' ? 'progreso' : u.ubicacion === 'Cliente' ? 'resuelto' : 'pendiente'}`}>
-                            {u.ubicacion}
-                          </span>
-                          {t.detalles?.cliente && (
-                            <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>
-                              <i className="fa-solid fa-building-user"></i> {t.detalles.cliente}
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <span className="badge suspendido" style={{background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444'}}>No Reportado</span>
-                      )}
-                    </td>
-                    <td style={{ padding: '12px' }}>
-                      {t ? (
-                        t.estado === 'Resuelto' ? <strong style={{color: '#10b981'}}><i className="fa-solid fa-check"></i> Finalizada</strong> : <span style={{color: '#3b82f6'}}><i className="fa-solid fa-clock"></i> En Turno</span>
-                      ) : '-'}
-                    </td>
-                    <td style={{ padding: '12px' }}>{t ? (t.fechaInicio ? t.fechaInicio.split(', ')[1] : t.fechaCreacion.split(', ')[1]) : '-'}</td>
-                    <td style={{ padding: '12px' }}>{t?.estado === 'Resuelto' && t.fechaFin ? t.fechaFin.split(', ')[1] : '-'}</td>
-                  </tr>
-                );
-              })}
-              {filteredTableUsers.length === 0 && (
-                <tr>
-                  <td colSpan="6" style={{ textAlign: 'center', padding: '30px', color: 'var(--text-muted)' }}>
-                    No se encontraron colaboradores que coincidan con los filtros aplicados.
-                  </td>
+          <div style={{ overflowX: 'auto', width: '100%' }}>
+            <table className="data-table" style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse', minWidth: '800px' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid var(--card-border)' }}>
+                  <th style={{ padding: '12px', color: 'var(--text-muted)' }}>Colaborador</th>
+                  <th style={{ padding: '12px', color: 'var(--text-muted)' }}>Cargo</th>
+                  <th style={{ padding: '12px', color: 'var(--text-muted)' }}>Ubicación de Hoy</th>
+                  <th style={{ padding: '12px', color: 'var(--text-muted)' }}>Estado de Jornada</th>
+                  <th style={{ padding: '12px', color: 'var(--text-muted)' }}>Hora Inicio</th>
+                  <th style={{ padding: '12px', color: 'var(--text-muted)' }}>Hora Fin</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filteredTableUsers.map(u => {
+                  const t = u.ticket;
+                  return (
+                    <tr key={u.username} style={{ borderBottom: '1px solid var(--card-border)' }}>
+                      <td style={{ padding: '12px', fontWeight: 'bold' }}>{u.displayName}</td>
+                      <td style={{ padding: '12px' }}>{u.cargo || 'N/A'}</td>
+                      <td style={{ padding: '12px' }}>
+                        {t ? (
+                          <div>
+                            <span className={`badge ${u.ubicacion === 'Oficina' ? 'progreso' : u.ubicacion === 'Cliente' ? 'resuelto' : 'pendiente'}`}>
+                              {u.ubicacion}
+                            </span>
+                            {t.detalles?.cliente && (
+                              <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                                <i className="fa-solid fa-building-user"></i> {t.detalles.cliente}
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="badge suspendido" style={{background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444'}}>No Reportado</span>
+                        )}
+                      </td>
+                      <td style={{ padding: '12px' }}>
+                        {t ? (
+                          t.estado === 'Resuelto' ? <strong style={{color: '#10b981'}}><i className="fa-solid fa-check"></i> Finalizada</strong> : <span style={{color: '#3b82f6'}}><i className="fa-solid fa-clock"></i> En Turno</span>
+                        ) : '-'}
+                      </td>
+                      <td style={{ padding: '12px' }}>{t ? (t.fechaInicio ? t.fechaInicio.split(', ')[1] : t.fechaCreacion.split(', ')[1]) : '-'}</td>
+                      <td style={{ padding: '12px' }}>{t?.estado === 'Resuelto' && t.fechaFin ? t.fechaFin.split(', ')[1] : '-'}</td>
+                    </tr>
+                  );
+                })}
+                {filteredTableUsers.length === 0 && (
+                  <tr>
+                    <td colSpan="6" style={{ textAlign: 'center', padding: '30px', color: 'var(--text-muted)' }}>
+                      No se encontraron colaboradores que coincidan con los filtros aplicados.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
