@@ -12,7 +12,14 @@ import { FormAuxilioEducativo } from './gh/FormAuxilioEducativo';
 export const FormGH = () => {
   const { currentUser } = useAuth();
   const nombre = currentUser?.nombreReal || currentUser?.username || '';
-  const { addTicket } = useTickets();
+  const { addTicket, actividades } = useTickets();
+  
+  const activeReport = (actividades || []).find(a => 
+    a.tipoSolicitud === 'Reporte de Asistencia' && 
+    a.solicitante === nombre &&
+    ['Pendiente', 'En progreso'].includes(a.estado)
+  );
+
   const [tipoSolicitud, setTipoSolicitud] = useState('');
   const [tipoTramite, setTipoTramite] = useState('');
   const settings = getAreaSettings('gh');
@@ -252,13 +259,19 @@ export const FormGH = () => {
       )}
 
       {tipoSolicitud === 'Reporte de Asistencia' ? (
-        <button type="submit" className={`btn-submit ${loadingSubmit ? 'loading' : ''}`} style={{ background: 'var(--green)', boxShadow: '0 4px 15px rgba(34,197,94,0.3)' }} disabled={loadingSubmit}>
-          {loadingSubmit ? (
-            <><span>Registrando Inicio...</span><i className="fa-solid fa-spinner fa-spin"></i></>
-          ) : (
-            <><span>Registrar Inicio de Jornada</span><i className="fa-solid fa-clock"></i></>
-          )}
-        </button>
+        activeReport ? (
+          <div style={{ padding: '15px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid #ef4444', borderRadius: '8px', textAlign: 'center', fontWeight: 'bold' }}>
+            <i className="fa-solid fa-triangle-exclamation"></i> Ya tienes una jornada en curso ({activeReport.clasificacion || activeReport.grupoExtra || 'Oficina'}). Finalízala antes de registrar otra.
+          </div>
+        ) : (
+          <button type="submit" className={`btn-submit ${loadingSubmit ? 'loading' : ''}`} style={{ background: 'var(--green)', boxShadow: '0 4px 15px rgba(34,197,94,0.3)' }} disabled={loadingSubmit}>
+            {loadingSubmit ? (
+              <><span>Registrando Inicio...</span><i className="fa-solid fa-spinner fa-spin"></i></>
+            ) : (
+              <><span>Registrar Inicio de Jornada</span><i className="fa-solid fa-clock"></i></>
+            )}
+          </button>
+        )
       ) : (
         <button type="submit" className={`btn-submit ${loadingSubmit ? 'loading' : ''}`} disabled={loadingSubmit}>
           {loadingSubmit ? (

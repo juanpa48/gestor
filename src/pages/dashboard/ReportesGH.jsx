@@ -38,6 +38,22 @@ export const ReportesGH = () => {
     });
   }, [actividades, updateTicket]);
 
+  const [userTick, setUserTick] = useState(0);
+
+  useEffect(() => {
+    const handleStorage = (e) => {
+      if (e.key === 'db_usuarios') setUserTick(t => t + 1);
+    };
+    const handleUpdate = () => setUserTick(t => t + 1);
+
+    window.addEventListener('storage', handleStorage);
+    window.addEventListener('usuariosActualizados', handleUpdate);
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+      window.removeEventListener('usuariosActualizados', handleUpdate);
+    };
+  }, []);
+
   // Get users
   const allUsers = useMemo(() => {
     try {
@@ -46,7 +62,7 @@ export const ReportesGH = () => {
     } catch {
       return [];
     }
-  }, []);
+  }, [userTick]);
 
   const { todayTickets, isHoyFestivoOFinDeSemana } = useMemo(() => {
     const hoy = new Date();
@@ -222,12 +238,14 @@ export const ReportesGH = () => {
               <i className="fa-solid fa-building"></i> En Oficina ({board.oficina.length})
             </h3>
             <div style={{ flex: 1, overflowY: 'auto' }}>
-              {board.oficina.map(u => (
+              {board.oficina.map(u => {
+                const timeStr = u.ticket?.fechaCreacion ? u.ticket.fechaCreacion.split(', ')[1] : '';
+                return (
                 <div key={u.username} draggable onDragStart={(e) => handleDragStart(e, u)} style={{ background: 'var(--card-bg)', border: '1px solid var(--card-border)', padding: '10px', borderRadius: '8px', marginBottom: '10px', cursor: 'grab', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
                     <strong>{u.displayName}</strong>
                     <div style={{ fontSize: '11px', color: u.ticket?.estado === 'Resuelto' ? '#10b981' : '#3b82f6', marginTop: '4px' }}>
-                      <i className={`fa-solid ${u.ticket?.estado === 'Resuelto' ? 'fa-check' : 'fa-clock'}`}></i> {u.ticket?.estado === 'Resuelto' ? 'Jornada Finalizada' : 'En turno'}
+                      <i className={`fa-solid ${u.ticket?.estado === 'Resuelto' ? 'fa-check' : 'fa-clock'}`}></i> {u.ticket?.estado === 'Resuelto' ? 'Finalizada' : 'En turno'} {timeStr ? `(${timeStr})` : ''}
                     </div>
                   </div>
                   {u.ticket?.estado !== 'Resuelto' && (
@@ -241,7 +259,7 @@ export const ReportesGH = () => {
                     </button>
                   )}
                 </div>
-              ))}
+              )})}
             </div>
           </div>
 
@@ -255,14 +273,16 @@ export const ReportesGH = () => {
               <i className="fa-solid fa-house-laptop"></i> En Casa ({board.casa.length})
             </h3>
             <div style={{ flex: 1, overflowY: 'auto' }}>
-              {board.casa.map(u => (
+              {board.casa.map(u => {
+                const timeStr = u.ticket?.fechaCreacion ? u.ticket.fechaCreacion.split(', ')[1] : '';
+                return (
                 <div key={u.username} draggable onDragStart={(e) => handleDragStart(e, u)} style={{ background: 'var(--card-bg)', border: '1px solid var(--card-border)', padding: '10px', borderRadius: '8px', marginBottom: '10px', cursor: 'grab' }}>
                   <strong>{u.displayName}</strong>
                   <div style={{ fontSize: '11px', color: u.ticket?.estado === 'Resuelto' ? '#10b981' : '#8b5cf6', marginTop: '4px' }}>
-                      <i className={`fa-solid ${u.ticket?.estado === 'Resuelto' ? 'fa-check' : 'fa-clock'}`}></i> {u.ticket?.estado === 'Resuelto' ? 'Jornada Finalizada' : 'En turno'}
+                      <i className={`fa-solid ${u.ticket?.estado === 'Resuelto' ? 'fa-check' : 'fa-clock'}`}></i> {u.ticket?.estado === 'Resuelto' ? 'Finalizada' : 'En turno'} {timeStr ? `(${timeStr})` : ''}
                   </div>
                 </div>
-              ))}
+              )})}
             </div>
           </div>
 
@@ -276,14 +296,21 @@ export const ReportesGH = () => {
               <i className="fa-solid fa-briefcase"></i> En Cliente ({board.cliente.length})
             </h3>
             <div style={{ flex: 1, overflowY: 'auto' }}>
-              {board.cliente.map(u => (
+              {board.cliente.map(u => {
+                const timeStr = u.ticket?.fechaCreacion ? u.ticket.fechaCreacion.split(', ')[1] : '';
+                return (
                 <div key={u.username} draggable onDragStart={(e) => handleDragStart(e, u)} style={{ background: 'var(--card-bg)', border: '1px solid var(--card-border)', padding: '10px', borderRadius: '8px', marginBottom: '10px', cursor: 'grab' }}>
                   <strong>{u.displayName}</strong>
+                  {u.ticket?.detalles?.cliente && (
+                    <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px', fontWeight: '500' }}>
+                      <i className="fa-solid fa-building-user"></i> {u.ticket.detalles.cliente}
+                    </div>
+                  )}
                   <div style={{ fontSize: '11px', color: u.ticket?.estado === 'Resuelto' ? '#10b981' : '#10b981', marginTop: '4px' }}>
-                      <i className={`fa-solid ${u.ticket?.estado === 'Resuelto' ? 'fa-check' : 'fa-clock'}`}></i> {u.ticket?.estado === 'Resuelto' ? 'Jornada Finalizada' : 'En turno'}
+                      <i className={`fa-solid ${u.ticket?.estado === 'Resuelto' ? 'fa-check' : 'fa-clock'}`}></i> {u.ticket?.estado === 'Resuelto' ? 'Finalizada' : 'En turno'} {timeStr ? `(${timeStr})` : ''}
                   </div>
                 </div>
-              ))}
+              )})}
             </div>
           </div>
         </div>
