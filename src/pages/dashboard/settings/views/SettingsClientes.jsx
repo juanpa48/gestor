@@ -26,9 +26,8 @@ export const SettingsClientes = () => {
     loadClientes();
   }, []);
 
-  const handleSave = (e) => {
-    e.preventDefault();
-    if (!currentCliente.nombre.trim()) return;
+  const handleSave = () => {
+    if (!currentCliente.nombre || !currentCliente.nombre.trim()) return;
 
     let updatedList = [...clientes];
     
@@ -161,7 +160,7 @@ export const SettingsClientes = () => {
               
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '20px' }}>
                 <button type="button" className="btn-secondary" onClick={() => setShowModal(false)}>Cancelar</button>
-                <button type="button" className="btn-primary" style={{ margin: 0 }} onClick={handleSave}>
+                <button type="button" className="btn-primary" style={{ margin: 0 }} onClick={() => handleSave()}>
                   {editMode ? 'Guardar Cambios' : 'Agregar Cliente'}
                 </button>
               </div>
