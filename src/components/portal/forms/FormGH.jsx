@@ -177,6 +177,19 @@ export const FormGH = () => {
         </div>
       </div>
 
+      {tipoSolicitud !== 'Convenios' && tipoSolicitud !== 'Vacaciones' && tipoSolicitud !== 'Cesantías' && tipoSolicitud !== 'Cesantias' && (
+        <div className="form-group">
+          <label className="form-label">DESCRIPCIÓN DE LA SOLICITUD</label>
+          <textarea 
+            className="glass-input" 
+            placeholder="Describa el requerimiento para Gestión Humana..." 
+            required 
+            value={solicitud} 
+            onChange={(e) => setSolicitud(e.target.value)}
+          ></textarea>
+        </div>
+      )}
+
       {/* RENDERIZADO DINÁMICO (CONTROLADOR) */}
       <div className="dynamic-form-area" style={{ padding: '15px 0', borderTop: '1px dashed var(--card-border)', borderBottom: '1px dashed var(--card-border)', margin: '15px 0' }}>
         {tipoSolicitud === 'Permisos' && (
@@ -198,18 +211,7 @@ export const FormGH = () => {
         )}
       </div>
 
-      {tipoSolicitud !== 'Convenios' && tipoSolicitud !== 'Vacaciones' && tipoSolicitud !== 'Cesantías' && tipoSolicitud !== 'Cesantias' && (
-        <div className="form-group">
-          <label className="form-label">DESCRIPCIÓN DE LA SOLICITUD</label>
-          <textarea 
-            className="glass-input" 
-            placeholder="Describa el requerimiento para Gestión Humana..." 
-            required 
-            value={solicitud} 
-            onChange={(e) => setSolicitud(e.target.value)}
-          ></textarea>
-        </div>
-      )}
+
 
       <div className="form-group">
         <label className="form-label">EVIDENCIAS / ARCHIVOS ADJUNTOS (Opcional)</label>
