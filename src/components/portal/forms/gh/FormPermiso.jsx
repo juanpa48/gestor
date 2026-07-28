@@ -6,18 +6,27 @@ export const FormPermiso = ({ detalles, setDetalles, tipoTramite }) => {
 
   // Inyectar datos del perfil del usuario al montar el componente (removidos datos innecesarios para Permisos)
   useEffect(() => {
-    setDetalles(prev => ({
-      ...prev,
-      fechaPermiso: prev.fechaPermiso || '',
-      horaInicio: prev.horaInicio || '',
-      horaFin: prev.horaFin || '',
-      fechaInicio: prev.fechaInicio || '',
-      fechaFin: prev.fechaFin || '',
-      tiempoAproximado: prev.tiempoAproximado || '',
-      comoCompensa: prev.comoCompensa || ''
-    }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    setDetalles(prev => {
+      const base = {
+        tiempoAproximado: prev.tiempoAproximado || '',
+      };
+
+      if (tipoTramite && tipoTramite.includes('Licencia no remunerada')) {
+        base.fechaInicio = prev.fechaInicio || '';
+        base.fechaFin = prev.fechaFin || '';
+      } else {
+        base.fechaPermiso = prev.fechaPermiso || '';
+        base.horaInicio = prev.horaInicio || '';
+        base.horaFin = prev.horaFin || '';
+      }
+
+      if (tipoTramite === 'Personal') {
+        base.comoCompensa = prev.comoCompensa || '';
+      }
+
+      return base;
+    });
+  }, [tipoTramite, setDetalles]);
 
   // Calcular dinámicamente
   useEffect(() => {
