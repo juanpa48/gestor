@@ -207,9 +207,7 @@ export const FormCesantias = ({ detalles, setDetalles, tipoTramite }) => {
               <i className="fa-solid fa-circle-info" style={{ color: '#3b82f6', marginRight: '5px' }}></i> Información Importante
             </h5>
             <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-color)', lineHeight: '1.5' }}>
-              Si sus cesantías están en <strong>Porvenir</strong>, deberá dirigirse al <strong>Banco AV Villas</strong> con la liquidación de pago de la institución educativa y ellos harán el debido trámite. 
-              <br /><br />
-              Si sus cesantías se encuentran en una <strong>entidad diferente</strong> a Porvenir, deberá validar directamente con ellos.
+              <strong>Importante:</strong> Si buscas la opción ESTUDIO: Para ti o tus hijos, no realices el trámite por este medio. Debes dirigirte directamente a Banco AV Villas (si eres cliente de Porvenir, si es otra entidad debes dirigirte a ella).
             </p>
           </div>
           <i className="fa-solid fa-graduation-cap" style={{ fontSize: '30px', color: '#3b82f6', marginBottom: '10px' }}></i>
