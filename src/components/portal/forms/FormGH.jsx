@@ -245,27 +245,28 @@ export const FormGH = () => {
              <i className="fa-solid fa-circle-info text-blue"></i> Este trámite utilizará el formulario genérico.
            </div>
         )}
-        {tipoSolicitud === 'Reporte de Asistencia' && tipoTramite === 'Cliente' && (
+         {tipoSolicitud === 'Reporte de Asistencia' && tipoTramite === 'Cliente' && (
            <div className="form-group" style={{ background: 'rgba(59, 130, 246, 0.05)', padding: '15px', borderRadius: '8px', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
              <label className="form-label text-blue" style={{ fontSize: '12px', fontWeight: 'bold' }}>
                <i className="fa-solid fa-building-user"></i> SELECCIONE EL CLIENTE A VISITAR *
              </label>
-             <input 
-               type="text" 
-               list="clientes-list"
-               className="glass-input" 
-               placeholder="Busque o escriba el cliente..."
-               required
-               value={detalles.cliente || ''}
-               onChange={(e) => setDetalles({...detalles, cliente: e.target.value})}
-               style={{ border: '1.5px solid #3b82f6', background: '#fff' }}
-             />
-             <datalist id="clientes-list">
-               {clientesDB.map(c => <option key={c.id} value={c.nombre}>{c.nit ? `NIT: ${c.nit}` : ''}</option>)}
-             </datalist>
-             <small style={{ display: 'block', marginTop: '6px', color: 'var(--text-muted)' }}>
-               Puede buscar en la lista o escribir el nombre manualmente si no lo encuentra.
-             </small>
+             <div className="select-wrapper">
+               <select 
+                 className="glass-input" 
+                 required
+                 value={detalles.cliente || ''}
+                 onChange={(e) => setDetalles({...detalles, cliente: e.target.value})}
+                 style={{ border: '1.5px solid #3b82f6', background: '#fff' }}
+               >
+                 <option value="" disabled>Despliegue para seleccionar el cliente...</option>
+                 {clientesDB.map(c => <option key={c.id} value={c.nombre}>{c.nombre} {c.nit ? `(NIT: ${c.nit})` : ''}</option>)}
+               </select>
+             </div>
+             {clientesDB.length === 0 && (
+               <small style={{ display: 'block', marginTop: '6px', color: '#ef4444', fontWeight: 'bold' }}>
+                 <i className="fa-solid fa-triangle-exclamation"></i> No hay clientes registrados. Comuníquese con Soporte TI.
+               </small>
+             )}
            </div>
          )}
       </div>
@@ -292,7 +293,7 @@ export const FormGH = () => {
       {tipoSolicitud === 'Reporte de Asistencia' ? (
         activeReport ? (
           <div style={{ padding: '15px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid #ef4444', borderRadius: '8px', textAlign: 'center', fontWeight: 'bold' }}>
-            <i className="fa-solid fa-triangle-exclamation"></i> Ya tienes una jornada en curso ({activeReport.clasificacion || activeReport.grupoExtra || 'Oficina'}). Finalízala antes de registrar otra.
+            <i className="fa-solid fa-triangle-exclamation"></i> Ya tienes una jornada en curso ({activeReport.tipoTramite || activeReport.clasificacion || activeReport.grupoExtra || 'Oficina'}). {activeReport.detalles?.registradoManualmentePor ? ' (Asignada por Gestión Humana).' : ' Finalízala antes de registrar otra.'}
           </div>
         ) : (
           <button type="submit" className={`btn-submit ${loadingSubmit ? 'loading' : ''}`} style={{ background: 'var(--green)', boxShadow: '0 4px 15px rgba(34,197,94,0.3)' }} disabled={loadingSubmit}>

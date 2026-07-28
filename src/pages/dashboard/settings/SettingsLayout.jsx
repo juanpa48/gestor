@@ -60,7 +60,7 @@ export const SettingsLayout = () => {
               <span style={{ fontWeight: '500' }}>Grupos y Trámites</span>
             </NavLink>
 
-            {area === 'gh' && (
+            {area === 'ti' && (
               <NavLink 
                 to={`/dashboard/${area}/settings/clientes`} 
                 className={({ isActive }) => `settings-nav-item ${isActive ? 'active' : ''}`}

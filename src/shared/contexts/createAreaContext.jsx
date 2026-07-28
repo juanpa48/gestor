@@ -56,13 +56,18 @@ export const createAreaContext = (config) => {
       const handleTicketUpdate = () => {
         fetchTickets();
       };
+      const handleStorage = (e) => {
+        if (e.key === storageKey) fetchTickets();
+      };
 
       window.addEventListener('actividadGuardada', handleTicketUpdate);
       window.addEventListener('ticketActualizado', handleTicketUpdate);
+      window.addEventListener('storage', handleStorage);
 
       return () => {
         window.removeEventListener('actividadGuardada', handleTicketUpdate);
         window.removeEventListener('ticketActualizado', handleTicketUpdate);
+        window.removeEventListener('storage', handleStorage);
       };
     }, [fetchTickets]);
 

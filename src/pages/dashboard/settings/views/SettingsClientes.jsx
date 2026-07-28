@@ -136,7 +136,7 @@ export const SettingsClientes = () => {
               <h3>{editMode ? 'Editar Cliente' : 'Nuevo Cliente'}</h3>
               <button className="btn-close" onClick={() => setShowModal(false)}><i className="fa-solid fa-xmark"></i></button>
             </div>
-            <form onSubmit={handleSave} className="modal-body">
+            <div className="modal-body">
               <div className="form-group">
                 <label className="form-label">Nombre de la Empresa o Cliente *</label>
                 <input 
@@ -161,11 +161,11 @@ export const SettingsClientes = () => {
               
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '20px' }}>
                 <button type="button" className="btn-secondary" onClick={() => setShowModal(false)}>Cancelar</button>
-                <button type="submit" className="btn-primary" style={{ margin: 0 }}>
+                <button type="button" className="btn-primary" style={{ margin: 0 }} onClick={handleSave}>
                   {editMode ? 'Guardar Cambios' : 'Agregar Cliente'}
                 </button>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       )}
