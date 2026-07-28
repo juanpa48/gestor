@@ -26,17 +26,22 @@ export const ReportesGH = () => {
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
 
-    actividades.forEach(a => {
+    // Evitar loop infinito: trackear los que ya mandamos a cerrar en este render
+    const ticketsToClose = actividades.filter(a => {
       if (a.tipoSolicitud === 'Reporte de Asistencia' && ['Pendiente', 'En progreso'].includes(a.estado)) {
         const d = parseFechaCreacion(a);
         if (d) {
           d.setHours(0, 0, 0, 0);
           if (d.getTime() < hoy.getTime()) {
-            // Es de un día anterior y quedó abierto: auto-cerrar
-            updateTicket(a.id, { estado: 'Resuelto' });
+            return true;
           }
         }
       }
+      return false;
+    });
+
+    ticketsToClose.forEach(a => {
+      updateTicket(a.id, { estado: 'Resuelto' });
     });
   }, [actividades, updateTicket]);
 
