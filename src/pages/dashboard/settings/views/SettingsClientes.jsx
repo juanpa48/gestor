@@ -129,7 +129,7 @@ export const SettingsClientes = () => {
       </div>
 
       {showModal && (
-        <div className="modal-overlay">
+        <div className="modal-overlay active">
           <div className="modal-content glass-panel" style={{ width: '450px' }}>
             <div className="modal-header">
               <h3>{editMode ? 'Editar Cliente' : 'Nuevo Cliente'}</h3>
