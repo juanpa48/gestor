@@ -33,7 +33,7 @@ export const FormGH = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!nombre || !tipoTramite || (!solicitud && tipoSolicitud !== 'Convenios' && tipoSolicitud !== 'Vacaciones' && tipoSolicitud !== 'Cesantías' && tipoSolicitud !== 'Cesantias' && tipoSolicitud !== 'Auxilio Educativo')) {
+    if (!nombre || !tipoTramite || (!solicitud && tipoSolicitud !== 'Convenios' && tipoSolicitud !== 'Vacaciones' && tipoSolicitud !== 'Cesantías' && tipoSolicitud !== 'Cesantias' && tipoSolicitud !== 'Auxilio Educativo' && tipoSolicitud !== 'Reporte de Asistencia')) {
       showToast('Por favor, complete todos los campos obligatorios.', 'error', 'triangle-exclamation');
       return;
     }
@@ -114,7 +114,8 @@ export const FormGH = () => {
           tipoSolicitud === 'Convenios' ? `Solicitud de Convenio de Nómina: ${tipoTramite}` : 
           tipoSolicitud === 'Vacaciones' ? `Solicitud de Vacaciones: ${tipoTramite}` : 
           (tipoSolicitud === 'Cesantías' || tipoSolicitud === 'Cesantias') ? `Solicitud de Cesantías: ${tipoTramite}` : 
-          tipoSolicitud === 'Auxilio Educativo' ? `Solicitud de Auxilio Educativo: ${tipoTramite}` : ''
+          tipoSolicitud === 'Auxilio Educativo' ? `Solicitud de Auxilio Educativo: ${tipoTramite}` : 
+          tipoSolicitud === 'Reporte de Asistencia' ? `Reporte de Asistencia en: ${tipoTramite}` : ''
         ),
         estado: 'Pendiente',
         responsable: '',
@@ -187,7 +188,7 @@ export const FormGH = () => {
         </div>
       )}
 
-      {tipoSolicitud !== 'Convenios' && tipoSolicitud !== 'Vacaciones' && tipoSolicitud !== 'Cesantías' && tipoSolicitud !== 'Cesantias' && tipoSolicitud !== 'Auxilio Educativo' && (
+      {tipoSolicitud !== 'Convenios' && tipoSolicitud !== 'Vacaciones' && tipoSolicitud !== 'Cesantías' && tipoSolicitud !== 'Cesantias' && tipoSolicitud !== 'Auxilio Educativo' && tipoSolicitud !== 'Reporte de Asistencia' && (
         <div className="form-group">
           <label className="form-label">
             {tipoSolicitud === 'Certificado Laboral' ? 'DATOS QUE REQUIERE EN EL CERTIFICADO LABORAL *' : 
@@ -224,7 +225,7 @@ export const FormGH = () => {
         {tipoSolicitud === 'Auxilio Educativo' && (
            <FormAuxilioEducativo detalles={detalles} setDetalles={setDetalles} tipoTramite={tipoTramite} />
         )}
-        {tipoSolicitud !== 'Permisos' && tipoSolicitud !== 'Convenios' && tipoSolicitud !== 'Vacaciones' && tipoSolicitud !== 'Cesantías' && tipoSolicitud !== 'Cesantias' && tipoSolicitud !== 'Auxilio Educativo' && tipoTramite !== '' && (
+        {tipoSolicitud !== 'Permisos' && tipoSolicitud !== 'Convenios' && tipoSolicitud !== 'Vacaciones' && tipoSolicitud !== 'Cesantías' && tipoSolicitud !== 'Cesantias' && tipoSolicitud !== 'Auxilio Educativo' && tipoSolicitud !== 'Reporte de Asistencia' && tipoTramite !== '' && (
            <div style={{ color: 'var(--text-muted)', fontSize: '14px', padding: '10px' }}>
              <i className="fa-solid fa-circle-info text-blue"></i> Este trámite utilizará el formulario genérico.
            </div>
@@ -233,30 +234,40 @@ export const FormGH = () => {
 
 
 
-      <div className="form-group">
-        <label className="form-label">EVIDENCIAS / ARCHIVOS ADJUNTOS (Opcional)</label>
-        <div className="file-upload-wrapper">
-          <input 
-            type="file" 
-            className="glass-input" 
-            multiple 
-            onChange={(e) => setArchivos(e.target.files)}
-          />
-          <small style={{ color: 'var(--text-muted)', marginTop: '4px', display: 'block' }}>
-            Puede seleccionar varios archivos a la vez.
-          </small>
+      {tipoSolicitud !== 'Reporte de Asistencia' && (
+        <div className="form-group">
+          <label className="form-label">EVIDENCIAS / ARCHIVOS ADJUNTOS (Opcional)</label>
+          <div className="file-upload-wrapper">
+            <input 
+              type="file" 
+              className="glass-input" 
+              multiple 
+              onChange={(e) => setArchivos(e.target.files)}
+            />
+            <small style={{ color: 'var(--text-muted)', marginTop: '4px', display: 'block' }}>
+              Puede seleccionar varios archivos a la vez.
+            </small>
+          </div>
         </div>
-      </div>
+      )}
 
-
-
-      <button type="submit" className={`btn-submit ${loadingSubmit ? 'loading' : ''}`} disabled={loadingSubmit}>
-        {loadingSubmit ? (
-          <><span>Enviando...</span><i className="fa-solid fa-spinner fa-spin"></i></>
-        ) : (
-          <><span>Enviar Solicitud a GH</span><i className="fa-solid fa-paper-plane"></i></>
-        )}
-      </button>
+      {tipoSolicitud === 'Reporte de Asistencia' ? (
+        <button type="submit" className={`btn-submit ${loadingSubmit ? 'loading' : ''}`} style={{ background: 'var(--green)', boxShadow: '0 4px 15px rgba(34,197,94,0.3)' }} disabled={loadingSubmit}>
+          {loadingSubmit ? (
+            <><span>Registrando Inicio...</span><i className="fa-solid fa-spinner fa-spin"></i></>
+          ) : (
+            <><span>Registrar Inicio de Jornada</span><i className="fa-solid fa-clock"></i></>
+          )}
+        </button>
+      ) : (
+        <button type="submit" className={`btn-submit ${loadingSubmit ? 'loading' : ''}`} disabled={loadingSubmit}>
+          {loadingSubmit ? (
+            <><span>Enviando...</span><i className="fa-solid fa-spinner fa-spin"></i></>
+          ) : (
+            <><span>Enviar Solicitud a GH</span><i className="fa-solid fa-paper-plane"></i></>
+          )}
+        </button>
+      )}
     </form>
   );
 };
