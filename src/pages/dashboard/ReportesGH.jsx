@@ -8,6 +8,8 @@ export const ReportesGH = () => {
   const [viewMode, setViewMode] = useState('kanban'); // 'kanban' | 'table'
   const [draggedUser, setDraggedUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterLocation, setFilterLocation] = useState('Todos');
 
   const showToast = (msg, type='success') => {
     const toast = document.getElementById('toast');
@@ -88,38 +90,50 @@ export const ReportesGH = () => {
     return { todayTickets: todayT, isHoyFestivoOFinDeSemana: isWeekend || isFestivo };
   }, [actividades]);
 
-  // Categorize
-  const board = useMemo(() => {
-    const cols = {
-      noReportados: [],
-      cliente: [],
-      casa: [],
-      oficina: []
-    };
-
-    allUsers.forEach(user => {
-      // Find if they have a ticket today
+  const enrichedUsers = useMemo(() => {
+    return allUsers.map(user => {
       const ticket = todayTickets.find(t => t.solicitante === user.nombreReal || t.solicitante === user.username);
-      
-      const userItem = {
+      let ubicacion = 'No Reportado';
+      if (ticket) {
+        ubicacion = ticket.tipoTramite || ticket.clasificacion || ticket.grupoExtra;
+      }
+      return {
         ...user,
         displayName: user.nombreReal || user.username,
-        ticket
+        ticket,
+        ubicacion
       };
+    }).sort((a, b) => a.displayName.localeCompare(b.displayName));
+  }, [allUsers, todayTickets]);
 
-      if (!ticket) {
+  const board = useMemo(() => {
+    const cols = { oficina: [], casa: [], cliente: [], noReportados: [] };
+
+    enrichedUsers.forEach(userItem => {
+      if (!userItem.ticket) {
         cols.noReportados.push(userItem);
       } else {
-        const tramite = ticket.tipoTramite || ticket.clasificacion || ticket.grupoExtra;
-        if (tramite === 'Cliente') cols.cliente.push(userItem);
-        else if (tramite === 'Trabajo en Casa') cols.casa.push(userItem);
-        else if (tramite === 'Oficina') cols.oficina.push(userItem);
+        if (userItem.ubicacion === 'Cliente') cols.cliente.push(userItem);
+        else if (userItem.ubicacion === 'Trabajo en Casa') cols.casa.push(userItem);
+        else if (userItem.ubicacion === 'Oficina') cols.oficina.push(userItem);
         else cols.noReportados.push(userItem); // fallback
       }
     });
 
     return cols;
-  }, [allUsers, todayTickets]);
+  }, [enrichedUsers]);
+
+  const filteredTableUsers = useMemo(() => {
+    return enrichedUsers.filter(u => {
+      if (filterLocation !== 'Todos' && u.ubicacion !== filterLocation) return false;
+      if (searchTerm) {
+        const q = searchTerm.toLowerCase();
+        const clientName = u.ticket?.detalles?.cliente?.toLowerCase() || '';
+        if (!u.displayName.toLowerCase().includes(q) && !clientName.includes(q)) return false;
+      }
+      return true;
+    });
+  }, [enrichedUsers, filterLocation, searchTerm]);
 
   const handleManualAssign = async (user, location) => {
     try {
@@ -315,7 +329,46 @@ export const ReportesGH = () => {
           </div>
         </div>
       ) : (
-        <div className="glass-panel" style={{ padding: '20px', borderRadius: '12px', background: 'var(--card-bg)' }}>
+        <div className="glass-panel fade-in" style={{ padding: '20px', borderRadius: '12px', background: 'var(--card-bg)' }}>
+          {/* Barra de Filtros y Buscador */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+            
+            {/* Pestañas de Filtro */}
+            <div style={{ display: 'flex', gap: '10px', background: 'rgba(255,255,255,0.05)', padding: '5px', borderRadius: '12px' }}>
+              {['Todos', 'Oficina', 'Trabajo en Casa', 'Cliente', 'No Reportado'].map(f => (
+                <button 
+                  key={f}
+                  onClick={() => setFilterLocation(f)}
+                  style={{ 
+                    padding: '8px 16px', 
+                    borderRadius: '8px', 
+                    border: 'none', 
+                    background: filterLocation === f ? 'var(--blue)' : 'transparent',
+                    color: filterLocation === f ? '#fff' : 'var(--text-muted)',
+                    fontWeight: filterLocation === f ? '600' : '400',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    fontSize: '13px'
+                  }}
+                >
+                  {f}
+                </button>
+              ))}
+            </div>
+
+            {/* Buscador */}
+            <div className="search-box" style={{ minWidth: '250px' }}>
+              <i className="fa-solid fa-search"></i>
+              <input 
+                type="text" 
+                placeholder="Buscar por colaborador o cliente..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="glass-input"
+              />
+            </div>
+          </div>
+
           <table className="data-table" style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--card-border)' }}>
@@ -328,7 +381,7 @@ export const ReportesGH = () => {
               </tr>
             </thead>
             <tbody>
-              {allUsers.map(u => {
+              {filteredTableUsers.map(u => {
                 const t = u.ticket;
                 return (
                   <tr key={u.username} style={{ borderBottom: '1px solid var(--card-border)' }}>
@@ -336,9 +389,16 @@ export const ReportesGH = () => {
                     <td style={{ padding: '12px' }}>{u.cargo || 'N/A'}</td>
                     <td style={{ padding: '12px' }}>
                       {t ? (
-                        <span className={`badge ${(t.tipoTramite || t.clasificacion) === 'Oficina' ? 'progreso' : (t.tipoTramite || t.clasificacion) === 'Cliente' ? 'resuelto' : 'pendiente'}`}>
-                          {t.tipoTramite || t.clasificacion || t.grupoExtra}
-                        </span>
+                        <div>
+                          <span className={`badge ${u.ubicacion === 'Oficina' ? 'progreso' : u.ubicacion === 'Cliente' ? 'resuelto' : 'pendiente'}`}>
+                            {u.ubicacion}
+                          </span>
+                          {t.detalles?.cliente && (
+                            <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                              <i className="fa-solid fa-building-user"></i> {t.detalles.cliente}
+                            </div>
+                          )}
+                        </div>
                       ) : (
                         <span className="badge suspendido" style={{background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444'}}>No Reportado</span>
                       )}
@@ -353,6 +413,13 @@ export const ReportesGH = () => {
                   </tr>
                 );
               })}
+              {filteredTableUsers.length === 0 && (
+                <tr>
+                  <td colSpan="6" style={{ textAlign: 'center', padding: '30px', color: 'var(--text-muted)' }}>
+                    No se encontraron colaboradores que coincidan con los filtros aplicados.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
