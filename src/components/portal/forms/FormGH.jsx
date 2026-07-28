@@ -160,31 +160,41 @@ export const FormGH = () => {
       <div className="form-group form-group-full">
         <label className="form-label">TIPO DE SOLICITUD</label>
         <div className="select-wrapper">
-          <select className="glass-input" required value={tipoSolicitud} onChange={(e) => { setTipoSolicitud(e.target.value); setTipoTramite(''); setDetalles({}); }}>
+          <select className="glass-input" required value={tipoSolicitud} onChange={(e) => { 
+            const val = e.target.value;
+            setTipoSolicitud(val); 
+            const trs = tiposSolicitud.find(g => g.nombre === val)?.tramites || [];
+            setTipoTramite(trs.length === 1 ? trs[0] : ''); 
+            setDetalles({}); 
+          }}>
             <option value="" disabled>Seleccione el Tipo de Solicitud...</option>
             {tiposSolicitud.map(g => <option key={g.nombre} value={g.nombre}>{g.nombre}</option>)}
           </select>
         </div>
       </div>
 
-      <div className="form-group form-group-full">
-        <label className="form-label">TRÁMITE ESPECÍFICO (GH)</label>
-        <div className="select-wrapper">
-          <select className="glass-input" required value={tipoTramite} onChange={(e) => setTipoTramite(e.target.value)} disabled={!tipoSolicitud}>
-            <option value="" disabled>Seleccione el Trámite...</option>
-            {tipoSolicitud && (tiposSolicitud.find(g => g.nombre === tipoSolicitud)?.tramites || []).map(t => (
-              <option key={t} value={t}>{t}</option>
-            ))}
-          </select>
+      {tipoSolicitud && (tiposSolicitud.find(g => g.nombre === tipoSolicitud)?.tramites || []).length > 1 && (
+        <div className="form-group form-group-full">
+          <label className="form-label">TRÁMITE ESPECÍFICO (GH)</label>
+          <div className="select-wrapper">
+            <select className="glass-input" required value={tipoTramite} onChange={(e) => setTipoTramite(e.target.value)} disabled={!tipoSolicitud}>
+              <option value="" disabled>Seleccione el Trámite...</option>
+              {tipoSolicitud && (tiposSolicitud.find(g => g.nombre === tipoSolicitud)?.tramites || []).map(t => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
+          </div>
         </div>
-      </div>
+      )}
 
       {tipoSolicitud !== 'Convenios' && tipoSolicitud !== 'Vacaciones' && tipoSolicitud !== 'Cesantías' && tipoSolicitud !== 'Cesantias' && tipoSolicitud !== 'Auxilio Educativo' && (
         <div className="form-group">
-          <label className="form-label">DESCRIPCIÓN DE LA SOLICITUD</label>
+          <label className="form-label">
+            {tipoSolicitud === 'Certificado Laboral' ? 'DATOS QUE REQUIERE EN EL CERTIFICADO LABORAL *' : 'DESCRIPCIÓN DE LA SOLICITUD'}
+          </label>
           <textarea 
             className="glass-input" 
-            placeholder="Describa el requerimiento para Gestión Humana..." 
+            placeholder={tipoSolicitud === 'Certificado Laboral' ? 'Ej: Dirigido a EPS Sura, especificando salario y fecha de ingreso...' : 'Describa el requerimiento para Gestión Humana...'} 
             required 
             value={solicitud} 
             onChange={(e) => setSolicitud(e.target.value)}

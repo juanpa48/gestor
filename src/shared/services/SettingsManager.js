@@ -59,6 +59,10 @@ const defaultTiposSolicitudGH = [
   {
     nombre: 'Auxilio Educativo',
     tramites: ["Posgrado", "Diplomado", "Curso"]
+  },
+  {
+    nombre: 'Certificado Laboral',
+    tramites: ["General"]
   }
 ];
 
