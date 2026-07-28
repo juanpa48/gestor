@@ -369,7 +369,7 @@ export const ReportesGH = () => {
             </div>
           </div>
 
-          <div style={{ overflowX: 'auto', width: '100%' }}>
+          <div style={{ overflowX: 'auto', overflowY: 'auto', width: '100%', maxHeight: 'calc(100vh - 260px)' }}>
             <table className="data-table" style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse', minWidth: '800px' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--card-border)' }}>
