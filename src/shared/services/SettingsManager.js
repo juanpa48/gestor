@@ -63,6 +63,10 @@ const defaultTiposSolicitudGH = [
   {
     nombre: 'Certificado Laboral',
     tramites: ["General"]
+  },
+  {
+    nombre: 'Sistema de Gestión',
+    tramites: ["General"]
   }
 ];
 

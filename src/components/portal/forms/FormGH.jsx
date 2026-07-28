@@ -190,11 +190,16 @@ export const FormGH = () => {
       {tipoSolicitud !== 'Convenios' && tipoSolicitud !== 'Vacaciones' && tipoSolicitud !== 'Cesantías' && tipoSolicitud !== 'Cesantias' && tipoSolicitud !== 'Auxilio Educativo' && (
         <div className="form-group">
           <label className="form-label">
-            {tipoSolicitud === 'Certificado Laboral' ? 'DATOS QUE REQUIERE EN EL CERTIFICADO LABORAL *' : 'DESCRIPCIÓN DE LA SOLICITUD'}
+            {tipoSolicitud === 'Certificado Laboral' ? 'DATOS QUE REQUIERE EN EL CERTIFICADO LABORAL *' : 
+             tipoSolicitud === 'Sistema de Gestión' ? 'DETALLE DE LO SOLICITADO *' : 'DESCRIPCIÓN DE LA SOLICITUD'}
           </label>
           <textarea 
             className="glass-input" 
-            placeholder={tipoSolicitud === 'Certificado Laboral' ? 'Ej: Dirigido a EPS Sura, especificando salario y fecha de ingreso...' : 'Describa el requerimiento para Gestión Humana...'} 
+            placeholder={
+              tipoSolicitud === 'Certificado Laboral' ? 'Ej: Dirigido a EPS Sura, especificando salario y fecha de ingreso...' : 
+              tipoSolicitud === 'Sistema de Gestión' ? 'Describa detalladamente su solicitud para el Sistema de Gestión...' : 
+              'Describa el requerimiento para Gestión Humana...'
+            } 
             required 
             value={solicitud} 
             onChange={(e) => setSolicitud(e.target.value)}

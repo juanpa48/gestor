@@ -547,17 +547,49 @@ export const Gestion = () => {
                 </div>
               </div>
 
-              <div className="form-group form-group-full">
-                <label className="form-label">Tipo de Trámite</label>
-                <div className="select-wrapper">
-                  <i className="fa-solid fa-layer-group select-icon-left"></i>
-                  <select id="m_clasificacion" className="form-select padded-left" value={ticketEdit.clasificacion} onChange={handleModalChange}>
-                    <option value="" disabled>Seleccione un Trámite...</option>
-                    {renderTramites()}
-                  </select>
-                  <i className="fa-solid fa-chevron-down select-arrow"></i>
+              {ticketEdit.tipoSolicitud !== 'Sistema de Gestión' && (
+                <div className="form-group form-group-full">
+                  <label className="form-label">Tipo de Trámite</label>
+                  <div className="select-wrapper">
+                    <i className="fa-solid fa-layer-group select-icon-left"></i>
+                    <select id="m_clasificacion" className="form-select padded-left" value={ticketEdit.clasificacion} onChange={handleModalChange}>
+                      <option value="" disabled>Seleccione un Trámite...</option>
+                      {renderTramites()}
+                    </select>
+                    <i className="fa-solid fa-chevron-down select-arrow"></i>
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {ticketEdit.tipoSolicitud === 'Sistema de Gestión' && (
+                <div className="form-group form-group-full" style={{ background: 'rgba(59, 130, 246, 0.05)', padding: '15px', borderRadius: '8px', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+                  <label className="form-label" style={{ marginBottom: '10px', color: 'var(--navy)' }}><i className="fa-solid fa-tags"></i> Clasificación para el Sistema de Gestión (Análisis GH)</label>
+                  <div style={{ display: 'flex', gap: '20px' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: '600', fontSize: '13px' }}>
+                      <input 
+                        type="radio" 
+                        name="sgc_clasificacion" 
+                        value="Calidad" 
+                        checked={ticketEdit.clasificacion === 'Calidad'}
+                        onChange={(e) => setTicketEdit({...ticketEdit, clasificacion: e.target.value})}
+                        style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                      />
+                      Calidad
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: '600', fontSize: '13px' }}>
+                      <input 
+                        type="radio" 
+                        name="sgc_clasificacion" 
+                        value="SST" 
+                        checked={ticketEdit.clasificacion === 'SST'}
+                        onChange={(e) => setTicketEdit({...ticketEdit, clasificacion: e.target.value})}
+                        style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                      />
+                      SST
+                    </label>
+                  </div>
+                </div>
+              )}
 
               {area === 'gh' && (
                 <div className="form-group form-group-full" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '10px' }}>
