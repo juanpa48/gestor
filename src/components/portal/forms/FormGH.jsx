@@ -32,7 +32,7 @@ export const FormGH = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!nombre || !tipoTramite || (!solicitud && tipoSolicitud !== 'Convenios' && tipoSolicitud !== 'Vacaciones')) {
+    if (!nombre || !tipoTramite || (!solicitud && tipoSolicitud !== 'Convenios' && tipoSolicitud !== 'Vacaciones' && tipoSolicitud !== 'Cesantías' && tipoSolicitud !== 'Cesantias')) {
       showToast('Por favor, complete todos los campos obligatorios.', 'error', 'triangle-exclamation');
       return;
     }
