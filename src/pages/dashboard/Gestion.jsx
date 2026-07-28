@@ -438,10 +438,16 @@ export const Gestion = () => {
 
                     // Capitalizar CamelCase de forma bonita
                     const formattedKey = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+                    
+                    let finalDisplayElement = displayValue;
+                    if (finalValue && !isNaN(finalValue) && (key.toLowerCase().includes('valor') || key.toLowerCase().includes('monto') || key.toLowerCase().includes('cuota') || key.toLowerCase().includes('precio'))) {
+                      finalDisplayElement = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(finalValue);
+                    }
+
                     return (
                       <div key={key}>
                         <strong style={{ color: 'var(--text-muted)' }}>{formattedKey}:</strong> 
-                        <span style={{ color: 'var(--text-color)', display: 'block', marginTop: '2px' }}>{displayValue}</span>
+                        <span style={{ color: 'var(--text-color)', display: 'block', marginTop: '2px' }}>{finalDisplayElement}</span>
                       </div>
                     );
                   })}
