@@ -88,6 +88,12 @@ export const FormCesantias = ({ detalles, setDetalles, tipoTramite }) => {
       {/* 1. COMPRA DE VIVIENDA */}
       {tipoTramite === 'Compra de vivienda' && (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px' }}>
+          <div style={{ padding: '10px', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '6px', borderLeft: '4px solid #3b82f6', marginBottom: '10px' }}>
+            <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-color)' }}>
+              <i className="fa-solid fa-circle-info" style={{ color: '#3b82f6', marginRight: '5px' }}></i> 
+              Para este trámite debes adjuntar los siguientes documentos:
+            </p>
+          </div>
           <div className="form-group">
             <label className="form-label">Adjunto: Carta *</label>
             <input 
@@ -124,6 +130,12 @@ export const FormCesantias = ({ detalles, setDetalles, tipoTramite }) => {
       {/* 2. MODIFICACIÓN DE VIVIENDA */}
       {tipoTramite === 'Modificación de vivienda' && (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px' }}>
+          <div style={{ padding: '10px', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '6px', borderLeft: '4px solid #3b82f6', marginBottom: '10px' }}>
+            <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-color)' }}>
+              <i className="fa-solid fa-circle-info" style={{ color: '#3b82f6', marginRight: '5px' }}></i> 
+              Para este trámite debes adjuntar los siguientes documentos:
+            </p>
+          </div>
           <div className="form-group">
             <label className="form-label">Adjunto: Carta *</label>
             <input 
@@ -181,7 +193,7 @@ export const FormCesantias = ({ detalles, setDetalles, tipoTramite }) => {
               <i className="fa-solid fa-triangle-exclamation"></i> Importante
             </strong>
             <p style={{ fontSize: '13px', margin: '5px 0 0 0', color: 'var(--text-color)' }}>
-              Después de finalizar la reparación locativa por favor enviar una fotografía de la reparación realizada.
+              Después de finalizar la reparación locativa por favor enviar una fotografía de la reparación realizada y enviar al correo de GH.
             </p>
           </div>
         </div>
@@ -189,10 +201,20 @@ export const FormCesantias = ({ detalles, setDetalles, tipoTramite }) => {
 
       {/* 3. ESTUDIO */}
       {tipoTramite === 'Estudio' && (
-        <div style={{ textAlign: 'center', padding: '15px' }}>
-          <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-            <i className="fa-solid fa-graduation-cap" style={{ fontSize: '24px', display: 'block', marginBottom: '10px' }}></i>
-            Por favor confirme sus datos personales. Si requiere adjuntar documentos de la institución, utilice el botón general de adjuntos al final del formulario principal.
+        <div style={{ textAlign: 'center', padding: '20px' }}>
+          <div style={{ padding: '15px', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '8px', borderLeft: '4px solid #3b82f6', marginBottom: '20px', textAlign: 'left' }}>
+            <h5 style={{ margin: '0 0 10px 0', color: 'var(--navy)', fontSize: '14px' }}>
+              <i className="fa-solid fa-circle-info" style={{ color: '#3b82f6', marginRight: '5px' }}></i> Información Importante
+            </h5>
+            <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-color)', lineHeight: '1.5' }}>
+              Si sus cesantías están en <strong>Porvenir</strong>, deberá dirigirse al <strong>Banco AV Villas</strong> con la liquidación de pago de la institución educativa y ellos harán el debido trámite. 
+              <br /><br />
+              Si sus cesantías se encuentran en una <strong>entidad diferente</strong> a Porvenir, deberá validar directamente con ellos.
+            </p>
+          </div>
+          <i className="fa-solid fa-graduation-cap" style={{ fontSize: '30px', color: '#3b82f6', marginBottom: '10px' }}></i>
+          <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: '14px' }}>
+            Para este trámite no es necesario adjuntar documentos adicionales a través de este portal. Por favor confirme sus datos personales. Si requiere adjuntar documentos de la institución, utilice el botón general de adjuntos al final del formulario principal.
           </p>
         </div>
       )}
