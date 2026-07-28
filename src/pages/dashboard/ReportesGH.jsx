@@ -392,7 +392,7 @@ export const ReportesGH = () => {
                       <td style={{ padding: '12px' }}>
                         {t ? (
                           <div>
-                            <span className={`badge ${u.ubicacion === 'Oficina' ? 'progreso' : u.ubicacion === 'Cliente' ? 'resuelto' : 'pendiente'}`}>
+                            <span className={`status-badge ${u.ubicacion === 'Oficina' ? 'progreso' : u.ubicacion === 'Cliente' ? 'resuelto' : 'pendiente'}`}>
                               {u.ubicacion}
                             </span>
                             {t.detalles?.cliente && (
@@ -402,7 +402,7 @@ export const ReportesGH = () => {
                             )}
                           </div>
                         ) : (
-                          <span className="badge suspendido" style={{background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444'}}>No Reportado</span>
+                          <span className="status-badge suspendido" style={{background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444'}}>No Reportado</span>
                         )}
                       </td>
                       <td style={{ padding: '12px' }}>
