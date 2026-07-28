@@ -41,6 +41,18 @@ export const FormAuxilioEducativo = ({ detalles, setDetalles, tipoTramite }) => 
     }));
   };
 
+  const formatCurrencyInput = (val) => {
+    if (!val) return '';
+    const rawValue = val.toString().replace(/\D/g, '');
+    if (!rawValue) return '';
+    return new Intl.NumberFormat('es-CO').format(parseInt(rawValue, 10));
+  };
+
+  const handleCurrencyChange = (campo, e) => {
+    const rawValue = e.target.value.replace(/\D/g, '');
+    handleChange(campo, rawValue);
+  };
+
   const legalText = `Yo, en mi calidad de beneficiario del Bono Educativo otorgado por AC&T FERRARO MOLINA S.A.S, en adelante, reconozco y acepto los términos y condiciones establecidos en este consentimiento informado.
 
 Aceptación del Bono Educativo:
@@ -162,13 +174,12 @@ Al aceptar este consentimiento informado, reconozco que he leído y comprendido 
         <div className="form-group">
           <label className="form-label">Valor Total del {tipoTramite || 'Programa'} *</label>
           <input 
-            type="number" 
+            type="text" 
             className="glass-input" 
             required 
-            min="0"
-            placeholder="Ej: 1500000"
-            value={detalles.valorTotal || ''} 
-            onChange={(e) => handleChange('valorTotal', e.target.value)}
+            placeholder="$ 1.500.000"
+            value={detalles.valorTotal ? formatCurrencyInput(detalles.valorTotal) : ''} 
+            onChange={(e) => handleCurrencyChange('valorTotal', e)}
           />
         </div>
         <div className="form-group">
