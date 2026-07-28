@@ -16,6 +16,14 @@
 
 ## Julio 2026
 
+### [2026-07-28] — Módulo de Auxilio Educativo, Certificados y SGC (GH) 🎓
+- **Flujo de Auxilio Educativo:** Se implementó el flujo completo para "Auxilio Educativo" con cálculo automático de "Bono Educativo a Otorgar" (20% del valor total con tope de $500,000 COP), firma electrónica segura del solicitante (con texto legal de consentimiento) y generación del documento en PDF interactivo (`ActaAuxilioPdf.jsx`) que consolida los datos y la firma electrónica. Formato automático de inputs de moneda a pesos colombianos.
+- **Nuevos Tipos de Solicitud Dinámicos:** Se agregaron "Certificado Laboral" y "Sistema de Gestión" al menú de GH. Se implementó lógica de ocultamiento dinámico: si el área solo tiene un (1) trámite específico, el selector de trámites se auto-asigna y se oculta de la vista del empleado sin afectar la persistencia en DB.
+- **Campos y Títulos Contextuales:** El campo "Descripción de la solicitud" ahora adapta su título y placeholder ("DATOS QUE REQUIERE EN EL CERTIFICADO LABORAL", "DETALLE DE LO SOLICITADO") según la selección del usuario.
+- **Clasificación SGC desde el Dashboard:** Para solicitudes de "Sistema de Gestión", el panel del gestor reemplaza el menú estándar de trámites por un selector radial ("Calidad" vs "SST") que guarda su selección directamente en la clasificación del ticket para análisis estadístico.
+- **Formato Inteligente de Moneda:** El dashboard del gestor (`Gestion.jsx`) ahora detecta y formatea automáticamente como pesos colombianos (COP) todos los valores relacionados con dinero (`valorTotal`, `valorBono`, montos) presentes en los detalles del ticket.
+- **Mejoras UX Formularios:** Reorganización del orden de los campos y añadido de notificaciones contextuales de obligación documental para trámites de vivienda y cesantías, además de avisos restrictivos para créditos de estudio.
+
 ### [2026-07-27] — Refactorización Global "Tipo de Solicitud" y Módulo de Convenios 📄
 - **Refactorización Terminológica:** Se realizó un cambio masivo en todo el frontend y la base de datos (localStorage) reemplazando la terminología "Área de Gestión / Grupo" por "Tipo de Solicitud" y "Tipo de Trámite" por "Trámite Específico". Esto afectó a `SettingsManager.js`, `DbService.js`, todos los formularios de solicitante (`FormGH`, `FormGE`, `FormTI`), los archivos de configuración (`config.js`) y todos los paneles del Gestor (`Gestion.jsx`, `RegistroActividadForm.jsx`, Estadísticas).
 - **Módulo Especializado de Convenios (GH):** Implementado el componente dinámico `FormConvenio.jsx` que calcula automáticamente proyecciones de deducción de nómina según monto, cuotas y fechas de corte (quincenal/mensual).
