@@ -28,6 +28,10 @@ export const Sidebar = () => {
     { path: `/dashboard/${area}/gestion`, icon: 'fa-tasks', label: 'Gestión' },
   ];
 
+  if (area === 'gh') {
+    NAV_ITEMS.push({ path: `/dashboard/${area}/reportes`, icon: 'fa-map-location-dot', label: 'Gestión de Reportes' });
+  }
+
   return (
     <aside className="sidebar">
       <div className="sidebar-logo">

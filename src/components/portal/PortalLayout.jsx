@@ -4,7 +4,7 @@ import { ActaDeduccion } from '../../pages/dashboard/modals/ActaDeduccion';
 import { ActaAuxilioPdf } from '../../pages/dashboard/modals/ActaAuxilioPdf';
 
 export const PortalLayout = ({ areaConfig, areaContext, onBack, children, nombre, setNombre }) => {
-  const { actividades, solicitantes, responsables } = areaContext();
+  const { actividades, solicitantes, responsables, updateActividad } = areaContext();
   const { logout } = useAuth();
   const [sistemas, setSistemas] = useState({});
   const [personalTI, setPersonalTI] = useState({});
@@ -210,6 +210,22 @@ export const PortalLayout = ({ areaConfig, areaContext, onBack, children, nombre
                             onClick={(e) => { e.stopPropagation(); setActaTicket(t); }}
                           >
                             <i className="fa-solid fa-file-pdf" style={{ color: '#ef4444' }}></i> Ver Acta
+                          </button>
+                        )}
+                        {t.tipoSolicitud === 'Reporte de Asistencia' && ['Pendiente', 'En progreso'].includes(t.estado) && (
+                          <button 
+                            className="btn-secondary" 
+                            style={{ fontSize: '11px', padding: '4px 10px', margin: 0, borderRadius: '4px', cursor: 'pointer', background: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5', fontWeight: 'bold' }}
+                            title="Registrar fin de su jornada"
+                            onClick={(e) => { 
+                              e.stopPropagation(); 
+                              if (window.confirm('¿Está seguro de que desea marcar el FIN de su jornada?')) {
+                                updateActividad(t.id, { estado: 'Resuelto' });
+                                showToast('Jornada finalizada exitosamente.', 'success', 'check');
+                              }
+                            }}
+                          >
+                            <i className="fa-solid fa-right-from-bracket"></i> Marcar Fin
                           </button>
                         )}
                       </div>
