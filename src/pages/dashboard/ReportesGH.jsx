@@ -3,13 +3,13 @@ import { useActiveArea } from '../../shared/contexts/ActiveAreaContext';
 
 export const ReportesGH = () => {
   const { ctx, config } = useActiveArea();
-  const { actividades, addActividad, updateActividad } = ctx;
+  const { actividades, addTicket, updateTicket } = ctx;
   const [viewMode, setViewMode] = useState('kanban'); // 'kanban' | 'table'
   const [draggedUser, setDraggedUser] = useState(null);
 
   // Auto-cierre de reportes de días anteriores a la medianoche
   useEffect(() => {
-    if (!actividades || !updateActividad) return;
+    if (!actividades || !updateTicket) return;
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
 
@@ -19,11 +19,11 @@ export const ReportesGH = () => {
         d.setHours(0, 0, 0, 0);
         if (d.getTime() < hoy.getTime()) {
           // Es de un día anterior y quedó abierto: auto-cerrar
-          updateActividad(a.id, { estado: 'Resuelto' });
+          updateTicket(a.id, { estado: 'Resuelto' });
         }
       }
     });
-  }, [actividades, updateActividad]);
+  }, [actividades, updateTicket]);
 
   // Get users
   const allUsers = useMemo(() => {
@@ -93,9 +93,9 @@ export const ReportesGH = () => {
 
   const handleManualAssign = async (user, location) => {
     if (user.ticket) {
-      await updateActividad(user.ticket.id, { tipoTramite: location });
+      await updateTicket(user.ticket.id, { tipoTramite: location });
     } else {
-      await addActividad({
+      await addTicket({
         solicitante: user.displayName,
         tipoSolicitud: 'Reporte de Asistencia',
         tipoTramite: location,
@@ -209,7 +209,7 @@ export const ReportesGH = () => {
                     <button 
                       className="btn-secondary" 
                       style={{ padding: '4px 8px', fontSize: '10px', margin: 0, color: '#ef4444' }}
-                      onClick={() => updateActividad(u.ticket.id, { estado: 'Resuelto' })}
+                      onClick={() => updateTicket(u.ticket.id, { estado: 'Resuelto' })}
                       title="Finalizar Jornada"
                     >
                       <i className="fa-solid fa-power-off"></i>

@@ -4,7 +4,7 @@ import { ActaDeduccion } from '../../pages/dashboard/modals/ActaDeduccion';
 import { ActaAuxilioPdf } from '../../pages/dashboard/modals/ActaAuxilioPdf';
 
 export const PortalLayout = ({ areaConfig, areaContext, onBack, children, nombre, setNombre }) => {
-  const { actividades, solicitantes, responsables, updateActividad } = areaContext();
+  const { actividades, solicitantes, responsables, updateTicket } = areaContext();
   const { logout } = useAuth();
   const [sistemas, setSistemas] = useState({});
   const [personalTI, setPersonalTI] = useState({});
@@ -220,7 +220,7 @@ export const PortalLayout = ({ areaConfig, areaContext, onBack, children, nombre
                             onClick={(e) => { 
                               e.stopPropagation(); 
                               if (window.confirm('¿Está seguro de que desea marcar el FIN de su jornada?')) {
-                                updateActividad(t.id, { estado: 'Resuelto' });
+                                updateTicket(t.id, { estado: 'Resuelto' });
                                 showToast('Jornada finalizada exitosamente.', 'success', 'check');
                               }
                             }}
