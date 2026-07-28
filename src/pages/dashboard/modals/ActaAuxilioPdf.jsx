@@ -44,6 +44,12 @@ export const ActaAuxilioPdf = ({ ticket, onClose }) => {
     minimumFractionDigits: 0
   }).format(d.valorTotal || 0);
 
+  const bonoFormat = new Intl.NumberFormat('es-CO', {
+    style: 'currency',
+    currency: 'COP',
+    minimumFractionDigits: 0
+  }).format(d.valorBono || 0);
+
   return (
     <div className="acta-overlay">
       <div className="acta-controls no-print">
@@ -95,7 +101,11 @@ export const ActaAuxilioPdf = ({ ticket, onClose }) => {
               </tr>
               <tr>
                 <td style={{ padding: '8px 0', width: '200px' }}><strong>Valor Total:</strong></td>
-                <td style={{ fontWeight: 'bold' }}>{valorFormat}</td>
+                <td>{valorFormat}</td>
+              </tr>
+              <tr>
+                <td style={{ padding: '8px 0', width: '200px' }}><strong>Bono Educativo a Otorgar:</strong></td>
+                <td style={{ fontWeight: 'bold' }}>{bonoFormat} (Sujeto a verificación)</td>
               </tr>
               <tr>
                 <td style={{ padding: '8px 0' }}><strong>Fecha y Hora de Autorización:</strong></td>

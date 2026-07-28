@@ -15,6 +15,7 @@ export const FormAuxilioEducativo = ({ detalles, setDetalles, tipoTramite }) => 
       fechaInicio: prev.fechaInicio || '',
       fechaFin: prev.fechaFin || '',
       valorTotal: prev.valorTotal || '',
+      valorBono: prev.valorBono || 0,
       consentimientoLegal: prev.consentimientoLegal || false,
       firmaCedula: prev.firmaCedula || '',
       firmaClave: prev.firmaClave || ''
@@ -23,10 +24,13 @@ export const FormAuxilioEducativo = ({ detalles, setDetalles, tipoTramite }) => 
   }, [tipoTramite]);
 
   const handleChange = (campo, valor) => {
-    setDetalles(prev => ({
-      ...prev,
-      [campo]: valor
-    }));
+    setDetalles(prev => {
+      const updated = { ...prev, [campo]: valor };
+      if (campo === 'valorTotal') {
+        updated.valorBono = Math.min((Number(valor) || 0) * 0.20, 500000);
+      }
+      return updated;
+    });
   };
 
   const handleFileChange = (campo, file) => {
@@ -177,6 +181,21 @@ Al aceptar este consentimiento informado, reconozco que he leído y comprendido 
             onChange={(e) => handleFileChange('factura', e.target.files[0])}
           />
         </div>
+        
+        {/* Visualización del Bono Calculado */}
+        {detalles.valorTotal && Number(detalles.valorTotal) > 0 && (
+          <div className="form-group" style={{ gridColumn: '1 / -1', background: 'rgba(34, 197, 94, 0.1)', padding: '15px', borderRadius: '8px', border: '1px dashed var(--green)', marginTop: '5px' }}>
+            <label className="form-label" style={{ color: 'var(--green)', fontSize: '13px' }}>
+              <i className="fa-solid fa-money-bill-wave"></i> Proyección del Bono Educativo a Recibir (20% max $500.000)
+            </label>
+            <div style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--text-color)', marginTop: '5px' }}>
+              {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(detalles.valorBono || 0)}
+            </div>
+            <small style={{ color: 'var(--text-muted)', display: 'block', marginTop: '5px' }}>
+              * Este valor es una proyección inicial sujeta a revisión por Gestión Humana.
+            </small>
+          </div>
+        )}
       </div>
 
       {/* Consentimiento Legal */}
