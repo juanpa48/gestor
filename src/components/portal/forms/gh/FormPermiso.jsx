@@ -21,7 +21,7 @@ export const FormPermiso = ({ detalles, setDetalles, tipoTramite }) => {
 
   // Calcular dinámicamente
   useEffect(() => {
-    if (tipoTramite === 'Licencia no remunerada') {
+    if (tipoTramite && tipoTramite.includes('Licencia no remunerada')) {
       if (detalles.fechaInicio && detalles.fechaFin) {
         const d1 = new Date(detalles.fechaInicio);
         const d2 = new Date(detalles.fechaFin);
@@ -75,7 +75,7 @@ export const FormPermiso = ({ detalles, setDetalles, tipoTramite }) => {
       </h4>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-        {tipoTramite === 'Licencia no remunerada' ? (
+        {tipoTramite && tipoTramite.includes('Licencia no remunerada') ? (
           <>
             <div className="form-group">
               <label className="form-label">Fecha Inicio *</label>
