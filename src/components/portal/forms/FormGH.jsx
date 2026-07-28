@@ -7,6 +7,7 @@ import { FormPermiso } from './gh/FormPermiso';
 import { FormConvenio } from './gh/FormConvenio';
 import { FormVacaciones } from './gh/FormVacaciones';
 import { FormCesantias } from './gh/FormCesantias';
+import { FormAuxilioEducativo } from './gh/FormAuxilioEducativo';
 
 export const FormGH = () => {
   const { currentUser } = useAuth();
@@ -32,12 +33,12 @@ export const FormGH = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!nombre || !tipoTramite || (!solicitud && tipoSolicitud !== 'Convenios' && tipoSolicitud !== 'Vacaciones' && tipoSolicitud !== 'Cesantías' && tipoSolicitud !== 'Cesantias')) {
+    if (!nombre || !tipoTramite || (!solicitud && tipoSolicitud !== 'Convenios' && tipoSolicitud !== 'Vacaciones' && tipoSolicitud !== 'Cesantías' && tipoSolicitud !== 'Cesantias' && tipoSolicitud !== 'Auxilio Educativo')) {
       showToast('Por favor, complete todos los campos obligatorios.', 'error', 'triangle-exclamation');
       return;
     }
 
-    if (tipoSolicitud === 'Convenios' && detalles.consentimientoLegal) {
+    if ((tipoSolicitud === 'Convenios' || tipoSolicitud === 'Auxilio Educativo') && detalles.consentimientoLegal) {
       const users = JSON.parse(localStorage.getItem('db_usuarios') || '[]');
       const targetUser = users.find(u => u.username === currentUser?.username);
       if (targetUser) {
@@ -97,7 +98,7 @@ export const FormGH = () => {
     try {
       delete sanitizedDetalles.firmaClave;
 
-      if (tipoSolicitud === 'Convenios' && sanitizedDetalles.consentimientoLegal) {
+      if ((tipoSolicitud === 'Convenios' || tipoSolicitud === 'Auxilio Educativo') && sanitizedDetalles.consentimientoLegal) {
         sanitizedDetalles.firmaISO = new Date().toISOString();
         sanitizedDetalles.firmaTimestamp = Date.now();
       }
@@ -112,7 +113,8 @@ export const FormGH = () => {
         solicitud: solicitud || (
           tipoSolicitud === 'Convenios' ? `Solicitud de Convenio de Nómina: ${tipoTramite}` : 
           tipoSolicitud === 'Vacaciones' ? `Solicitud de Vacaciones: ${tipoTramite}` : 
-          (tipoSolicitud === 'Cesantías' || tipoSolicitud === 'Cesantias') ? `Solicitud de Cesantías: ${tipoTramite}` : ''
+          (tipoSolicitud === 'Cesantías' || tipoSolicitud === 'Cesantias') ? `Solicitud de Cesantías: ${tipoTramite}` : 
+          tipoSolicitud === 'Auxilio Educativo' ? `Solicitud de Auxilio Educativo: ${tipoTramite}` : ''
         ),
         estado: 'Pendiente',
         responsable: '',
@@ -177,7 +179,7 @@ export const FormGH = () => {
         </div>
       </div>
 
-      {tipoSolicitud !== 'Convenios' && tipoSolicitud !== 'Vacaciones' && tipoSolicitud !== 'Cesantías' && tipoSolicitud !== 'Cesantias' && (
+      {tipoSolicitud !== 'Convenios' && tipoSolicitud !== 'Vacaciones' && tipoSolicitud !== 'Cesantías' && tipoSolicitud !== 'Cesantias' && tipoSolicitud !== 'Auxilio Educativo' && (
         <div className="form-group">
           <label className="form-label">DESCRIPCIÓN DE LA SOLICITUD</label>
           <textarea 
@@ -204,7 +206,10 @@ export const FormGH = () => {
         {(tipoSolicitud === 'Cesantías' || tipoSolicitud === 'Cesantias') && (
            <FormCesantias detalles={detalles} setDetalles={setDetalles} tipoTramite={tipoTramite} />
         )}
-        {tipoSolicitud !== 'Permisos' && tipoSolicitud !== 'Convenios' && tipoSolicitud !== 'Vacaciones' && tipoSolicitud !== 'Cesantías' && tipoSolicitud !== 'Cesantias' && tipoTramite !== '' && (
+        {tipoSolicitud === 'Auxilio Educativo' && (
+           <FormAuxilioEducativo detalles={detalles} setDetalles={setDetalles} tipoTramite={tipoTramite} />
+        )}
+        {tipoSolicitud !== 'Permisos' && tipoSolicitud !== 'Convenios' && tipoSolicitud !== 'Vacaciones' && tipoSolicitud !== 'Cesantías' && tipoSolicitud !== 'Cesantias' && tipoSolicitud !== 'Auxilio Educativo' && tipoTramite !== '' && (
            <div style={{ color: 'var(--text-muted)', fontSize: '14px', padding: '10px' }}>
              <i className="fa-solid fa-circle-info text-blue"></i> Este trámite utilizará el formulario genérico.
            </div>

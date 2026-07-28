@@ -55,6 +55,10 @@ const defaultTiposSolicitudGH = [
   {
     nombre: 'Cesantías',
     tramites: ["Estudio", "Compra de vivienda", "Modificación de vivienda"]
+  },
+  {
+    nombre: 'Auxilio Educativo',
+    tramites: ["Posgrado", "Diplomado", "Curso"]
   }
 ];
 
