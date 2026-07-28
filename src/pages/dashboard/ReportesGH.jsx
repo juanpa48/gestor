@@ -334,21 +334,22 @@ export const ReportesGH = () => {
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
             
             {/* Pestañas de Filtro */}
-            <div style={{ display: 'flex', gap: '10px', background: 'rgba(255,255,255,0.05)', padding: '5px', borderRadius: '12px' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', padding: '5px' }}>
               {['Todos', 'Oficina', 'Trabajo en Casa', 'Cliente', 'No Reportado'].map(f => (
                 <button 
                   key={f}
                   onClick={() => setFilterLocation(f)}
                   style={{ 
-                    padding: '8px 16px', 
-                    borderRadius: '8px', 
-                    border: 'none', 
-                    background: filterLocation === f ? 'var(--blue)' : 'transparent',
-                    color: filterLocation === f ? '#fff' : 'var(--text-muted)',
-                    fontWeight: filterLocation === f ? '600' : '400',
+                    padding: '8px 18px', 
+                    borderRadius: '20px', 
+                    border: filterLocation === f ? '1px solid var(--blue)' : '1px solid #e2e8f0', 
+                    background: filterLocation === f ? 'var(--blue)' : '#f8fafc',
+                    color: filterLocation === f ? '#ffffff' : '#475569',
+                    fontWeight: filterLocation === f ? '600' : '500',
                     cursor: 'pointer',
-                    transition: 'all 0.2s',
-                    fontSize: '13px'
+                    transition: 'all 0.2s ease-in-out',
+                    fontSize: '13px',
+                    boxShadow: filterLocation === f ? '0 4px 12px rgba(59, 130, 246, 0.3)' : 'none'
                   }}
                 >
                   {f}
