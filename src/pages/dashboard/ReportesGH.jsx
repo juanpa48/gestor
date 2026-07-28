@@ -94,7 +94,7 @@ export const ReportesGH = () => {
       if (!ticket) {
         cols.noReportados.push(userItem);
       } else {
-        const tramite = ticket.tipoTramite;
+        const tramite = ticket.tipoTramite || ticket.clasificacion || ticket.grupoExtra;
         if (tramite === 'Cliente') cols.cliente.push(userItem);
         else if (tramite === 'Trabajo en Casa') cols.casa.push(userItem);
         else if (tramite === 'Oficina') cols.oficina.push(userItem);
@@ -309,8 +309,8 @@ export const ReportesGH = () => {
                     <td style={{ padding: '12px' }}>{u.cargo || 'N/A'}</td>
                     <td style={{ padding: '12px' }}>
                       {t ? (
-                        <span className={`badge ${t.tipoTramite === 'Oficina' ? 'progreso' : t.tipoTramite === 'Cliente' ? 'resuelto' : 'pendiente'}`}>
-                          {t.tipoTramite}
+                        <span className={`badge ${(t.tipoTramite || t.clasificacion) === 'Oficina' ? 'progreso' : (t.tipoTramite || t.clasificacion) === 'Cliente' ? 'resuelto' : 'pendiente'}`}>
+                          {t.tipoTramite || t.clasificacion || t.grupoExtra}
                         </span>
                       ) : (
                         <span className="badge suspendido" style={{background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444'}}>No Reportado</span>
