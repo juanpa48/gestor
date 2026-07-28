@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useActiveArea } from '../../shared/contexts/ActiveAreaContext';
 import { parseFechaCreacion } from '../../shared/utils/timeHelpers';
 
@@ -10,6 +10,7 @@ export const ReportesGH = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterLocation, setFilterLocation] = useState('Todos');
+  const closedTicketsRef = useRef(new Set());
 
   const showToast = (msg, type='success') => {
     const toast = document.getElementById('toast');
@@ -23,16 +24,16 @@ export const ReportesGH = () => {
   // Auto-cierre de reportes de días anteriores a la medianoche
   useEffect(() => {
     if (!actividades || !updateTicket) return;
-    const hoy = new Date();
-    hoy.setHours(0, 0, 0, 0);
+    const cutoff = new Date();
+    cutoff.setHours(0, 0, 0, 0);
 
-    // Evitar loop infinito: trackear los que ya mandamos a cerrar en este render
+    // Evitar loop infinito: trackear los que ya mandamos a cerrar
     const ticketsToClose = actividades.filter(a => {
       if (a.tipoSolicitud === 'Reporte de Asistencia' && ['Pendiente', 'En progreso'].includes(a.estado)) {
+        if (closedTicketsRef.current.has(a.id)) return false; // Ya lo mandamos a cerrar
         const d = parseFechaCreacion(a);
         if (d) {
-          d.setHours(0, 0, 0, 0);
-          if (d.getTime() < hoy.getTime()) {
+          if (d.getTime() < cutoff.getTime()) {
             return true;
           }
         }
@@ -41,6 +42,7 @@ export const ReportesGH = () => {
     });
 
     ticketsToClose.forEach(a => {
+      closedTicketsRef.current.add(a.id);
       updateTicket(a.id, { estado: 'Resuelto' });
     });
   }, [actividades, updateTicket]);
@@ -84,12 +86,14 @@ export const ReportesGH = () => {
       if (festivos.includes(hoyStr)) isFestivo = true;
     } catch {}
 
+    const cutoff = new Date();
+    cutoff.setHours(0, 0, 0, 0);
+
     const todayT = actividades.filter(a => {
       if (a.tipoSolicitud !== 'Reporte de Asistencia') return false;
       const d = parseFechaCreacion(a);
       if (!d) return false;
-      d.setHours(0,0,0,0);
-      return d.getTime() === hoy.getTime();
+      return d.getTime() >= cutoff.getTime();
     });
 
     return { todayTickets: todayT, isHoyFestivoOFinDeSemana: isWeekend || isFestivo };

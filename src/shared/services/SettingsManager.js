@@ -67,6 +67,10 @@ const defaultTiposSolicitudGH = [
   {
     nombre: 'Sistema de Gestión',
     tramites: ["General"]
+  },
+  {
+    nombre: 'Reporte de Asistencia',
+    tramites: ["Cliente", "Trabajo en Casa"]
   }
 ];
 
