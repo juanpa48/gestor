@@ -342,8 +342,8 @@ export const ReportesGH = () => {
                   style={{ 
                     padding: '8px 18px', 
                     borderRadius: '20px', 
-                    border: filterLocation === f ? '1px solid var(--blue)' : '1px solid #e2e8f0', 
-                    background: filterLocation === f ? 'var(--blue)' : '#f8fafc',
+                    border: filterLocation === f ? '1px solid #3b82f6' : '1px solid #e2e8f0', 
+                    background: filterLocation === f ? '#3b82f6' : '#f8fafc',
                     color: filterLocation === f ? '#ffffff' : '#475569',
                     fontWeight: filterLocation === f ? '600' : '500',
                     cursor: 'pointer',
