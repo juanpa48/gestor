@@ -206,7 +206,7 @@ export const ReportesGH = () => {
       )}
 
       {viewMode === 'kanban' ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', minHeight: '600px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', height: 'calc(100vh - 200px)', minHeight: '400px' }}>
           {/* No Reportados */}
           <div 
             style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--card-border)', borderRadius: '12px', padding: '15px', display: 'flex', flexDirection: 'column' }}
