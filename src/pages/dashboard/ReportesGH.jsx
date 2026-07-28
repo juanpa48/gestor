@@ -1,11 +1,22 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useActiveArea } from '../../shared/contexts/ActiveAreaContext';
+import { parseFechaCreacion } from '../../shared/utils/timeHelpers';
 
 export const ReportesGH = () => {
   const { ctx, config } = useActiveArea();
   const { actividades, addTicket, updateTicket } = ctx;
   const [viewMode, setViewMode] = useState('kanban'); // 'kanban' | 'table'
   const [draggedUser, setDraggedUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const showToast = (msg, type='success') => {
+    const toast = document.getElementById('toast');
+    if (toast) {
+      toast.className = `toast show ${type}`;
+      toast.innerHTML = `<i class="fa-solid fa-${type === 'success' ? 'check' : 'triangle-exclamation'}"></i> &nbsp;${msg}`;
+      setTimeout(() => { toast.className = 'toast'; }, 3000);
+    }
+  };
 
   // Auto-cierre de reportes de días anteriores a la medianoche
   useEffect(() => {
@@ -15,11 +26,13 @@ export const ReportesGH = () => {
 
     actividades.forEach(a => {
       if (a.tipoSolicitud === 'Reporte de Asistencia' && ['Pendiente', 'En progreso'].includes(a.estado)) {
-        const d = new Date(a.fechaCreacion || a.fechaISO);
-        d.setHours(0, 0, 0, 0);
-        if (d.getTime() < hoy.getTime()) {
-          // Es de un día anterior y quedó abierto: auto-cerrar
-          updateTicket(a.id, { estado: 'Resuelto' });
+        const d = parseFechaCreacion(a);
+        if (d) {
+          d.setHours(0, 0, 0, 0);
+          if (d.getTime() < hoy.getTime()) {
+            // Es de un día anterior y quedó abierto: auto-cerrar
+            updateTicket(a.id, { estado: 'Resuelto' });
+          }
         }
       }
     });
@@ -50,7 +63,8 @@ export const ReportesGH = () => {
 
     const todayT = actividades.filter(a => {
       if (a.tipoSolicitud !== 'Reporte de Asistencia') return false;
-      const d = new Date(a.fechaCreacion || a.fechaISO);
+      const d = parseFechaCreacion(a);
+      if (!d) return false;
       d.setHours(0,0,0,0);
       return d.getTime() === hoy.getTime();
     });
@@ -92,19 +106,29 @@ export const ReportesGH = () => {
   }, [allUsers, todayTickets]);
 
   const handleManualAssign = async (user, location) => {
-    if (user.ticket) {
-      await updateTicket(user.ticket.id, { tipoTramite: location });
-    } else {
-      await addTicket({
-        solicitante: user.displayName,
-        tipoSolicitud: 'Reporte de Asistencia',
-        tipoTramite: location,
-        estado: 'En progreso', 
-        fechaCreacion: new Date().toLocaleString(),
-        detalles: {
-          registradoManualmentePor: 'Gestión Humana'
-        }
-      });
+    try {
+      setIsLoading(true);
+      showToast(`Procesando asistencia para ${user.displayName}...`, 'info');
+      if (user.ticket) {
+        await updateTicket(user.ticket.id, { tipoTramite: location });
+      } else {
+        await addTicket({
+          solicitante: user.displayName,
+          tipoSolicitud: 'Reporte de Asistencia',
+          tipoTramite: location,
+          estado: 'En progreso', 
+          fechaCreacion: new Date().toLocaleString(),
+          detalles: {
+            registradoManualmentePor: 'Gestión Humana'
+          }
+        });
+      }
+      showToast(`Asistencia marcada para ${user.displayName} en ${location}`);
+    } catch (error) {
+      console.error(error);
+      showToast('Error al procesar la asistencia', 'error');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -177,8 +201,9 @@ export const ReportesGH = () => {
                   <button 
                     className="btn-secondary" 
                     style={{ padding: '6px 10px', fontSize: '12px', margin: 0 }}
-                    onClick={() => handleManualAssign(u, 'Oficina')}
+                    onClick={(e) => { e.stopPropagation(); handleManualAssign(u, 'Oficina'); }}
                     title="Marcar Asistencia en Oficina"
+                    disabled={isLoading}
                   >
                     <i className="fa-solid fa-building"></i>
                   </button>
