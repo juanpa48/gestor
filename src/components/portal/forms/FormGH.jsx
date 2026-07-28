@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useGHContext as useTickets } from '../../../areas/gestion-humana/context/GHContext';
 import { getAreaSettings } from '../../../shared/services/SettingsManager';
 import { UploadService } from '../../../shared/services/UploadService';
