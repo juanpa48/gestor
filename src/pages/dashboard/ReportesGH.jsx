@@ -2,8 +2,8 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useActiveArea } from '../../shared/contexts/ActiveAreaContext';
 
 export const ReportesGH = () => {
-  const { areaContext, config } = useActiveArea();
-  const { actividades, addActividad, updateActividad } = areaContext();
+  const { ctx, config } = useActiveArea();
+  const { actividades, addActividad, updateActividad } = ctx;
   const [viewMode, setViewMode] = useState('kanban'); // 'kanban' | 'table'
   const [draggedUser, setDraggedUser] = useState(null);
 
