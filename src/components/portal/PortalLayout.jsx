@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../shared/contexts/AuthContext';
 import { ActaDeduccion } from '../../pages/dashboard/modals/ActaDeduccion';
+import { ActaAuxilioPdf } from '../../pages/dashboard/modals/ActaAuxilioPdf';
 
 export const PortalLayout = ({ areaConfig, areaContext, onBack, children, nombre, setNombre }) => {
   const { actividades, solicitantes, responsables } = areaContext();
@@ -186,7 +187,7 @@ export const PortalLayout = ({ areaConfig, areaContext, onBack, children, nombre
                   else if (estadoTxt.includes('esuelto') || estadoTxt.includes('errado')) bqClass = 'resuelto';
 
                   const truncar = t.solicitud ? (t.solicitud.length > 40 ? t.solicitud.substring(0, 40) + '...' : t.solicitud) : 'Sin detalles';
-                  const isConvenio = t.tipoSolicitud === 'Convenios' || (t.solicitud && t.solicitud.includes('Convenio de Nómina'));
+                  const isActa = t.tipoSolicitud === 'Convenios' || t.tipoSolicitud === 'Auxilio Educativo' || (t.solicitud && t.solicitud.includes('Convenio de Nómina')) || (t.solicitud && t.solicitud.includes('Auxilio Educativo'));
 
                   return (
                     <div key={t.id} className="history-ticket">
@@ -201,7 +202,7 @@ export const PortalLayout = ({ areaConfig, areaContext, onBack, children, nombre
                           <span className={`badge ${bqClass}`}>{estadoTxt}</span>
                           <span className="ht-date" style={{ marginLeft: '6px' }}>{t.id || '--'}</span>
                         </div>
-                        {isConvenio && (
+                        {isActa && (
                           <button 
                             className="btn-secondary" 
                             style={{ fontSize: '11px', padding: '3px 8px', margin: 0, borderRadius: '4px', cursor: 'pointer' }}
@@ -263,7 +264,8 @@ export const PortalLayout = ({ areaConfig, areaContext, onBack, children, nombre
       </div>
       <div id="toast" className="toast"></div>
 
-      {actaTicket && <ActaDeduccion ticket={actaTicket} onClose={() => setActaTicket(null)} />}
+      {actaTicket && actaTicket.tipoSolicitud === 'Convenios' && <ActaDeduccion ticket={actaTicket} onClose={() => setActaTicket(null)} />}
+      {actaTicket && actaTicket.tipoSolicitud === 'Auxilio Educativo' && <ActaAuxilioPdf ticket={actaTicket} onClose={() => setActaTicket(null)} />}
     </div>
   );
 };

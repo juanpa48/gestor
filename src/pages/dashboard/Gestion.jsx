@@ -3,6 +3,7 @@ import { useActiveArea } from '../../shared/contexts/ActiveAreaContext';
 import { getAreaSettings } from '../../shared/services/SettingsManager';
 import { calculateSlaBadge } from '../../shared/utils/timeHelpers';
 import { ActaDeduccion } from './modals/ActaDeduccion';
+import { ActaAuxilioPdf } from './modals/ActaAuxilioPdf';
 
 export const Gestion = () => {
   const { ctx, config, area } = useActiveArea();
@@ -395,7 +396,7 @@ export const Gestion = () => {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                   <strong style={{ color: 'var(--navy)' }}><i className="fa-solid fa-list-check"></i> Detalles Específicos del Trámite</strong>
                   
-                  {ticketEdit.tipoSolicitud === 'Convenios' && (
+                  {(ticketEdit.tipoSolicitud === 'Convenios' || ticketEdit.tipoSolicitud === 'Auxilio Educativo') && (
                     <button type="button" className="btn-primary" style={{ padding: '6px 12px', fontSize: '12px', background: 'var(--red)' }} onClick={() => setShowActa(true)}>
                       <i className="fa-solid fa-file-pdf"></i> Generar Acta PDF
                     </button>
@@ -673,9 +674,12 @@ export const Gestion = () => {
         </div>
       )}
 
-      {/* RENDER ACTA DE DEDUCCIÓN (PRINTABLE) */}
-      {showActa && ticketEdit && (
+      {/* RENDER ACTA DE DEDUCCIÓN / BONO EDUCATIVO (PRINTABLE) */}
+      {showActa && ticketEdit && ticketEdit.tipoSolicitud === 'Convenios' && (
         <ActaDeduccion ticket={ticketEdit} onClose={() => setShowActa(false)} />
+      )}
+      {showActa && ticketEdit && ticketEdit.tipoSolicitud === 'Auxilio Educativo' && (
+        <ActaAuxilioPdf ticket={ticketEdit} onClose={() => setShowActa(false)} />
       )}
 
     </section>
