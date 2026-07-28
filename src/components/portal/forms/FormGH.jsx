@@ -29,6 +29,14 @@ export const FormGH = () => {
   const [detalles, setDetalles] = useState({}); // Estado dinámico inyectado por sub-componentes
   const [loadingSubmit, setLoadingSubmit] = useState(false);
 
+  const clientesDB = useMemo(() => {
+    try {
+      return JSON.parse(localStorage.getItem('db_clientes') || '[]');
+    } catch {
+      return [];
+    }
+  }, []);
+
   const showToast = (message, type = 'success', icon = 'check') => {
     const toast = document.getElementById('toast');
     if (toast) {
@@ -237,6 +245,29 @@ export const FormGH = () => {
              <i className="fa-solid fa-circle-info text-blue"></i> Este trámite utilizará el formulario genérico.
            </div>
         )}
+        {tipoSolicitud === 'Reporte de Asistencia' && tipoTramite === 'Cliente' && (
+           <div className="form-group" style={{ background: 'rgba(59, 130, 246, 0.05)', padding: '15px', borderRadius: '8px', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+             <label className="form-label text-blue" style={{ fontSize: '12px', fontWeight: 'bold' }}>
+               <i className="fa-solid fa-building-user"></i> SELECCIONE EL CLIENTE A VISITAR *
+             </label>
+             <input 
+               type="text" 
+               list="clientes-list"
+               className="glass-input" 
+               placeholder="Busque o escriba el cliente..."
+               required
+               value={detalles.cliente || ''}
+               onChange={(e) => setDetalles({...detalles, cliente: e.target.value})}
+               style={{ border: '1.5px solid #3b82f6', background: '#fff' }}
+             />
+             <datalist id="clientes-list">
+               {clientesDB.map(c => <option key={c.id} value={c.nombre}>{c.nit ? `NIT: ${c.nit}` : ''}</option>)}
+             </datalist>
+             <small style={{ display: 'block', marginTop: '6px', color: 'var(--text-muted)' }}>
+               Puede buscar en la lista o escribir el nombre manualmente si no lo encuentra.
+             </small>
+           </div>
+         )}
       </div>
 
 
