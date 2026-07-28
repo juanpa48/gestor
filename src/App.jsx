@@ -8,6 +8,7 @@ import { SettingsFestivos } from './pages/dashboard/settings/views/SettingsFesti
 import { SettingsTramites } from './pages/dashboard/settings/views/SettingsTramites'
 import { SettingsSLA } from './pages/dashboard/settings/views/SettingsSLA'
 import { SettingsUsuarios } from './pages/dashboard/settings/views/SettingsUsuarios'
+import { SettingsClientes } from './pages/dashboard/settings/views/SettingsClientes'
 import { ReportesGH } from './pages/dashboard/ReportesGH'
 import { Portal } from './pages/Portal'
 
@@ -44,6 +45,7 @@ function App() {
             <Route path="tramites" element={<SettingsTramites />} />
             <Route path="sla" element={<SettingsSLA />} />
             <Route path="festivos" element={<SettingsFestivos />} />
+            <Route path="clientes" element={<SettingsClientes />} />
           </Route>
         </Route>
         

@@ -60,6 +60,17 @@ export const SettingsLayout = () => {
               <span style={{ fontWeight: '500' }}>Grupos y Trámites</span>
             </NavLink>
 
+            {area === 'gh' && (
+              <NavLink 
+                to={`/dashboard/${area}/settings/clientes`} 
+                className={({ isActive }) => `settings-nav-item ${isActive ? 'active' : ''}`}
+                style={{ padding: '10px 15px', borderRadius: '8px', textDecoration: 'none', color: 'var(--text-light)', display: 'flex', alignItems: 'center', gap: '10px', transition: 'all 0.3s' }}
+              >
+                <i className="fa-solid fa-users" style={{ width: '20px', textAlign: 'center' }}></i>
+                <span style={{ fontWeight: '500' }}>Directorio Clientes</span>
+              </NavLink>
+            )}
+
             {area !== 'gh' && (
               <NavLink 
                 to={`/dashboard/${area}/settings/sla`} 
