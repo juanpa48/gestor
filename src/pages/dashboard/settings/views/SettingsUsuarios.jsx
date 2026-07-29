@@ -20,6 +20,7 @@ export const SettingsUsuarios = () => {
   const [jefeInmediato, setJefeInmediato] = useState('');
   const [role, setRole] = useState('solicitante');
   const [area, setArea] = useState('');
+  const [avatar, setAvatar] = useState('');
   const [activeTab, setActiveTab] = useState('resolutores'); // resolutores | solicitantes
 
   useEffect(() => {
@@ -62,6 +63,7 @@ export const SettingsUsuarios = () => {
       setJefeInmediato(user.jefeInmediato || '');
       setRole(user.role || 'solicitante');
       setArea(user.area || '');
+      setAvatar(user.avatar || '');
     } else {
       setEditingUsername(null);
       setNombreReal('');
@@ -72,6 +74,7 @@ export const SettingsUsuarios = () => {
       setJefeInmediato('');
       setRole('solicitante');
       setArea('');
+      setAvatar('');
     }
     setModalOpen(true);
   };
@@ -103,6 +106,7 @@ export const SettingsUsuarios = () => {
         db[userIndex].jefeInmediato = jefeInmediato.trim();
         db[userIndex].role = role;
         db[userIndex].area = (role === 'solicitante') ? null : area;
+        db[userIndex].avatar = avatar.trim();
         
         localStorage.setItem('db_usuarios', JSON.stringify(db));
         
@@ -133,6 +137,7 @@ export const SettingsUsuarios = () => {
         passwordHash: empHash,
         role: role,
         area: (role === 'solicitante') ? null : area,
+        avatar: avatar.trim(),
         cargo: cargo.trim() || ((role === 'solicitante') ? 'Empleado' : 'Gestor'),
         cedula: cedula.trim(),
         celular: celular.trim(),
@@ -342,6 +347,13 @@ export const SettingsUsuarios = () => {
                 <label className="form-label">Jefe Inmediato</label>
                 <input type="text" className="glass-input" value={jefeInmediato} onChange={e => setJefeInmediato(e.target.value)} />
               </div>
+
+              {role !== 'solicitante' && (
+                <div className="form-group">
+                  <label className="form-label">URL de Imagen (Avatar)</label>
+                  <input type="text" className="glass-input" value={avatar} onChange={e => setAvatar(e.target.value)} placeholder="https://ejemplo.com/foto.jpg" />
+                </div>
+              )}
 
               <div className="form-group">
                 <label className="form-label">Rol en el Sistema *</label>

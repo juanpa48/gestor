@@ -29,7 +29,7 @@ export const StatCards = () => {
     const inProg = actividades.filter(a => a.estado === 'En progreso').length;
     
     let urgentCount = 0;
-    if (area === 'gh') {
+    if (area === 'gh' || area === 'ge') {
       urgentCount = actividades.filter(a => {
         if (['Resuelto', 'Cerrado'].includes(a.estado)) return false;
         const remaining = getSlaRemainingMs(a, slas);
@@ -55,6 +55,27 @@ export const StatCards = () => {
         datasets: [{
           data: [pPendiente, pProgreso],
           backgroundColor: ['#f59e0b', '#3b82f6'],
+          borderWidth: 0
+        }]
+      };
+    } else if (area === 'ge') {
+      const grouped = {};
+      abiertos.forEach(a => {
+        const tipo = a.tipoSolicitud || 'Otros';
+        grouped[tipo] = (grouped[tipo] || 0) + 1;
+      });
+      
+      const labels = Object.keys(grouped).length > 0 ? Object.keys(grouped).map(l => l.substring(0, 15) + (l.length > 15 ? '...' : '')) : ['Sin registros'];
+      const data = Object.keys(grouped).length > 0 ? Object.values(grouped) : [1];
+      const bgColors = Object.keys(grouped).length > 0 
+        ? ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#ec4899', '#06b6d4', '#6366f1'] 
+        : ['#e2e8f0'];
+
+      return {
+        labels,
+        datasets: [{
+          data,
+          backgroundColor: bgColors,
           borderWidth: 0
         }]
       };
@@ -151,7 +172,7 @@ export const StatCards = () => {
   // Chart 4: Tareas Urgentes (Doughnut) o Próximo a vencer
   const chart4Data = useMemo(() => {
     let urgentes = [];
-    if (area === 'gh') {
+    if (area === 'gh' || area === 'ge') {
       urgentes = actividades.filter(a => {
         const remaining = getSlaRemainingMs(a, slas);
         return remaining !== Infinity && remaining <= 2 * 3600 * 1000;
@@ -226,7 +247,7 @@ export const StatCards = () => {
       <div className="stat-card card-urgent">
         <div className="stat-top">
           <div>
-            <div className="stat-label">{area === 'gh' ? 'PRÓXIMO A VENCER' : 'TAREAS URGENTES'}</div>
+            <div className="stat-label">{area === 'gh' || area === 'ge' ? 'PRÓXIMO A VENCER' : 'TAREAS URGENTES'}</div>
             <div className="stat-value red">{String(stats.urgent).padStart(2, '0')}</div>
           </div>
           <div className="stat-icon red-icon"><i className="fa-solid fa-triangle-exclamation"></i></div>

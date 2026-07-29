@@ -36,7 +36,7 @@ export const SettingsSLA = () => {
     setIsSaving(true);
     // Preservar grupos si existen
     const currentSettings = getAreaSettings(area);
-    saveAreaSettings(area, currentSettings.grupos || [], slas);
+    saveAreaSettings(area, currentSettings.grupos || currentSettings.tiposSolicitud || [], slas);
     
     setTimeout(() => {
       setIsSaving(false);
@@ -56,7 +56,7 @@ export const SettingsSLA = () => {
       </p>
 
       <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-        {['Urgente', 'Alta', 'Media', 'Baja'].map(prio => (
+        {(area === 'ge' ? ['Urgente'] : ['Urgente', 'Alta', 'Media', 'Baja']).map(prio => (
           <div key={prio} style={{ flex: '1 1 200px', background: 'rgba(255,255,255,0.5)', padding: '16px', borderRadius: '12px', border: '1px solid var(--card-border)' }}>
             <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: 'var(--navy)', marginBottom: '8px', display: 'flex', alignItems: 'center' }}>
               <span className="prioridad-dot" style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: prio === 'Urgente' ? '#ef4444' : prio === 'Alta' ? '#f59e0b' : prio === 'Media' ? '#3b82f6' : '#22c55e', marginRight: '6px' }}></span>

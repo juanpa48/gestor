@@ -90,8 +90,11 @@ export const AreaDatabase = () => {
     { title: 'Tiempo Pausado (ms)', key: 'tiempoPausadoTotal' }
   ];
 
-  if (area === 'gh') {
+  if (area === 'gh' || area === 'ge') {
     exactCols = exactCols.filter(c => c.key !== 'tipo' && c.key !== 'prioridad');
+  }
+  
+  if (area === 'gh') {
     exactCols.splice(exactCols.findIndex(c => c.key === 'estado') + 1, 0, { title: 'Novedad de Nómina', key: 'novedadNomina' });
   }
 
@@ -326,3 +329,5 @@ export const AreaDatabase = () => {
     </div>
   );
 };
+
+

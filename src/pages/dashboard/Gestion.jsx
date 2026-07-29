@@ -134,6 +134,9 @@ export const Gestion = () => {
   };
 
   const renderTramites = () => {
+    if (area === 'gh' && ticketEdit.tipoSolicitud === 'Solicitudes Internas') {
+      return <option key="Novedades para nómina" value="Novedades para nómina">Novedades para nómina</option>;
+    }
     const grupoEncontrado = config.tiposSolicitud?.find(g => ticketEdit.tipoSolicitud.includes(g.nombre) || g.nombre.includes(ticketEdit.tipoSolicitud)) || config.grupos?.find(g => ticketEdit.tipoSolicitud.includes(g.nombre) || g.nombre.includes(ticketEdit.tipoSolicitud));
     if (grupoEncontrado) {
       return grupoEncontrado.tramites.map(t => <option key={t} value={t}>{t}</option>);
@@ -255,11 +258,11 @@ export const Gestion = () => {
               <thead>
                 <tr>
                   <th>ID</th>
-                  {area !== 'gh' && <th>Tipo</th>}
+                  {area === 'ti' ? <th>Tipo</th> : <th>Tipo de Solicitud</th>}
                   <th>Solicitud</th>
                   <th>Solicitante</th>
                   <th>Estado</th>
-                  {area !== 'gh' && <th>Prioridad</th>}
+                  {area === 'ti' && <th>Prioridad</th>}
                   {area === 'gh' && <th>Nómina</th>}
                   <th>SLA (Restante)</th>
                   <th>Responsable</th>
@@ -275,7 +278,7 @@ export const Gestion = () => {
                   return (
                     <tr key={t.id} className="ticket-row-clickable" data-ticket-id={t.id} onClick={() => openModal(t.id)}>
                       <td><strong>{t.id || ''}</strong></td>
-                      {area !== 'gh' && (
+                      {area === 'ti' ? (
                         <td>
                           {t.tipo ? (
                             <span className={`tipo-badge ${t.tipo.toLowerCase()}`}>
@@ -284,13 +287,15 @@ export const Gestion = () => {
                             </span>
                           ) : <span style={{ color: 'var(--text-muted)', fontSize: '11px' }}>N/A</span>}
                         </td>
+                      ) : (
+                        <td><span style={{ fontSize: '13px', fontWeight: '500', color: 'var(--text-color)' }}>{t.tipoSolicitud || 'N/A'}</span></td>
                       )}
                       <td style={{ maxWidth: '350px', whiteSpace: 'normal', overflowWrap: 'anywhere', wordBreak: 'break-word', lineHeight: '1.4' }}>
                         {t.solicitud || t.nombre || ''}
                       </td>
                       <td>{t.nombre || t.solicitante || ''}</td>
                       <td><span className={`status-badge ${estadoClase}`}>{t.estado || ''}</span></td>
-                      {area !== 'gh' && (
+                      {area === 'ti' && (
                         <td>
                           <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
                             <span className="prioridad-dot" style={{ background: dot }}></span>{prio}
@@ -335,7 +340,7 @@ export const Gestion = () => {
                         <div key={t.id} className={`kanban-card ${prio.toLowerCase()}`} data-ticket-id={t.id} onClick={() => openModal(t.id)}>
                           <div className="kanban-card-id">
                             {t.id || ''}
-                            {t.tipo && (
+                            {t.tipo && area === 'ti' && (
                               <span className={`tipo-badge ${t.tipo.toLowerCase()}`} style={{ float: 'right', fontSize: '9px', padding: '2px 6px', marginTop: '-2px' }}>
                                 {t.tipo}
                               </span>
@@ -517,7 +522,7 @@ export const Gestion = () => {
                 </div>
               </div>
 
-              {area !== 'gh' && (
+              {area === 'ti' && (
                 <div className="form-group">
                   <label className="form-label">Prioridad</label>
                   <div className="select-wrapper">
@@ -539,9 +544,10 @@ export const Gestion = () => {
                   <i className="fa-solid fa-users-gear select-icon-left"></i>
                   <select id="m_tipoSolicitud" className="form-select padded-left" value={ticketEdit.tipoSolicitud} onChange={handleModalChange}>
                     <option value="" disabled>Seleccione el Tipo...</option>
-                    {(config.tiposSolicitud || config.grupos || []).map((g, idx) => (
+                    {(config.tiposSolicitud || config.grupos || []).filter(g => g.nombre !== 'Solicitudes Internas').map((g, idx) => (
                       <option key={idx} value={g.nombre}>{g.nombre}</option>
                     ))}
+                    {area === 'gh' && <option value="Solicitudes Internas">Solicitudes Internas</option>}
                   </select>
                   <i className="fa-solid fa-chevron-down select-arrow"></i>
                 </div>

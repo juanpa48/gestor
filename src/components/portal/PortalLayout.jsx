@@ -302,9 +302,11 @@ export const PortalLayout = ({ areaConfig, areaContext, onBack, children, nombre
               </div>
             ) : (
               responsables.map((resp, idx) => {
+                const sysUsers = JSON.parse(localStorage.getItem('db_usuarios') || '[]');
                 const n = typeof resp === 'object' ? resp.nombre : resp;
-                const cargo = typeof resp === 'object' ? resp.cargo : 'Personal TI';
-                const foto = (typeof resp === 'object' && resp.foto) ? resp.foto : `https://i.pravatar.cc/150?u=${n.replace(' ','')}`;
+                const foundUser = sysUsers.find(u => u.nombreReal === n || u.username === n);
+                const cargo = foundUser?.cargo || (typeof resp === 'object' ? resp.cargo : 'Personal TI');
+                const foto = foundUser?.avatar || ((typeof resp === 'object' && resp.foto) ? resp.foto : `https://i.pravatar.cc/150?u=${n.replace(' ','')}`);
                 
                 const info = personalTI[n];
                 const st = getEstadoDetails(info ? info.estado : 'disponible');

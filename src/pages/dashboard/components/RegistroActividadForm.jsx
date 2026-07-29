@@ -210,6 +210,9 @@ export const RegistroActividadForm = () => {
   };
 
   const renderTramites = () => {
+    if (area === 'gh' && formData.tipoSolicitud === 'Solicitudes Internas') {
+      return <option key="Novedades para nómina" value="Novedades para nómina">Novedades para nómina</option>;
+    }
     const grupoEncontrado = config.tiposSolicitud?.find(g => formData.tipoSolicitud === g.nombre) || config.grupos?.find(g => formData.tipoSolicitud === g.nombre);
     if (grupoEncontrado) {
       return grupoEncontrado.tramites.map(t => <option key={t} value={t}>{t}</option>);
@@ -276,7 +279,7 @@ export const RegistroActividadForm = () => {
               <i className="fa-solid fa-chevron-down select-arrow"></i>
             </div>
           </div>
-          {area !== 'gh' && (
+          {area === 'ti' && (
             <div className="form-group">
               <label className="form-label" htmlFor="prioridad">Prioridad</label>
               <div className="select-wrapper">
@@ -294,7 +297,7 @@ export const RegistroActividadForm = () => {
           )}
 
           {/* Fila 4 */}
-          {area !== 'gh' && (
+          {area === 'ti' && (
             <div className="form-group full-width">
               <label className="form-label">Tipo de Ticket</label>
               <div className="type-selector-container">
@@ -325,9 +328,10 @@ export const RegistroActividadForm = () => {
               <i className="fa-solid fa-users-gear select-icon-left"></i>
               <select id="tipoSolicitud" name="tipoSolicitud" className="form-select padded-left" required value={formData.tipoSolicitud} onChange={handleInputChange}>
                 <option value="" disabled>Seleccione el Tipo...</option>
-                {(config.tiposSolicitud || config.grupos || []).map((g, idx) => (
+                {(config.tiposSolicitud || config.grupos || []).filter(g => g.nombre !== 'Solicitudes Internas').map((g, idx) => (
                   <option key={idx} value={g.nombre}>{g.nombre}</option>
                 ))}
+                {area === 'gh' && <option value="Solicitudes Internas">Solicitudes Internas</option>}
               </select>
               <i className="fa-solid fa-chevron-down select-arrow"></i>
             </div>
@@ -477,7 +481,7 @@ export const RegistroActividadForm = () => {
                   <textarea id="qr_solicitud" className="form-textarea" placeholder="¿Qué se necesita urgente?..." rows="3" required value={quickFormData.qr_solicitud} onChange={handleQuickInputChange}></textarea>
                 </div>
 
-                {area !== 'gh' && (
+                {area === 'ti' && (
                   <div className="form-group full-width">
                     <label className="form-label">Tipo de Ticket</label>
                     <div className="type-selector-container" style={{ gridTemplateColumns: '1fr 1fr' }}>
@@ -517,20 +521,22 @@ export const RegistroActividadForm = () => {
                       <i className="fa-solid fa-chevron-down select-arrow"></i>
                     </div>
                   </div>
-                  <div className="form-group">
-                    <label className="form-label">Prioridad (Opcional)</label>
-                    <div className="select-wrapper">
-                      <i className="fa-solid fa-arrow-down select-icon-left"></i>
-                      <select id="qr_prioridad" className="form-select padded-left" value={quickFormData.qr_prioridad} onChange={handleQuickInputChange}>
-                        <option value="">En blanco / Ninguna</option>
-                        <option value="Baja">Baja</option>
-                        <option value="Media">Media</option>
-                        <option value="Alta">Alta</option>
-                        <option value="Urgente">Urgente</option>
-                      </select>
-                      <i className="fa-solid fa-chevron-down select-arrow"></i>
+                  {area === 'ti' && (
+                    <div className="form-group">
+                      <label className="form-label">Prioridad (Opcional)</label>
+                      <div className="select-wrapper">
+                        <i className="fa-solid fa-arrow-down select-icon-left"></i>
+                        <select id="qr_prioridad" className="form-select padded-left" value={quickFormData.qr_prioridad} onChange={handleQuickInputChange}>
+                          <option value="">En blanco / Ninguna</option>
+                          <option value="Baja">Baja</option>
+                          <option value="Media">Media</option>
+                          <option value="Alta">Alta</option>
+                          <option value="Urgente">Urgente</option>
+                        </select>
+                        <i className="fa-solid fa-chevron-down select-arrow"></i>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
 

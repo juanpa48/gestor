@@ -71,7 +71,7 @@ export const SettingsLayout = () => {
               </NavLink>
             )}
 
-            {area !== 'gh' && (
+            {((area === 'ti') || (area === 'ge' && isAdmin)) && (
               <NavLink 
                 to={`/dashboard/${area}/settings/sla`} 
                 className={({ isActive }) => `settings-nav-item ${isActive ? 'active' : ''}`}

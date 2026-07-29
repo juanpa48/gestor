@@ -245,7 +245,7 @@ export const Actividades = () => {
                   <th>Solicitud</th>
                   <th>Solicitante</th>
                   <th>Estado</th>
-                  {area !== 'gh' && <th>Prioridad</th>}
+                  {area === 'ti' && <th>Prioridad</th>}
                   {area === 'gh' && <th>Nómina</th>}
                   <th>SLA (Restante)</th>
                   <th>Tipo de Solicitud</th>
@@ -275,7 +275,7 @@ export const Actividades = () => {
                       </td>
                       <td>{r.nombre || r.solicitante || ''}</td>
                       <td><span className={`status-badge ${estadoClass}`}>{r.estado || ''}</span></td>
-                      {area !== 'gh' && (
+                      {area === 'ti' && (
                         <td><span className={`prioridad-badge ${prioClass}`}>{r.prioridad || ''}</span></td>
                       )}
                       {area === 'gh' && (
@@ -290,7 +290,7 @@ export const Actividades = () => {
                 })}
                 {paginatedActividades.length === 0 && (
                   <tr>
-                    <td colSpan={area !== 'gh' ? "9" : "8"} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
+                    <td colSpan={area === 'ti' ? "9" : "8"} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
                       No se encontraron actividades con los filtros actuales.
                     </td>
                   </tr>

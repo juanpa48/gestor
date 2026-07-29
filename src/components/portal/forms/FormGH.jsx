@@ -44,7 +44,8 @@ export const FormGH = () => {
   const [tipoSolicitud, setTipoSolicitud] = useState('');
   const [tipoTramite, setTipoTramite] = useState('');
   const settings = getAreaSettings('gh');
-  const tiposSolicitud = settings.tiposSolicitud || [];
+  // Filtramos "Solicitudes Internas" para que no se muestre a los usuarios normales
+  const tiposSolicitud = (settings.tiposSolicitud || []).filter(g => g.nombre !== 'Solicitudes Internas');
   const [solicitud, setSolicitud] = useState('');
   const [archivos, setArchivos] = useState([]);
   const [detalles, setDetalles] = useState({}); // Estado dinámico inyectado por sub-componentes

@@ -70,7 +70,12 @@ const defaultTiposSolicitudGH = [
   },
   {
     nombre: 'Reporte de Asistencia',
-    tramites: ["Cliente", "Trabajo en Casa"]
+    tramites: ["Trabajo en Casa", "Cliente", "Oficina"]
+  },
+  {
+    nombre: 'Solicitudes Internas',
+    tramites: ["Novedades para nómina"],
+    internalOnly: true
   }
 ];
 
@@ -106,6 +111,12 @@ export const initSettingsDB = () => {
     } else {
       settings.gh.tiposSolicitud = defaultTiposSolicitudGH;
     }
+
+    // Auto-heal GE if accidentally wiped
+    if (!settings.ge || !settings.ge.tiposSolicitud || settings.ge.tiposSolicitud.length === 0) {
+      if (!settings.ge) settings.ge = { slas: { ...defaultSlas } };
+      settings.ge.tiposSolicitud = defaultTiposSolicitudGE;
+    }
   }
   localStorage.setItem('db_settings', JSON.stringify(settings));
 };
@@ -116,13 +127,24 @@ export const getAreaSettings = (areaId) => {
   return settings[areaId] || { grupos: [] };
 };
 
-export const saveAreaSettings = (areaId, grupos, slas) => {
+export const saveAreaSettings = (areaId, gruposOrTipos, slas) => {
   initSettingsDB();
   const settings = JSON.parse(localStorage.getItem('db_settings'));
   const oldSettings = settings[areaId] || {};
-  settings[areaId] = { 
-    grupos,
+  
+  const newAreaSettings = { 
+    ...oldSettings,
     slas: slas !== undefined ? slas : (oldSettings.slas || { Urgente: 2, Alta: 8, Media: 24, Baja: 48 })
   };
+
+  if (gruposOrTipos) {
+    if (areaId === 'ti') {
+      newAreaSettings.grupos = gruposOrTipos;
+    } else {
+      newAreaSettings.tiposSolicitud = gruposOrTipos;
+    }
+  }
+
+  settings[areaId] = newAreaSettings;
   localStorage.setItem('db_settings', JSON.stringify(settings));
 };

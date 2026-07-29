@@ -152,8 +152,8 @@ export const ActaAuxilioPdf = ({ ticket, onClose }) => {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <tbody>
               <tr>
-                <td style={{ width: '50%', paddingRight: '20px', verticalAlign: 'bottom' }}>
-                  <div style={{ borderBottom: '1px solid #000', marginBottom: '10px' }}>
+                <td style={{ width: '100%', verticalAlign: 'bottom' }}>
+                  <div style={{ borderBottom: '1px solid #000', marginBottom: '10px', width: '50%' }}>
                     <p style={{ margin: 0, paddingBottom: '2px', fontFamily: 'monospace', fontSize: '12px' }}>
                       FIRMA DIGITAL: {d.firmaTimestamp || new Date().getTime()}-{ticket.id}
                     </p>
@@ -161,13 +161,6 @@ export const ActaAuxilioPdf = ({ ticket, onClose }) => {
                   <p style={{ margin: 0, fontWeight: 'bold' }}>Firma del Colaborador</p>
                   <p style={{ margin: '5px 0 0 0', fontSize: '12px' }}>Nombre: {solicitanteStr}</p>
                   <p style={{ margin: '2px 0 0 0', fontSize: '12px' }}>C.C: {cedula}</p>
-                </td>
-                <td style={{ width: '50%', paddingLeft: '20px', verticalAlign: 'bottom' }}>
-                  <div style={{ borderBottom: '1px solid #000', marginBottom: '10px', height: '30px' }}>
-                    {/* Espacio para firma GH si fuera manual, aunque no es requerida */}
-                  </div>
-                  <p style={{ margin: 0, fontWeight: 'bold' }}>Gestión Humana</p>
-                  <p style={{ margin: '5px 0 0 0', fontSize: '12px' }}>AC&T FERRARO MOLINA S.A.S</p>
                 </td>
               </tr>
             </tbody>
