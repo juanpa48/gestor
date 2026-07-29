@@ -1,8 +1,18 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../../../shared/contexts/AuthContext';
+import { DbService } from '../../../../shared/services/DbService';
 
 export const FormPermiso = ({ detalles, setDetalles, tipoTramite }) => {
   const { currentUser } = useAuth();
+  const [festivos, setFestivos] = useState([]);
+
+  useEffect(() => {
+    const fetchFestivos = async () => {
+      const data = await DbService.getFestivos();
+      setFestivos(data || []);
+    };
+    fetchFestivos();
+  }, []);
 
   // Inyectar datos del perfil del usuario al montar el componente (removidos datos innecesarios para Permisos)
   useEffect(() => {
@@ -32,12 +42,30 @@ export const FormPermiso = ({ detalles, setDetalles, tipoTramite }) => {
   useEffect(() => {
     if (tipoTramite && tipoTramite.includes('Licencia no remunerada')) {
       if (detalles.fechaInicio && detalles.fechaFin) {
-        const d1 = new Date(detalles.fechaInicio);
-        const d2 = new Date(detalles.fechaFin);
-        const diffTime = d2.getTime() - d1.getTime();
-        if (diffTime >= 0) {
-          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // Inclusive
-          const calculo = `${diffDays} día(s)`;
+        const [y1, m1, d1_val] = detalles.fechaInicio.split('-');
+        const [y2, m2, d2_val] = detalles.fechaFin.split('-');
+        const startD = new Date(y1, m1 - 1, d1_val, 12, 0, 0);
+        const endD = new Date(y2, m2 - 1, d2_val, 12, 0, 0);
+
+        if (endD >= startD) {
+          let count = 0;
+          let current = new Date(startD);
+          
+          while (current <= endD) {
+            const dayOfWeek = current.getDay();
+            const year = current.getFullYear();
+            const month = String(current.getMonth() + 1).padStart(2, '0');
+            const day = String(current.getDate()).padStart(2, '0');
+            const dateStr = `${year}-${month}-${day}`;
+            
+            // Si no es domingo(0) ni sábado(6) y no está en festivos
+            if (dayOfWeek !== 0 && dayOfWeek !== 6 && !festivos.some(f => f.fecha === dateStr)) {
+              count++;
+            }
+            current.setDate(current.getDate() + 1);
+          }
+          
+          const calculo = `${count} día(s) hábil(es)`;
           if (detalles.tiempoAproximado !== calculo) {
             setDetalles(prev => ({ ...prev, tiempoAproximado: calculo }));
           }

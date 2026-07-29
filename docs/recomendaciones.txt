@@ -1,19 +1,44 @@
-eliminnar para gestion humana el modulo de TIPO DE TICKET
-y prioridad
+----eliminnar para gestion humana el modulo de TIPO DE TICKET
+y prioridad----
 
-para gestion humana pornerle solo un sla 9 horas de respuesta
+---para gestion humana pornerle solo un sla 9 horas de respuesta---
 
-cuando llega una solicitud debe contar el tiempo del sla
+----cuando llega una solicitud debe contar el tiempo del sla----
 
-mirar si es posible implementar una firma para la deducion de nomina, tambein cuando se llena el formulario que se pueda imprimir la solcitud para dejarlo como evidencia 
+----mirar si es posible implementar una firma para la deducion de nomina, tambein cuando se llena el formulario que se pueda imprimir la solcitud para dejarlo como evidencia----- 
 
 Mirar la implementacion de reporte diario de control de personal (visitas y trabajo en casa)
 
-clasificacion de tickets para novedad de nomina para el formulario de gh poner un chulo
+---- clasificacion de tickets para novedad de nomina para el formulario de gh poner un chulo ---
 
-poner en el dashboard de gh alerta de tickets pronto a vencer 
+----poner en el dashboard de gh alerta de tickets pronto a vencer ---
 
-pausar el tiempo del sla cuando estan en tiempo de almuerzo, reuniones, fuera de horario laboral
+-----pausar el tiempo del sla cuando estan en tiempo de almuerzo, reuniones, fuera de horario laboral-------
 
-poner condicional para que el sla empiece a contar solo en jornada laboral
+-----poner condicional para que el sla empiece a contar solo en jornada laboral-----
+
+----en los permisos LNR no poner horas si no fecha inicio y fecha fin la calculador ya no va ser en horas si no en dias de licencias---
+
+
+-----en el tramite de compra de vivienda deja una nota que diga: para este tramite debes adjuntar lo siguientes documentos, lo mismo aplica para el tramite de modificacion de vivienda----
+
+----para el tamite de modificacion de vivienda en el texto al final----
+
+----Después de finalizar la reparación locativa por favor enviar una fotografía de la reparación realizada y enviar al correo de GH-----
+
+---en el tramite de estudi seria colocar una nota que diga lo siguiente: si es por venir debera a dirigirse a banco av villas con la liquidacion de pago de la institucion y ellos haran el debido tramite, si su cecantias se encuentra a una entidad diferente a porvenir debera validar directamente con ellos---
+
+---en el tipo de solicitu de auxilio educativo poner los textos que esta en el formulario antiguo de lina en la parte del final, y luego de eso poner el archivo pdf----
+
+---agregar tambienen el caso de que seleccionen posgrado sera una unica vez por programa---
+
+agregar un tipo de solicitud que solo sea interna del resoluctor que se llame novedades para nomina
+
+en licencia no remunera colocar que no cuente los sabados y domingos
+
+----y el de reportes agregar campo del tema de los clientes----
+
+en auxilio educativo eliminar la firma de gh y la empresa
+
+poner un tipo de solicitud que se llame solicitudes internas para el portal del resoluctor y en tipo de tramite poner novedades para nomina
 

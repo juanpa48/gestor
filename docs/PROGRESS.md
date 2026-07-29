@@ -60,3 +60,21 @@
 - [x] **Módulo de Festivos:** Interfaz para que el administrador configure las fechas festivas y el SLA las descuente automáticamente.
 - [x] **Reglas de Cierre ITIL:** Los tickets "Resueltos" pasan automáticamente a estado "Cerrado" pasadas las 72 horas.
 - [x] **Métricas de Estados Completas:** Renderizado de tarjetas de estadísticas para todos los estados posibles en la vista de Dashboard (Actividades).
+
+---
+
+## Nuevo Objetivo: Reestructuración del Reporte de Asistencia Diario
+> **Contexto:** Se requiere separar el módulo de Asistencia Diaria del sistema de tickets (actividades) para evitar contaminación de la base de datos de Gestión Humana y mejorar la confiabilidad del tablero.
+
+- [x] **Fase 1: Capa de Servicios y Desacoplamiento del Formulario**
+  - [x] Añadir `getAsistenciaDiaria()` y `saveAsistenciaDiaria(data)` en `DbService.js`.
+  - [x] Interceptar en `FormGH.jsx` y evitar crear ticket, guardando en su lugar en la nueva DB.
+- [x] **Fase 2: Nuevo Motor del Tablero Kanban**
+  - [x] Desvincular de `actividades` y conectar a `db_asistencia_diaria`.
+  - [x] Reseteo matemático dinámico en `enrichedUsers` sin bucles.
+- [x] **Fase 3: Portal UI y Limpieza de Deuda Técnica**
+  - [x] Extraer lógica de botón "Marcar Fin" fuera del renderizado de tickets.
+  - [x] Crear insignia "Actualmente en turno" reactiva a `db_asistencia_diaria`.
+- [x] **Fase 4: Documentación Obligatoria**
+  - [x] Registrar cambio en `CHANGELOG.md`.
+  - [x] Actualizar `ARCHITECTURE.md`.

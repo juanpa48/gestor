@@ -1,10 +1,11 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useActiveArea } from '../../shared/contexts/ActiveAreaContext';
 import { parseFechaCreacion } from '../../shared/utils/timeHelpers';
+import { DbService } from '../../shared/services/DbService';
 
 export const ReportesGH = () => {
   const { ctx, config } = useActiveArea();
-  const { actividades, addTicket, updateTicket } = ctx;
+  const { actividades } = ctx;
   const [viewMode, setViewMode] = useState('kanban'); // 'kanban' | 'table'
   const [draggedUser, setDraggedUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -21,31 +22,27 @@ export const ReportesGH = () => {
     }
   };
 
-  // Auto-cierre de reportes de días anteriores a la medianoche
+  const [asistencias, setAsistencias] = useState(() => {
+    try {
+      return DbService.cleanAsistenciaDiariaSync();
+    } catch {
+      return {};
+    }
+  });
+
   useEffect(() => {
-    if (!actividades || !updateTicket) return;
-    const cutoff = new Date();
-    cutoff.setHours(0, 0, 0, 0);
-
-    // Evitar loop infinito: trackear los que ya mandamos a cerrar
-    const ticketsToClose = actividades.filter(a => {
-      if (a.tipoSolicitud === 'Reporte de Asistencia' && ['Pendiente', 'En progreso'].includes(a.estado)) {
-        if (closedTicketsRef.current.has(a.id)) return false; // Ya lo mandamos a cerrar
-        const d = parseFechaCreacion(a);
-        if (d) {
-          if (d.getTime() < cutoff.getTime()) {
-            return true;
-          }
-        }
-      }
-      return false;
-    });
-
-    ticketsToClose.forEach(a => {
-      closedTicketsRef.current.add(a.id);
-      updateTicket(a.id, { estado: 'Resuelto' });
-    });
-  }, [actividades, updateTicket]);
+    const fetchAsistencia = async () => {
+      const db = await DbService.getAsistenciaDiaria();
+      setAsistencias(db);
+    };
+    fetchAsistencia();
+    window.addEventListener('storage', fetchAsistencia);
+    window.addEventListener('asistenciaActualizada', fetchAsistencia);
+    return () => {
+      window.removeEventListener('storage', fetchAsistencia);
+      window.removeEventListener('asistenciaActualizada', fetchAsistencia);
+    };
+  }, []);
 
   const [userTick, setUserTick] = useState(0);
 
@@ -66,14 +63,13 @@ export const ReportesGH = () => {
   // Get users
   const allUsers = useMemo(() => {
     try {
-      const db = JSON.parse(localStorage.getItem('db_usuarios') || '[]');
-      return db.filter(u => u.role !== 'admin_ti');
+      return JSON.parse(localStorage.getItem('db_usuarios') || '[]');
     } catch {
       return [];
     }
   }, [userTick]);
 
-  const { todayTickets, isHoyFestivoOFinDeSemana } = useMemo(() => {
+  const isHoyFestivoOFinDeSemana = useMemo(() => {
     const hoy = new Date();
     hoy.setHours(0,0,0,0);
     
@@ -86,34 +82,20 @@ export const ReportesGH = () => {
       if (festivos.includes(hoyStr)) isFestivo = true;
     } catch {}
 
-    const cutoff = new Date();
-    cutoff.setHours(0, 0, 0, 0);
-
-    const todayT = actividades.filter(a => {
-      if (a.tipoSolicitud !== 'Reporte de Asistencia') return false;
-      const d = parseFechaCreacion(a);
-      if (!d) return false;
-      return d.getTime() >= cutoff.getTime();
-    });
-
-    return { todayTickets: todayT, isHoyFestivoOFinDeSemana: isWeekend || isFestivo };
-  }, [actividades]);
+    return isWeekend || isFestivo;
+  }, []);
 
   const enrichedUsers = useMemo(() => {
     return allUsers.map(user => {
-      const ticket = todayTickets.find(t => t.solicitante === user.nombreReal || t.solicitante === user.username);
-      let ubicacion = 'No Reportado';
-      if (ticket) {
-        ubicacion = ticket.tipoTramite || ticket.clasificacion || ticket.grupoExtra;
-      }
+      const miAsistencia = asistencias[user.nombreReal] || asistencias[user.username];
       return {
         ...user,
         displayName: user.nombreReal || user.username,
-        ticket,
-        ubicacion
+        ticket: miAsistencia || null,
+        ubicacion: miAsistencia ? miAsistencia.ubicacion : 'No Reportado'
       };
     }).sort((a, b) => a.displayName.localeCompare(b.displayName));
-  }, [allUsers, todayTickets]);
+  }, [allUsers, asistencias]);
 
   const board = useMemo(() => {
     const cols = { oficina: [], casa: [], cliente: [], noReportados: [] };
@@ -148,20 +130,25 @@ export const ReportesGH = () => {
     try {
       setIsLoading(true);
       showToast(`Procesando asistencia para ${user.displayName}...`, 'info');
-      if (user.ticket) {
-        await updateTicket(user.ticket.id, { tipoTramite: location });
-      } else {
-        await addTicket({
-          solicitante: user.displayName,
-          tipoSolicitud: 'Reporte de Asistencia',
-          tipoTramite: location,
-          estado: 'En progreso', 
-          fechaCreacion: new Date().toLocaleString(),
-          detalles: {
-            registradoManualmentePor: 'Gestión Humana'
-          }
-        });
-      }
+      const currentDb = await DbService.getAsistenciaDiaria();
+      currentDb[user.displayName] = {
+        nombre: user.displayName,
+        ubicacion: location,
+        timestamp: Date.now(),
+        fechaISO: new Date().toISOString(),
+        detalles: {
+          registradoManualmentePor: 'Gestión Humana'
+        }
+      };
+
+      await DbService.saveAsistenciaDiaria(currentDb);
+      await DbService.registrarHistoricoAsistencia({
+        ...currentDb[user.displayName],
+        accion: 'Asignación Manual por GH'
+      });
+      
+      window.dispatchEvent(new Event('storage'));
+      window.dispatchEvent(new Event('asistenciaActualizada'));
       showToast(`Asistencia marcada para ${user.displayName} en ${location}`);
     } catch (error) {
       console.error(error);
@@ -310,7 +297,7 @@ export const ReportesGH = () => {
             </h3>
             <div style={{ flex: 1, overflowY: 'auto' }}>
               {board.cliente.map(u => {
-                const timeStr = u.ticket?.fechaCreacion ? u.ticket.fechaCreacion.split(', ')[1] : '';
+                const timeStr = u.ticket?.timestamp ? new Date(u.ticket.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
                 return (
                 <div key={u.username} draggable onDragStart={(e) => handleDragStart(e, u)} style={{ background: 'var(--card-bg)', border: '1px solid var(--card-border)', padding: '10px', borderRadius: '8px', marginBottom: '10px', cursor: 'grab' }}>
                   <strong>{u.displayName}</strong>
@@ -319,7 +306,7 @@ export const ReportesGH = () => {
                       <i className="fa-solid fa-building-user"></i> {u.ticket.detalles.cliente}
                     </div>
                   )}
-                  <div style={{ fontSize: '11px', color: u.ticket?.estado === 'Resuelto' ? '#10b981' : '#10b981', marginTop: '4px' }}>
+                  <div style={{ fontSize: '11px', color: u.ticket?.estado === 'Resuelto' ? '#10b981' : '#3b82f6', marginTop: '4px' }}>
                       <i className={`fa-solid ${u.ticket?.estado === 'Resuelto' ? 'fa-check' : 'fa-clock'}`}></i> {u.ticket?.estado === 'Resuelto' ? 'Finalizada' : 'En turno'} {timeStr ? `(${timeStr})` : ''}
                   </div>
                 </div>
@@ -409,8 +396,8 @@ export const ReportesGH = () => {
                           t.estado === 'Resuelto' ? <strong style={{color: '#10b981'}}><i className="fa-solid fa-check"></i> Finalizada</strong> : <span style={{color: '#3b82f6'}}><i className="fa-solid fa-clock"></i> En Turno</span>
                         ) : '-'}
                       </td>
-                      <td style={{ padding: '12px' }}>{t ? (t.fechaInicio ? t.fechaInicio.split(', ')[1] : t.fechaCreacion.split(', ')[1]) : '-'}</td>
-                      <td style={{ padding: '12px' }}>{t?.estado === 'Resuelto' && t.fechaFin ? t.fechaFin.split(', ')[1] : '-'}</td>
+                      <td style={{ padding: '12px' }}>{t?.timestamp ? new Date(t.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '-'}</td>
+                      <td style={{ padding: '12px' }}>{t?.estado === 'Resuelto' && t.fechaFinTimestamp ? new Date(t.fechaFinTimestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '-'}</td>
                     </tr>
                   );
                 })}

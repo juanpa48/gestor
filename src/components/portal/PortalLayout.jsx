@@ -9,6 +9,7 @@ export const PortalLayout = ({ areaConfig, areaContext, onBack, children, nombre
   const [sistemas, setSistemas] = useState({});
   const [personalTI, setPersonalTI] = useState({});
   const [actaTicket, setActaTicket] = useState(null);
+  const [activeAsistencia, setActiveAsistencia] = useState(null);
   // Sync systems & IT staff from localStorage
   useEffect(() => {
     const handleStorage = () => {
@@ -23,6 +24,30 @@ export const PortalLayout = ({ areaConfig, areaContext, onBack, children, nombre
     window.addEventListener('storage', handleStorage);
     return () => window.removeEventListener('storage', handleStorage);
   }, []);
+
+  useEffect(() => {
+    if (!nombre) {
+      setActiveAsistencia(null);
+      return;
+    }
+    const fetchAsistencia = async () => {
+      const { DbService } = await import('../../shared/services/DbService.js');
+      const db = await DbService.getAsistenciaDiaria();
+      const miAsistencia = db[nombre];
+      if (miAsistencia) {
+        setActiveAsistencia(miAsistencia);
+      } else {
+        setActiveAsistencia(null);
+      }
+    };
+    fetchAsistencia();
+    window.addEventListener('storage', fetchAsistencia);
+    window.addEventListener('asistenciaActualizada', fetchAsistencia);
+    return () => {
+      window.removeEventListener('storage', fetchAsistencia);
+      window.removeEventListener('asistenciaActualizada', fetchAsistencia);
+    };
+  }, [nombre]);
 
   const misTickets = useMemo(() => {
     if (!nombre) return [];
@@ -167,6 +192,44 @@ export const PortalLayout = ({ areaConfig, areaContext, onBack, children, nombre
             <i className="fa-solid fa-clock-rotate-left"></i> Sus Tickets Recientes
           </div>
           
+          {activeAsistencia && (
+            <div style={{ background: activeAsistencia.estado === 'Resuelto' ? 'rgba(34, 197, 94, 0.1)' : 'rgba(34, 197, 94, 0.1)', border: `1px solid ${activeAsistencia.estado === 'Resuelto' ? '#16a34a' : '#22c55e'}`, borderRadius: '8px', padding: '12px', marginBottom: '15px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#16a34a', fontWeight: 'bold' }}>
+                <i className={`fa-solid ${activeAsistencia.estado === 'Resuelto' ? 'fa-check-circle' : 'fa-map-location-dot'}`}></i>
+                <span>{activeAsistencia.estado === 'Resuelto' ? 'Jornada finalizada: ' : 'Actualmente en turno: '} {activeAsistencia.ubicacion}</span>
+              </div>
+              {activeAsistencia.estado !== 'Resuelto' && (
+                <button 
+                  className="btn-secondary" 
+                  style={{ fontSize: '12px', padding: '6px 12px', margin: 0, borderRadius: '4px', cursor: 'pointer', background: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5', fontWeight: 'bold', alignSelf: 'flex-start' }}
+                  title="Registrar fin de su jornada"
+                  onClick={async (e) => { 
+                    e.stopPropagation(); 
+                    if (window.confirm('¿Está seguro de que desea marcar el FIN de su jornada?')) {
+                      const { DbService } = await import('../../shared/services/DbService.js');
+                      const currentDb = await DbService.getAsistenciaDiaria();
+                      if (currentDb[nombre]) {
+                        currentDb[nombre].estado = 'Resuelto';
+                        currentDb[nombre].fechaFinTimestamp = Date.now();
+                        currentDb[nombre].fechaFinISO = new Date().toISOString();
+                        await DbService.saveAsistenciaDiaria(currentDb);
+                        await DbService.registrarHistoricoAsistencia({
+                          ...currentDb[nombre],
+                          accion: 'Fin de Turno'
+                        });
+                        window.dispatchEvent(new Event('storage'));
+                        window.dispatchEvent(new Event('asistenciaActualizada'));
+                        showToast('Jornada finalizada exitosamente.', 'success', 'check');
+                      }
+                    }
+                  }}
+                >
+                  <i className="fa-solid fa-right-from-bracket"></i> Marcar Fin
+                </button>
+              )}
+            </div>
+          )}
+
           <div id="historialLista">
             {!nombre ? (
               <div className="empty-history">
@@ -210,22 +273,6 @@ export const PortalLayout = ({ areaConfig, areaContext, onBack, children, nombre
                             onClick={(e) => { e.stopPropagation(); setActaTicket(t); }}
                           >
                             <i className="fa-solid fa-file-pdf" style={{ color: '#ef4444' }}></i> Ver Acta
-                          </button>
-                        )}
-                        {t.tipoSolicitud === 'Reporte de Asistencia' && ['Pendiente', 'En progreso'].includes(t.estado) && (
-                          <button 
-                            className="btn-secondary" 
-                            style={{ fontSize: '11px', padding: '4px 10px', margin: 0, borderRadius: '4px', cursor: 'pointer', background: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5', fontWeight: 'bold' }}
-                            title="Registrar fin de su jornada"
-                            onClick={(e) => { 
-                              e.stopPropagation(); 
-                              if (window.confirm('¿Está seguro de que desea marcar el FIN de su jornada?')) {
-                                updateTicket(t.id, { estado: 'Resuelto' });
-                                showToast('Jornada finalizada exitosamente.', 'success', 'check');
-                              }
-                            }}
-                          >
-                            <i className="fa-solid fa-right-from-bracket"></i> Marcar Fin
                           </button>
                         )}
                       </div>

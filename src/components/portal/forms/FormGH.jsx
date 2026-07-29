@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useGHContext as useTickets } from '../../../areas/gestion-humana/context/GHContext';
 import { getAreaSettings } from '../../../shared/services/SettingsManager';
 import { UploadService } from '../../../shared/services/UploadService';
@@ -8,17 +8,38 @@ import { FormConvenio } from './gh/FormConvenio';
 import { FormVacaciones } from './gh/FormVacaciones';
 import { FormCesantias } from './gh/FormCesantias';
 import { FormAuxilioEducativo } from './gh/FormAuxilioEducativo';
+import { DbService } from '../../../shared/services/DbService';
 
 export const FormGH = () => {
   const { currentUser } = useAuth();
   const nombre = currentUser?.nombreReal || currentUser?.username || '';
   const { addTicket, actividades } = useTickets();
   
-  const activeReport = (actividades || []).find(a => 
-    a.tipoSolicitud === 'Reporte de Asistencia' && 
-    a.solicitante === nombre &&
-    ['Pendiente', 'En progreso'].includes(a.estado)
-  );
+  const [activeReport, setActiveReport] = useState(null);
+
+  useEffect(() => {
+    const fetchAsistencia = async () => {
+      const db = await DbService.getAsistenciaDiaria();
+      
+      const miAsistencia = db[nombre];
+      if (miAsistencia) {
+        setActiveReport({ 
+          tipoTramite: miAsistencia.ubicacion, 
+          detalles: miAsistencia.detalles || {},
+          estado: miAsistencia.estado || 'Activo'
+        });
+      } else {
+        setActiveReport(null);
+      }
+    };
+    fetchAsistencia();
+    window.addEventListener('storage', fetchAsistencia);
+    window.addEventListener('asistenciaActualizada', fetchAsistencia);
+    return () => {
+      window.removeEventListener('storage', fetchAsistencia);
+      window.removeEventListener('asistenciaActualizada', fetchAsistencia);
+    };
+  }, [nombre]);
 
   const [tipoSolicitud, setTipoSolicitud] = useState('');
   const [tipoTramite, setTipoTramite] = useState('');
@@ -118,31 +139,48 @@ export const FormGH = () => {
         sanitizedDetalles.firmaTimestamp = Date.now();
       }
 
-      const nuevoTicket = {
-        id: newId,
-        fechaISO: new Date().toISOString(),
-        fechaCreacion: new Date().toLocaleString(),
-        nombre: nombre,
-        solicitante: nombre,
-        cargo: currentUser?.cargo || 'Usuario del Sistema',
-        solicitud: solicitud || (
-          tipoSolicitud === 'Convenios' ? `Solicitud de Convenio de Nómina: ${tipoTramite}` : 
-          tipoSolicitud === 'Vacaciones' ? `Solicitud de Vacaciones: ${tipoTramite}` : 
-          (tipoSolicitud === 'Cesantías' || tipoSolicitud === 'Cesantias') ? `Solicitud de Cesantías: ${tipoTramite}` : 
-          tipoSolicitud === 'Auxilio Educativo' ? `Solicitud de Auxilio Educativo: ${tipoTramite}` : 
-          tipoSolicitud === 'Reporte de Asistencia' ? `Reporte de Asistencia en: ${tipoTramite}` : ''
-        ),
-        estado: 'Pendiente',
-        responsable: '',
-        tipoSolicitud: tipoSolicitud || 'Trámites de Personal',
-        grupoExtra: tipoTramite,
-        clasificacion: tipoTramite,
-        novedadNomina: false,
-        detalles: sanitizedDetalles,
-        adjuntos: adjuntosUrls
-      };
-
-      await addTicket(nuevoTicket);
+      if (tipoSolicitud === 'Reporte de Asistencia') {
+        const asistenciaData = {
+          nombre: nombre,
+          ubicacion: tipoTramite,
+          timestamp: Date.now(),
+          fechaISO: new Date().toISOString(),
+          detalles: sanitizedDetalles
+        };
+        const currentDb = await DbService.getAsistenciaDiaria();
+        currentDb[nombre] = asistenciaData;
+        await DbService.saveAsistenciaDiaria(currentDb);
+        await DbService.registrarHistoricoAsistencia({
+          ...asistenciaData,
+          accion: 'Inicio de Turno'
+        });
+        window.dispatchEvent(new Event('storage'));
+        window.dispatchEvent(new Event('asistenciaActualizada'));
+      } else {
+        const nuevoTicket = {
+          id: newId,
+          fechaISO: new Date().toISOString(),
+          fechaCreacion: new Date().toLocaleString(),
+          nombre: nombre,
+          solicitante: nombre,
+          cargo: currentUser?.cargo || 'Usuario del Sistema',
+          solicitud: solicitud || (
+            tipoSolicitud === 'Convenios' ? `Solicitud de Convenio de Nómina: ${tipoTramite}` : 
+            tipoSolicitud === 'Vacaciones' ? `Solicitud de Vacaciones: ${tipoTramite}` : 
+            (tipoSolicitud === 'Cesantías' || tipoSolicitud === 'Cesantias') ? `Solicitud de Cesantías: ${tipoTramite}` : 
+            tipoSolicitud === 'Auxilio Educativo' ? `Solicitud de Auxilio Educativo: ${tipoTramite}` : ''
+          ),
+          estado: 'Pendiente',
+          responsable: '',
+          tipoSolicitud: tipoSolicitud || 'Trámites de Personal',
+          grupoExtra: tipoTramite,
+          clasificacion: tipoTramite,
+          novedadNomina: false,
+          detalles: sanitizedDetalles,
+          adjuntos: adjuntosUrls
+        };
+        await addTicket(nuevoTicket);
+      }
       
       setSolicitud('');
       setTipoSolicitud('');
@@ -292,11 +330,14 @@ export const FormGH = () => {
 
       {tipoSolicitud === 'Reporte de Asistencia' ? (
         activeReport ? (
-          <div style={{ padding: '15px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid #ef4444', borderRadius: '8px', textAlign: 'center', fontWeight: 'bold' }}>
-            <i className="fa-solid fa-triangle-exclamation"></i> Ya tienes una jornada en curso ({activeReport.tipoTramite || activeReport.clasificacion || activeReport.grupoExtra || 'Oficina'}). {activeReport.detalles?.registradoManualmentePor ? ' (Asignada por Gestión Humana).' : ' Finalízala antes de registrar otra.'}
+          <div style={{ padding: '15px', background: activeReport.estado === 'Resuelto' ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)', color: activeReport.estado === 'Resuelto' ? '#16a34a' : '#ef4444', border: `1px solid ${activeReport.estado === 'Resuelto' ? '#22c55e' : '#ef4444'}`, borderRadius: '8px', textAlign: 'center', fontWeight: 'bold' }}>
+            <i className={`fa-solid ${activeReport.estado === 'Resuelto' ? 'fa-check-circle' : 'fa-triangle-exclamation'}`}></i> 
+            {activeReport.estado === 'Resuelto'
+              ? ` Ya completaste tu jornada hoy en ${activeReport.tipoTramite}.`
+              : ` Ya tienes una jornada en curso (${activeReport.tipoTramite}).${activeReport.detalles?.registradoManualmentePor ? ' (Asignada por Gestión Humana).' : ' Finalízala antes de registrar otra.'}`}
           </div>
         ) : (
-          <button type="submit" className={`btn-submit ${loadingSubmit ? 'loading' : ''}`} style={{ background: 'var(--green)', boxShadow: '0 4px 15px rgba(34,197,94,0.3)' }} disabled={loadingSubmit}>
+          <button type="submit" className={`btn-submit ${loadingSubmit ? 'loading' : ''}`} style={{ background: '#22c55e', boxShadow: '0 4px 15px rgba(34,197,94,0.3)', color: 'white' }} disabled={loadingSubmit}>
             {loadingSubmit ? (
               <><span>Registrando Inicio...</span><i className="fa-solid fa-spinner fa-spin"></i></>
             ) : (

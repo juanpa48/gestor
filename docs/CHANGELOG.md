@@ -16,6 +16,12 @@
 
 ## Julio 2026
 
+### [2026-07-28] — Desacoplamiento de Asistencia Diaria y Nuevo Motor Kanban ⏱️
+- **Arquitectura Local-First:** Se separó el módulo de "Reporte de Asistencia" del sistema general de tickets para evitar la contaminación de la base de datos de actividades. Ahora la asistencia se almacena en `db_asistencia_diaria`.
+- **Nuevo Motor Matemático de Tablero Kanban:** El tablero de Control de Personal (`ReportesGH.jsx`) ya no depende de cerrar tickets ni sufre de bucles de estado. En su lugar, compara dinámicamente la estampa de tiempo (`timestamp`) del empleado con la hora de corte configurada (19:14 h). Si el registro expira, el empleado pasa a "No Reportado" automáticamente sin mutar la base de datos.
+- **Sincronización Inter-Pestañas Silenciosa:** Se implementó una sincronización mediante eventos `storage` que permite actualizar el tablero Kanban y el Portal de Empleado en tiempo real al registrar asistencia, eliminando la notificación sonora (Do-Mi-Sol) y visual masiva para no saturar a las gestoras.
+- **Insignia Reactiva del Portal:** Se añadió una nueva insignia al portal del empleado ("Actualmente en turno") que lee su estado desde `db_asistencia_diaria` y le proporciona un botón dedicado para marcar el fin de su jornada, reemplazando el botón que antes aparecía dentro del historial de tickets.
+
 ### [2026-07-28] — Módulo de Auxilio Educativo, Certificados y SGC (GH) 🎓
 - **Flujo de Auxilio Educativo:** Se implementó el flujo completo para "Auxilio Educativo" con cálculo automático de "Bono Educativo a Otorgar" (20% del valor total con tope de $500,000 COP), firma electrónica segura del solicitante (con texto legal de consentimiento) y generación del documento en PDF interactivo (`ActaAuxilioPdf.jsx`) que consolida los datos y la firma electrónica. Formato automático de inputs de moneda a pesos colombianos.
 - **Nuevos Tipos de Solicitud Dinámicos:** Se agregaron "Certificado Laboral" y "Sistema de Gestión" al menú de GH. Se implementó lógica de ocultamiento dinámico: si el área solo tiene un (1) trámite específico, el selector de trámites se auto-asigna y se oculta de la vista del empleado sin afectar la persistencia en DB.

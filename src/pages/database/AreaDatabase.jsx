@@ -98,11 +98,24 @@ export const AreaDatabase = () => {
   const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S'];
 
   const [rawSolicitantes, setRawSolicitantes] = useState([]);
+  const [dbAsistencia, setDbAsistencia] = useState([]);
+  const [dbHistorico, setDbHistorico] = useState([]);
 
-  useEffect(() => {
+  const loadData = () => {
     const users = JSON.parse(localStorage.getItem('db_usuarios')) || [];
     setRawSolicitantes(users.filter(u => u.role === 'solicitante'));
-  }, []);
+    
+    if (area === 'gh') {
+      const asistencia = JSON.parse(localStorage.getItem('db_asistencia_diaria')) || {};
+      setDbAsistencia(Object.values(asistencia));
+      const historico = JSON.parse(localStorage.getItem('db_historico_asistencia')) || [];
+      setDbHistorico(historico);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, [area]);
 
   return (
     <div className="database-container">
@@ -130,6 +143,12 @@ export const AreaDatabase = () => {
       <div className="db-tabs">
         <button className={`db-tab-btn ${activeTab === 'actividades' ? 'active' : ''}`} onClick={() => setActiveTab('actividades')}>Actividades</button>
         <button className={`db-tab-btn ${activeTab === 'solicitantes' ? 'active' : ''}`} onClick={() => setActiveTab('solicitantes')}>Solicitantes</button>
+        {area === 'gh' && (
+          <>
+            <button className={`db-tab-btn ${activeTab === 'asistencia_diaria' ? 'active' : ''}`} onClick={() => setActiveTab('asistencia_diaria')}>Asistencia Diaria (En Vivo)</button>
+            <button className={`db-tab-btn ${activeTab === 'historico_asistencia' ? 'active' : ''}`} onClick={() => setActiveTab('historico_asistencia')}>Histórico de Asistencia</button>
+          </>
+        )}
       </div>
 
       {activeTab === 'actividades' && (
@@ -158,7 +177,7 @@ export const AreaDatabase = () => {
                     <td className="row-num">{index + 2}</td>
                     {exactCols.map(c => (
                       <td key={c.key}>
-                        {c.key === 'novedadNomina' ? (row[c.key] ? 'Sí' : 'No') : (row[c.key] || '')}
+                        {c.key === 'novedadNomina' ? (row[c.key] ? 'Sí' : 'No') : (typeof row[c.key] === 'object' && row[c.key] !== null ? JSON.stringify(row[c.key]) : (row[c.key] || ''))}
                       </td>
                     ))}
                   </tr>
@@ -225,7 +244,85 @@ export const AreaDatabase = () => {
         </div>
       )}
 
+      {area === 'gh' && activeTab === 'asistencia_diaria' && (
+        <div className="db-table-container">
+          <button className="btn-refresh" onClick={loadData}>Recargar Datos (db_asistencia_diaria)</button>
+          <table className="db-table list-table">
+            <thead>
+              <tr>
+                <th className="row-num"></th>
+                <th>Nombre</th>
+                <th>Ubicación</th>
+                <th>Estado</th>
+                <th>Fecha ISO</th>
+                <th>Timestamp</th>
+                <th>Fecha Fin ISO</th>
+                <th>Fecha Fin Timestamp</th>
+                <th>Detalles</th>
+              </tr>
+            </thead>
+            <tbody>
+              {dbAsistencia.length === 0 ? (
+                <tr><td colSpan={9} className="empty-msg" style={{textAlign:'center'}}>No hay registros de asistencia en vivo hoy.</td></tr>
+              ) : (
+                dbAsistencia.map((row, idx) => (
+                  <tr key={row.nombre}>
+                    <td className="row-num">{idx + 2}</td>
+                    <td>{row.nombre}</td>
+                    <td>{row.ubicacion}</td>
+                    <td>{row.estado || 'Activo'}</td>
+                    <td>{row.fechaISO}</td>
+                    <td>{row.timestamp}</td>
+                    <td>{row.fechaFinISO || ''}</td>
+                    <td>{row.fechaFinTimestamp || ''}</td>
+                    <td>{row.detalles ? JSON.stringify(row.detalles) : ''}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
 
+      {area === 'gh' && activeTab === 'historico_asistencia' && (
+        <div className="db-table-container">
+          <button className="btn-refresh" onClick={loadData}>Recargar Datos (db_historico_asistencia)</button>
+          <table className="db-table list-table">
+            <thead>
+              <tr>
+                <th className="row-num"></th>
+                <th>ID</th>
+                <th>Fecha Registro</th>
+                <th>Acción</th>
+                <th>Nombre</th>
+                <th>Ubicación</th>
+                <th>Estado</th>
+                <th>Fecha Inicio ISO</th>
+                <th>Fecha Fin ISO</th>
+              </tr>
+            </thead>
+            <tbody>
+              {dbHistorico.length === 0 ? (
+                <tr><td colSpan={9} className="empty-msg" style={{textAlign:'center'}}>No hay historial registrado.</td></tr>
+              ) : (
+                dbHistorico.map((row, idx) => (
+                  <tr key={row.id || idx}>
+                    <td className="row-num">{idx + 2}</td>
+                    <td>{row.id}</td>
+                    <td>{row.fechaRegistro}</td>
+                    <td><strong>{row.accion}</strong></td>
+                    <td>{row.nombre}</td>
+                    <td>{row.ubicacion}</td>
+                    <td>{row.estado || 'Activo'}</td>
+                    <td>{row.fechaISO}</td>
+                    <td>{row.fechaFinISO || ''}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 };

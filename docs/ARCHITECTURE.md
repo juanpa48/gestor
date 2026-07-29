@@ -141,7 +141,14 @@ Responsabilidades:
 - `SettingsFestivos`: Panel para gestión de días festivos que afectan al motor SLA global.
 - `SettingsUsuarios`: **Módulo de Administración de Cuentas** exclusivo para TI (`admin_ti`). Cuenta con protección de ruta, tabla unificada con pestañas (Resolutores vs Empleados), y formularios modales (desbloqueos, edición y reseteo de contraseñas).
 
-### 4.8 Notificaciones (`NotificationCenter.jsx` + `NotificationHelper.js`)
+### 4.8 Control de Personal Diario / Asistencia (`ReportesGH.jsx`)
+Responsabilidades:
+- Tablero Kanban especializado exclusivo de Gestión Humana para trackear la ubicación de los empleados (Oficina, Cliente, Casa).
+- **Desacoplamiento Total:** Ya no lee de la colección de tickets (`actividades`), sino que utiliza su propio repositorio clave-valor independiente (`db_asistencia_diaria`).
+- **Reseteo Matemático:** No requiere scripts de cierre ni muta la base de datos para limpiar el tablero a la hora de corte. Compara dinámicamente el `timestamp` del registro con el umbral matemático (ej. 19:14h), moviendo al usuario a "No Reportado" visualmente.
+- Sincronización silenciosa multi-pestaña escuchando eventos nativos `storage` en lugar de emitir ruido visual o sonoro a la gestora.
+
+### 4.9 Notificaciones (`NotificationCenter.jsx` + `NotificationHelper.js`)
 Responsabilidades:
 - Panel desplegable de notificaciones integrado en el `Topbar`.
 

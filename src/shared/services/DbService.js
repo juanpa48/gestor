@@ -195,6 +195,76 @@ export const DbService = {
     });
   },
   
+  cleanAsistenciaDiariaSync: () => {
+    let db = JSON.parse(localStorage.getItem('db_asistencia_diaria')) || {};
+    const now = new Date();
+    const cutoff = new Date(now);
+    cutoff.setHours(11, 39, 0, 0); 
+    if (now.getTime() < cutoff.getTime()) {
+      cutoff.setDate(cutoff.getDate() - 1);
+    }
+    const cutoffTime = cutoff.getTime();
+    let changed = false;
+    let historico = null;
+    
+    Object.keys(db).forEach(user => {
+      const record = db[user];
+      if (record.timestamp < cutoffTime) {
+        if (record.estado !== 'Resuelto' && record.ubicacion !== 'Oficina') {
+          if (!historico) historico = JSON.parse(localStorage.getItem('db_historico_asistencia')) || [];
+          historico.push({
+            ...record,
+            estado: 'Resuelto',
+            fechaFinISO: cutoff.toISOString(),
+            accion: 'Fin de Turno (Automático)',
+            id: Date.now().toString() + Math.random().toString().slice(2,5),
+            fechaRegistro: new Date().toLocaleString()
+          });
+        }
+        delete db[user];
+        changed = true;
+      }
+    });
+    
+    if (changed) {
+      localStorage.setItem('db_asistencia_diaria', JSON.stringify(db));
+      if (historico) localStorage.setItem('db_historico_asistencia', JSON.stringify(historico));
+    }
+    return db;
+  },
+
+  getAsistenciaDiaria: async () => {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        resolve(DbService.cleanAsistenciaDiariaSync());
+      }, 300);
+    });
+  },
+
+  saveAsistenciaDiaria: async (asistenciaObj) => {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        localStorage.setItem('db_asistencia_diaria', JSON.stringify(asistenciaObj));
+        resolve({ success: true });
+      }, 300);
+    });
+  },
+
+  registrarHistoricoAsistencia: async (registro) => {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        const historico = JSON.parse(localStorage.getItem('db_historico_asistencia')) || [];
+        historico.push({
+          ...registro,
+          id: Date.now().toString(),
+          fechaRegistro: new Date().toLocaleString()
+        });
+        localStorage.setItem('db_historico_asistencia', JSON.stringify(historico));
+        resolve({ success: true });
+      }, 100);
+    });
+  },
+
   getEstadoPersonal: async () => {
     return new Promise(resolve => {
       setTimeout(() => {
