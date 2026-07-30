@@ -309,7 +309,7 @@ app.post('/api/tickets', async (req, res) => {
         codigo, t.areaKey, t.solicitante, t.solicitud, t.descripcion,
         t.estado || 'Pendiente', t.prioridad, t.tipo, t.tipoSolicitud,
         t.clasificacion, t.responsable, t.accion, t.empresa, t.nit,
-        t.cargoSolicitante, t.fechaCreacion || new Date().toLocaleString(),
+        t.cargoSolicitante || t.cargo, t.fechaCreacion || new Date().toLocaleString(),
         t.fechaISO || new Date().toISOString(), t.fechaInicio,
         t.fechaInicioTimestamp, t.fechaFin, t.fechaFinTimestamp,
         t.fechaPausa !== undefined ? t.fechaPausa : null,
@@ -352,7 +352,7 @@ app.put('/api/tickets/:codigo', async (req, res) => {
         t.fechaCierreTimestamp, t.tiempo, t.tiempoPausadoTotal,
         t.agentPauseStart, t.fechaPermiso, t.horaSalida, t.horaLlegada,
         t.adjuntos ? JSON.stringify(t.adjuntos) : null,
-        t.nombre, t.area, t.empresa, t.nit, t.cargoSolicitante, t.detalles ? JSON.stringify(t.detalles) : null, t.grupoExtra || null, t.novedadNomina || false,
+        t.nombre, t.area, t.empresa, t.nit, t.cargoSolicitante || t.cargo, t.detalles ? JSON.stringify(t.detalles) : null, t.grupoExtra || null, t.novedadNomina || false,
         codigo
       ]
     );
