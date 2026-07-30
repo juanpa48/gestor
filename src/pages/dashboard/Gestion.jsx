@@ -22,7 +22,6 @@ export const Gestion = () => {
   const [modalLoading, setModalLoading] = useState(false);
   const [certificadoFile, setCertificadoFile] = useState(null);
   const [archivosVistos, setArchivosVistos] = useState(new Set());
-  const [mensajeResolutor, setMensajeResolutor] = useState('');
   const [filtroEstado, setFiltroEstado] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [tick, setTick] = useState(0);
@@ -121,12 +120,6 @@ export const Gestion = () => {
       adjuntos: t.adjuntos || []
     });
     
-    let parsedDetalles = t.detalles;
-    if (typeof parsedDetalles === 'string') {
-      try { parsedDetalles = JSON.parse(parsedDetalles); } catch(e) { parsedDetalles = {}; }
-    }
-    setMensajeResolutor(parsedDetalles?.mensajeResolutor || '');
-    
     setArchivosVistos(new Set()); // Resetear vistos al abrir nuevo ticket
     setCertificadoFile(null);
     setModalOpen(true);
@@ -166,9 +159,6 @@ export const Gestion = () => {
         }
       }
       
-      if (mensajeResolutor) {
-        parsedDetalles.mensajeResolutor = mensajeResolutor;
-      }
       finalDetalles = parsedDetalles;
 
       await updateTicket(ticketEdit.id, {
@@ -653,14 +643,8 @@ export const Gestion = () => {
               </div>
 
               <div className="form-group form-group-full">
-                <label className="form-label" style={{ color: 'var(--primary)' }}><i className="fa-solid fa-message"></i> Respuesta de GH (Visible en el portal del empleado)</label>
-                <textarea className="form-input form-input-full" rows="2" placeholder="Ej: Aprobado / Denegado. Recuerda traer el soporte original mañana..." value={mensajeResolutor} onChange={(e) => setMensajeResolutor(e.target.value)}></textarea>
-                <small style={{ color: 'var(--text-muted)', display: 'block', marginTop: '4px' }}>Este mensaje le aparecerá directamente al colaborador en su historial de tickets recientes.</small>
-              </div>
-
-              <div className="form-group form-group-full">
-                <label className="form-label">Acción Técnica / Notas Internas</label>
-                <textarea id="m_accion" className="form-input form-input-full" rows="2" placeholder="Describe lo que hiciste para resolverlo..." value={ticketEdit.accion} onChange={handleModalChange}></textarea>
+                <label className="form-label">Acción Técnica / Notas</label>
+                <textarea id="m_accion" className="form-input form-input-full" rows="2" placeholder="Describe lo que hiciste para resolverlo o deja un mensaje al solicitante..." value={ticketEdit.accion} onChange={handleModalChange}></textarea>
               </div>
 
               {ticketEdit.adjuntos && ticketEdit.adjuntos.length > 0 && (

@@ -295,9 +295,9 @@ export const PortalLayout = ({ areaConfig, areaContext, onBack, children, nombre
                         </div>
                       </div>
                       
-                      {t.detalles?.mensajeResolutor && (
+                      {t.accion && (
                         <div style={{ marginTop: '8px', padding: '8px', backgroundColor: 'rgba(59, 130, 246, 0.1)', borderLeft: '3px solid #3b82f6', borderRadius: '0 4px 4px 0', fontSize: '11px', color: '#1e293b' }}>
-                          <strong><i className="fa-solid fa-message"></i> Respuesta GH:</strong> {t.detalles.mensajeResolutor}
+                          <strong><i className="fa-solid fa-message"></i> Respuesta GH:</strong> {t.accion}
                         </div>
                       )}
                     </div>
