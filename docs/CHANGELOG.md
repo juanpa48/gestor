@@ -16,6 +16,12 @@
 
 ## Julio 2026
 
+### [2026-07-29] — Motor de Exportación Avanzado y Carga Masiva de Usuarios 🚀
+- **Exportación Dual (CSV/XLSX):** Se implementó un motor de exportación avanzado en las Bases de Datos y tableros de Actividades que permite descargar los reportes consolidados, aplanando los datos estructurados en JSON (como los detalles dinámicos) en columnas legibles. Soporta la librería `xlsx` para la generación de libros Excel reales y archivos `.csv` con codificación UTF-8 BOM.
+- **Botón Inteligente de Descarga:** Los tableros cuentan con un botón "Descargar a Excel (CSV)" que asigna automáticamente el nombre del área y la fecha al archivo generado (ej. `Exportacion_GH_2026-07-29.csv`).
+- **Importación Masiva de Usuarios:** En el panel de Gestión de Usuarios (`SettingsUsuarios.jsx`) se añadió un motor para leer y cargar cientos de usuarios desde una plantilla Excel (`.xlsx`). 
+- **Ciberseguridad y Políticas Anti-Duplicados:** El importador hashea y usa la cédula del usuario (`Cédula`) como contraseña predeterminada para evitar contraseñas débiles genéricas. Filtra usuarios ya existentes e inyecta la política del *Principio de Menor Privilegio*, asignándoles a todos el rol base de "Empleado (Solo Portal)".
+
 ### [2026-07-28] — Desacoplamiento de Asistencia Diaria y Nuevo Motor Kanban ⏱️
 - **Arquitectura Local-First:** Se separó el módulo de "Reporte de Asistencia" del sistema general de tickets para evitar la contaminación de la base de datos de actividades. Ahora la asistencia se almacena en `db_asistencia_diaria`.
 - **Nuevo Motor Matemático de Tablero Kanban:** El tablero de Control de Personal (`ReportesGH.jsx`) ya no depende de cerrar tickets ni sufre de bucles de estado. En su lugar, compara dinámicamente la estampa de tiempo (`timestamp`) del empleado con la hora de corte configurada (19:14 h). Si el registro expira, el empleado pasa a "No Reportado" automáticamente sin mutar la base de datos.

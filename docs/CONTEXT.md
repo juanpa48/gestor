@@ -58,4 +58,5 @@ Lee `docs/TECHNICAL_SPECS.md` → Patrones, riesgos, modelo de datos y reglas op
 - ✅ **Fase 2, 3 y 4 Completadas**: Portales dinámicos, Dashboards adaptables por área y Base de Datos Multi-Área.
 - ✅ **Especialización por Área (GH)**: Implementado SLA fijo y validaciones exclusivas de Nómina.
 - ✅ **Panel de Configuración Refactorizado**: Arquitectura modular con sub-rutas, tablas paginadas y blindaje de seguridad para gestión de usuarios.
+- ✅ **Exportación e Importación de Datos**: Motor dual de exportación (CSV/XLSX) con aplanamiento de JSON y Carga Masiva de Usuarios desde Excel con encriptación automática de contraseñas.
 - 🔲 **EN CURSO**: Migración a backend real (futuro). Actualmente sigue usando `localStorage` encapsulado en `DbService`.

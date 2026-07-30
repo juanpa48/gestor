@@ -11,7 +11,25 @@
 
 ## 🚀 Bitácora de Progreso (Gestión Empresarial)
 
-## Nuevo Objetivo: Módulo de Convenios y Firma Digital
+  - [x] **Fase 4: Documentación Obligatoria**
+  - [x] Registrar cambio en `CHANGELOG.md` y `ARCHITECTURE.md`.
+
+---
+
+## Objetivo Completado: Motor de Exportación Avanzado y Carga Masiva
+> **Contexto:** Habilitar la exportación dinámica (CSV/XLSX) aplanando campos anidados para métricas precisas. Y permitir a los administradores subir usuarios de forma masiva desde una plantilla de Excel (`.xlsx`).
+
+- [x] **Motor de Exportación Dual:**
+  - [x] Aplanamiento inteligente de columnas anidadas (ej. `detalles` de Gestión Humana).
+  - [x] Exportación a `.csv` con codificación UTF-8 BOM y nombres autogenerados.
+- [x] **Importador Masivo de Usuarios:**
+  - [x] Modal UI y sistema de descarga de "Plantilla Base.xlsx" en `SettingsUsuarios.jsx`.
+  - [x] Motor de lectura usando `FileReader` y la librería `xlsx`.
+  - [x] Reglas de seguridad: Hasheo SHA-256 de la `Cédula` como contraseña, filtro anti-duplicados y rol `solicitante` por defecto.
+
+---
+
+## Objetivo Completado: Módulo de Convenios y Firma Digital
 > **Contexto:** Se requiere construir el segundo formulario altamente especializado de GH ("Convenios") el cual involucra deducciones de nómina. Para dar respaldo legal, se implementará un componente de Firma Digital Canvas en el formulario del empleado y un Generador de Acta PDF en el Dashboard del Gestor.
 
 - [x] **Fase 1: Construcción del Formulario de Convenios (`FormConvenio.jsx`)**
