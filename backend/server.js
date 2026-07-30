@@ -644,8 +644,8 @@ app.put('/api/sistemas', async (req, res) => {
       const now = new Date();
       const cutoff = new Date(now);
       
-      // Ajustado a las 15:11 hora Colombia (COT es UTC-5, así que 15 + 5 = 20)
-      cutoff.setUTCHours(20, 11, 0, 0); 
+      // Ajustado a las 00:00 (Medianoche) hora Colombia (COT es UTC-5, así que 0 + 5 = 5)
+      cutoff.setUTCHours(5, 0, 0, 0);
       
       if (now.getTime() < cutoff.getTime()) {
         cutoff.setDate(cutoff.getDate() - 1);
