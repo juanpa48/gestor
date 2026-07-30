@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import * as XLSX from 'xlsx';
 import { hashPassword, useAuth } from '../../../../shared/contexts/AuthContext';
 import { useActiveArea } from '../../../../shared/contexts/ActiveAreaContext';
 
@@ -9,6 +10,8 @@ export const SettingsUsuarios = () => {
 
   const [users, setUsers] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
+  const [importModalOpen, setImportModalOpen] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
   const [editingUsername, setEditingUsername] = useState(null);
 
   // Form State
@@ -81,6 +84,121 @@ export const SettingsUsuarios = () => {
 
   const closeModal = () => {
     setModalOpen(false);
+  };
+
+  const closeImportModal = () => {
+    setImportModalOpen(false);
+  };
+
+  const downloadTemplate = () => {
+    const ws = XLSX.utils.json_to_sheet([{
+      'Nombre Real': 'Juan Perez',
+      'Nombre de Usuario (Login)': 'juanperez',
+      'Cargo': 'Analista de Datos',
+      'Cédula': '100200300',
+      'Celular': '3001234567',
+      'Jefe Inmediato': 'Maria Gonzalez'
+    }]);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Plantilla Usuarios");
+    XLSX.writeFile(wb, "Plantilla_Usuarios.xlsx");
+  };
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setIsImporting(true);
+    const reader = new FileReader();
+
+    reader.onload = async (evt) => {
+      try {
+        const data = evt.target.result;
+        const workbook = XLSX.read(data, { type: 'binary' });
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        
+        // Convertir a JSON
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+        
+        // Fase 3: Procesar los datos (stub para la fase 2)
+        await processImportData(jsonData);
+      } catch (error) {
+        console.error("Error leyendo el archivo:", error);
+        showToast("Error al leer el archivo. Asegúrate de que sea un Excel válido.", "error");
+        setIsImporting(false);
+      }
+      
+      // Limpiar el input file
+      e.target.value = null;
+    };
+
+    reader.onerror = () => {
+      showToast("Hubo un problema leyendo el archivo.", "error");
+      setIsImporting(false);
+    };
+
+    reader.readAsBinaryString(file);
+  };
+
+  const processImportData = async (jsonData) => {
+    let db = [...users];
+    let importedCount = 0;
+    let skippedCount = 0;
+
+    for (const row of jsonData) {
+      const rowNombre = String(row['Nombre Real'] || row['Nombre'] || row['nombre'] || '');
+      const rowUsername = String(row['Nombre de Usuario (Login)'] || row['Usuario'] || row['usuario'] || '');
+      const rowCedula = String(row['Cédula'] || row['Cedula'] || row['cedula'] || '');
+      const rowCargo = String(row['Cargo'] || row['cargo'] || 'Empleado');
+      const rowCelular = String(row['Celular'] || row['celular'] || '');
+      const rowJefe = String(row['Jefe Inmediato'] || row['Jefe'] || row['jefe'] || '');
+
+      if (!rowNombre.trim() || !rowUsername.trim()) {
+        skippedCount++;
+        continue;
+      }
+
+      // Evitar duplicados
+      if (db.some(u => u.username.toLowerCase() === rowUsername.trim().toLowerCase())) {
+        skippedCount++;
+        continue;
+      }
+
+      // La contraseña es la cédula, o '12345' si no tiene cédula
+      const plainPassword = rowCedula.trim() ? rowCedula.trim() : '12345';
+      const empHash = await hashPassword(plainPassword);
+
+      const newUser = {
+        id: `U-${String(db.length + 1).padStart(2, '0')}`,
+        username: rowUsername.trim(),
+        nombreReal: rowNombre.trim(),
+        passwordHash: empHash,
+        role: 'solicitante', // Siempre Empleado por seguridad
+        area: null,
+        avatar: '',
+        cargo: rowCargo.trim(),
+        cedula: rowCedula.trim(),
+        celular: String(rowCelular).trim(),
+        jefeInmediato: rowJefe.trim(),
+        bloqueado: false,
+        intentosFallidos: 0
+      };
+      
+      db.push(newUser);
+      importedCount++;
+    }
+
+    if (importedCount > 0) {
+      localStorage.setItem('db_usuarios', JSON.stringify(db));
+      setUsers(db);
+      showToast(`¡${importedCount} usuarios importados con éxito! (${skippedCount} omitidos)`);
+    } else {
+      showToast(`No se importó ningún usuario. Revisa la plantilla. (${skippedCount} omitidos)`, 'error');
+    }
+
+    setIsImporting(false);
+    closeImportModal();
   };
 
   const handleSaveUser = async (e) => {
@@ -205,9 +323,14 @@ export const SettingsUsuarios = () => {
         <h2 style={{ fontSize: '18px', color: 'var(--navy)' }}>
           <i className="fa-solid fa-users-gear"></i> Gestión de Usuarios
         </h2>
-        <button className="btn-primary" onClick={() => openModal()} style={{ padding: '8px 16px', fontSize: '14px' }}>
-          <i className="fa-solid fa-user-plus"></i> Nuevo Usuario
-        </button>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button className="btn-primary" onClick={() => setImportModalOpen(true)} style={{ padding: '8px 16px', fontSize: '14px', background: '#10b981', borderColor: '#059669', color: '#fff' }}>
+            <i className="fa-solid fa-file-import"></i> Importar Masivamente
+          </button>
+          <button className="btn-primary" onClick={() => openModal()} style={{ padding: '8px 16px', fontSize: '14px' }}>
+            <i className="fa-solid fa-user-plus"></i> Nuevo Usuario
+          </button>
+        </div>
       </div>
 
       <div className="db-tabs" style={{ marginBottom: '20px' }}>
@@ -383,6 +506,53 @@ export const SettingsUsuarios = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* --- MODAL DE IMPORTACIÓN MASIVA --- */}
+      {importModalOpen && (
+        <div className="modal-overlay active" onClick={closeImportModal}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '400px', background: 'var(--card-bg)' }}>
+            <div className="modal-header">
+              <h3><i className="fa-solid fa-file-import"></i> Importar Empleados</h3>
+              <button className="btn-close" onClick={closeImportModal}><i className="fa-solid fa-xmark"></i></button>
+            </div>
+            <div className="modal-body" style={{ textAlign: 'center' }}>
+              <p style={{ color: 'var(--text-muted)', marginBottom: '20px', fontSize: '14px' }}>
+                Descarga la plantilla oficial, rellénala y súbela aquí para registrar usuarios masivamente.
+              </p>
+              
+              <button 
+                type="button" 
+                onClick={downloadTemplate} 
+                className="btn-primary" 
+                style={{ width: '100%', marginBottom: '20px', background: '#3b82f6', borderColor: '#2563eb' }}
+              >
+                <i className="fa-solid fa-download"></i> Descargar Plantilla Base
+              </button>
+
+              <div style={{ border: '2px dashed var(--card-border)', padding: '20px', borderRadius: '8px', background: 'rgba(255,255,255,0.5)' }}>
+                <i className="fa-solid fa-upload" style={{ fontSize: '24px', color: 'var(--navy)', marginBottom: '10px' }}></i>
+                <p style={{ fontWeight: '500', marginBottom: '10px' }}>Sube tu plantilla completa (.xlsx)</p>
+                <input 
+                  type="file" 
+                  accept=".xlsx, .csv" 
+                  style={{ width: '100%' }}
+                  disabled={isImporting}
+                  onChange={handleFileUpload}
+                />
+              </div>
+
+              {isImporting && (
+                <div style={{ marginTop: '15px', color: '#10b981', fontWeight: 'bold' }}>
+                  <i className="fa-solid fa-spinner fa-spin"></i> Importando y encriptando...
+                </div>
+              )}
+            </div>
+            <div className="modal-footer">
+              <button className="btn-secondary" onClick={closeImportModal} disabled={isImporting}>Cancelar</button>
+            </div>
           </div>
         </div>
       )}
