@@ -52,12 +52,8 @@ export const PortalLayout = ({ areaConfig, areaContext, onBack, children, nombre
       }
     };
     fetchAsistencia();
-    window.addEventListener('storage', fetchAsistencia);
-    window.addEventListener('asistenciaActualizada', fetchAsistencia);
-    return () => {
-      window.removeEventListener('storage', fetchAsistencia);
-      window.removeEventListener('asistenciaActualizada', fetchAsistencia);
-    };
+    const intervalId = setInterval(fetchAsistencia, 15000);
+    return () => clearInterval(intervalId);
   }, [nombre]);
 
   const misTickets = useMemo(() => {
@@ -227,8 +223,7 @@ export const PortalLayout = ({ areaConfig, areaContext, onBack, children, nombre
                             ...currentDb[nombre],
                             accion: 'Fin de Turno'
                           });
-                          window.dispatchEvent(new Event('storage'));
-                          window.dispatchEvent(new Event('asistenciaActualizada'));
+                          setActiveAsistencia(null);
                           showToast('Jornada finalizada exitosamente.', 'success', 'check');
                         }
                       }

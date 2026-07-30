@@ -40,12 +40,8 @@ export const FormGH = () => {
       }
     };
     fetchAsistencia();
-    window.addEventListener('storage', fetchAsistencia);
-    window.addEventListener('asistenciaActualizada', fetchAsistencia);
-    return () => {
-      window.removeEventListener('storage', fetchAsistencia);
-      window.removeEventListener('asistenciaActualizada', fetchAsistencia);
-    };
+    const intervalId = setInterval(fetchAsistencia, 15000);
+    return () => clearInterval(intervalId);
   }, [nombre]);
 
   const [tipoSolicitud, setTipoSolicitud] = useState('');
@@ -175,8 +171,7 @@ export const FormGH = () => {
           ...asistenciaData,
           accion: 'Inicio de Turno'
         });
-        window.dispatchEvent(new Event('storage'));
-        window.dispatchEvent(new Event('asistenciaActualizada'));
+        setActiveReport({ tipoTramite, detalles: sanitizedDetalles });
       } else {
         const nuevoTicket = {
           id: newId,

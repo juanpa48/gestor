@@ -399,7 +399,7 @@ export const Gestion = () => {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                   <strong style={{ color: 'var(--navy)' }}><i className="fa-solid fa-list-check"></i> Detalles Específicos del Trámite</strong>
                   
-                  {ticketEdit.tipoSolicitud && (ticketEdit.tipoSolicitud.includes('Convenio') || ticketEdit.tipoSolicitud.includes('Auxilio Educativo')) && (
+                  {((ticketEdit.tipoSolicitud && (ticketEdit.tipoSolicitud.includes('Convenio') || ticketEdit.tipoSolicitud.includes('Auxilio Educativo'))) || (ticketEdit.solicitud && (ticketEdit.solicitud.includes('Convenio') || ticketEdit.solicitud.includes('Auxilio Educativo')))) && (
                     <button type="button" className="btn-primary" style={{ padding: '6px 12px', fontSize: '12px', background: 'var(--red)' }} onClick={() => setShowActa(true)}>
                       <i className="fa-solid fa-file-pdf"></i> Generar Acta PDF
                     </button>
@@ -714,10 +714,10 @@ export const Gestion = () => {
       )}
 
       {/* RENDER ACTA DE DEDUCCIÓN / BONO EDUCATIVO (PRINTABLE) */}
-      {showActa && ticketEdit && ticketEdit.tipoSolicitud && ticketEdit.tipoSolicitud.includes('Convenio') && (
+      {showActa && ticketEdit && ((ticketEdit.tipoSolicitud && ticketEdit.tipoSolicitud.includes('Convenio')) || (ticketEdit.solicitud && ticketEdit.solicitud.includes('Convenio'))) && (
         <ActaDeduccion ticket={ticketEdit} onClose={() => setShowActa(false)} />
       )}
-      {showActa && ticketEdit && ticketEdit.tipoSolicitud && ticketEdit.tipoSolicitud.includes('Auxilio Educativo') && (
+      {showActa && ticketEdit && ((ticketEdit.tipoSolicitud && ticketEdit.tipoSolicitud.includes('Auxilio Educativo')) || (ticketEdit.solicitud && ticketEdit.solicitud.includes('Auxilio Educativo'))) && (
         <ActaAuxilioPdf ticket={ticketEdit} onClose={() => setShowActa(false)} />
       )}
 

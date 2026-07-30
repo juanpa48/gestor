@@ -31,29 +31,12 @@ export const ReportesGH = () => {
       setAsistencias(db);
     };
     fetchAsistencia();
-    window.addEventListener('storage', fetchAsistencia);
-    window.addEventListener('asistenciaActualizada', fetchAsistencia);
-    return () => {
-      window.removeEventListener('storage', fetchAsistencia);
-      window.removeEventListener('asistenciaActualizada', fetchAsistencia);
-    };
+    fetchAsistencia();
+    const intervalId = setInterval(fetchAsistencia, 15000);
+    return () => clearInterval(intervalId);
   }, []);
 
-  const [userTick, setUserTick] = useState(0);
 
-  useEffect(() => {
-    const handleStorage = (e) => {
-      if (e.key === 'db_usuarios') setUserTick(t => t + 1);
-    };
-    const handleUpdate = () => setUserTick(t => t + 1);
-
-    window.addEventListener('storage', handleStorage);
-    window.addEventListener('usuariosActualizados', handleUpdate);
-    return () => {
-      window.removeEventListener('storage', handleStorage);
-      window.removeEventListener('usuariosActualizados', handleUpdate);
-    };
-  }, []);
 
   // Get users from API
   const [allUsers, setAllUsers] = useState([]);
@@ -67,7 +50,9 @@ export const ReportesGH = () => {
       }
     };
     fetchUsers();
-  }, [userTick]);
+    const intervalId = setInterval(fetchUsers, 60000);
+    return () => clearInterval(intervalId);
+  }, []);
 
   const [festivos, setFestivos] = useState([]);
   
@@ -167,8 +152,8 @@ export const ReportesGH = () => {
         accion: 'Asignación Manual por GH'
       });
       
-      window.dispatchEvent(new Event('storage'));
-      window.dispatchEvent(new Event('asistenciaActualizada'));
+      const updatedDb = await DbService.getAsistenciaDiaria();
+      setAsistencias(updatedDb);
       showToast(`Asistencia marcada para ${user.displayName} en ${location}`);
     } catch (error) {
       console.error(error);
