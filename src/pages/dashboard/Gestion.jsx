@@ -653,7 +653,7 @@ export const Gestion = () => {
               </div>
 
               <div className="form-group form-group-full">
-                <label className="form-label" style={{ color: 'var(--primary)' }}><i className="fa-solid fa-message"></i> Mensaje para el Solicitante (Visible en su portal)</label>
+                <label className="form-label" style={{ color: 'var(--primary)' }}><i className="fa-solid fa-message"></i> Respuesta de GH (Visible en el portal del empleado)</label>
                 <textarea className="form-input form-input-full" rows="2" placeholder="Ej: Aprobado / Denegado. Recuerda traer el soporte original mañana..." value={mensajeResolutor} onChange={(e) => setMensajeResolutor(e.target.value)}></textarea>
                 <small style={{ color: 'var(--text-muted)', display: 'block', marginTop: '4px' }}>Este mensaje le aparecerá directamente al colaborador en su historial de tickets recientes.</small>
               </div>
