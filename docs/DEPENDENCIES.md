@@ -113,6 +113,7 @@ flowchart TD
 - `DbService.js` interactúa con las llaves de tickets (`db_actividades_ge`, etc.) y gestiona los Festivos Globales (`db_festivos`) y las estampas de pausas dinámicas de los agentes.
 - `SettingsManager.js` controla las llaves de configuración global (`db_settings`) para nutrir dinámicamente los menús de trámites.
 - `AuthContext.jsx` controla dinámicamente `db_usuarios` con soporte para validación criptográfica (SHA-256).
+- **`exportHelpers.js`**: Utilidad compartida (`src/shared/utils/`) que envuelve la librería `xlsx` para orquestar la exportación dinámica aplanando estructuras anidadas y generando descargas nativas. Consumido por `AreaDatabase.jsx` y `Actividades.jsx`.
 
 ---
 

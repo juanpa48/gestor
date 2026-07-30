@@ -131,6 +131,7 @@ Responsabilidades:
 Responsabilidades:
 - Herramienta CRUD independiente para mantenimiento de `localStorage`.
 - Consumo dinámico de `useActiveArea` para aislar `responsables` y `actividades` por área.
+- **Motor de Exportación Avanzado:** Incluye un botón para descargar métricas que utiliza `xlsx` y `exportHelpers.js` para aplanar JSONs anidados y entregar archivos `.csv` listos para análisis de BI.
 - Ruta: `/database/:area` (fuera del DashboardLayout y restringida solo para admin_ti).
 
 ### 4.7 Configuración Global (`SettingsLayout.jsx` y Vistas Anidadas)
@@ -139,7 +140,7 @@ Responsabilidades:
 - `SettingsTramites`: Permite agregar/quitar tipos de solicitud y trámites dinámicamente (`db_settings`).
 - `SettingsSLA`: Configura los tiempos máximos de respuesta (Urgente, Alta, Media, Baja).
 - `SettingsFestivos`: Panel para gestión de días festivos que afectan al motor SLA global.
-- `SettingsUsuarios`: **Módulo de Administración de Cuentas** exclusivo para TI (`admin_ti`). Cuenta con protección de ruta, tabla unificada con pestañas (Resolutores vs Empleados), y formularios modales (desbloqueos, edición y reseteo de contraseñas).
+- `SettingsUsuarios`: **Módulo de Administración de Cuentas** exclusivo para TI (`admin_ti`). Cuenta con protección de ruta, tabla unificada con pestañas y **Motor de Importación Masiva**: Permite cargar `.xlsx` con cientos de usuarios, encriptando sus cédulas como contraseñas e impidiendo duplicados automáticamente.
 
 ### 4.8 Control de Personal Diario / Asistencia (`ReportesGH.jsx`)
 Responsabilidades:
