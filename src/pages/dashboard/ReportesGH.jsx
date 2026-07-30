@@ -44,7 +44,7 @@ export const ReportesGH = () => {
     const fetchUsers = async () => {
       try {
         const data = await apiClient('/usuarios');
-        setAllUsers(data.filter(u => u.role !== 'admin_ti'));
+        setAllUsers(data);
       } catch (error) {
         console.error('Error fetching users:', error);
       }
