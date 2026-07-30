@@ -719,11 +719,20 @@ app.get('/api/asistencia/historico', async (req, res) => {
 
 app.post('/api/asistencia/historico', async (req, res) => {
   try {
-    const { nombre, ubicacion, accion, fechaISO, detalles, timestamp } = req.body;
+    const { nombre, ubicacion, accion, fechaISO, detalles, timestamp, estado, fechaFinISO, fechaFinTimestamp } = req.body;
+    
+    const fullDetalles = {
+      ...(detalles || {}),
+      estado: estado || (accion === 'Inicio de Turno' ? 'Activo' : 'Resuelto'),
+      fechaInicioISO: req.body.fechaInicioISO || fechaISO,
+      fechaFinISO: fechaFinISO,
+      fechaFinTimestamp: fechaFinTimestamp
+    };
+
     await pool.query(
       `INSERT INTO asistencia_historico (nombre, ubicacion, accion, fecha_iso, detalles, timestamp)
        VALUES ($1, $2, $3, $4, $5, $6)`,
-      [nombre, ubicacion, accion, fechaISO, detalles ? JSON.stringify(detalles) : null, timestamp || Date.now()]
+      [nombre, ubicacion, accion, fechaISO || new Date().toISOString(), JSON.stringify(fullDetalles), timestamp || Date.now()]
     );
     res.json({ success: true });
   } catch (err) {

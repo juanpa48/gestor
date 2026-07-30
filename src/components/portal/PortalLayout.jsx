@@ -218,6 +218,7 @@ export const PortalLayout = ({ areaConfig, areaContext, onBack, children, nombre
                         if (currentDb[nombre]) {
                           currentDb[nombre].estado = 'Resuelto';
                           currentDb[nombre].fechaFinTimestamp = Date.now();
+                          currentDb[nombre].fechaFinISO = new Date().toISOString();
                           await DbService.saveAsistenciaDiaria(currentDb);
                           await DbService.registrarHistoricoAsistencia({
                             ...currentDb[nombre],

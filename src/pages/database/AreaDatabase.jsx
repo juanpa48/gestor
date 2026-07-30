@@ -248,24 +248,30 @@ export const AreaDatabase = () => {
           <table className="db-table list-table">
             <thead>
               <tr>
-                <th>Usuario</th>
                 <th>Nombre</th>
-                <th>Estado</th>
                 <th>Ubicación</th>
-                <th>Última Acción</th>
+                <th>Estado</th>
+                <th>Fecha ISO</th>
+                <th>Timestamp</th>
+                <th>Fecha Fin ISO</th>
+                <th>Fecha Fin Timestamp</th>
+                <th>Detalles</th>
               </tr>
             </thead>
             <tbody>
               {Object.keys(dbAsistencia).length === 0 ? (
-                <tr><td colSpan={5} className="empty-msg" style={{textAlign:'center'}}>Nadie ha reportado asistencia hoy.</td></tr>
+                <tr><td colSpan={8} className="empty-msg" style={{textAlign:'center'}}>Nadie ha reportado asistencia hoy.</td></tr>
               ) : (
                 Object.entries(dbAsistencia).map(([username, datos]) => (
                   <tr key={username}>
-                    <td>{username}</td>
                     <td>{datos.nombre || username}</td>
-                    <td>{datos.estado}</td>
-                    <td>{datos.ubicacion}</td>
-                    <td>{new Date(datos.timestamp).toLocaleTimeString()}</td>
+                    <td>{datos.ubicacion || '-'}</td>
+                    <td>{datos.estado || 'Activo'}</td>
+                    <td>{datos.fechaISO || '-'}</td>
+                    <td>{datos.timestamp || '-'}</td>
+                    <td>{datos.fechaFinISO || '-'}</td>
+                    <td>{datos.fechaFinTimestamp || '-'}</td>
+                    <td>{JSON.stringify(datos.detalles || {})}</td>
                   </tr>
                 ))
               )}
@@ -297,32 +303,38 @@ export const AreaDatabase = () => {
                 <th className="col-letter">D</th>
                 <th className="col-letter">E</th>
                 <th className="col-letter">F</th>
+                <th className="col-letter">G</th>
+                <th className="col-letter">H</th>
               </tr>
               <tr>
                 <th className="row-num" className="col-letter"></th>
                 <th>ID</th>
+                <th>Fecha Registro</th>
+                <th>Acción</th>
                 <th>Nombre</th>
                 <th>Ubicación</th>
-                <th>Acción</th>
-                <th>Fecha</th>
-                <th>Detalles (JSON)</th>
+                <th>Estado</th>
+                <th>Fecha Inicio ISO</th>
+                <th>Fecha Fin ISO</th>
               </tr>
             </thead>
             <tbody>
               {dbHistorico.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="empty-msg" style={{textAlign:'center'}}>No hay registros en el histórico de asistencia.</td>
+                  <td colSpan={9} className="empty-msg" style={{textAlign:'center'}}>No hay registros en el histórico de asistencia.</td>
                 </tr>
               ) : (
                 dbHistorico.map((row, idx) => (
                   <tr key={idx}>
                     <td className="row-num">{idx + 1}</td>
                     <td>{row.id}</td>
+                    <td>{row.fecha_iso}</td>
+                    <td>{row.accion}</td>
                     <td>{row.nombre}</td>
                     <td>{row.ubicacion}</td>
-                    <td>{row.accion}</td>
-                    <td>{row.fecha_iso}</td>
-                    <td>{JSON.stringify(row.detalles || {})}</td>
+                    <td>{row.detalles?.estado || (row.accion === 'Inicio de Turno' ? 'Activo' : 'Resuelto')}</td>
+                    <td>{row.detalles?.fechaInicioISO || (row.accion === 'Inicio de Turno' ? row.fecha_iso : '-')}</td>
+                    <td>{row.detalles?.fechaFinISO || (row.accion === 'Fin de Turno' ? row.fecha_iso : '-')}</td>
                   </tr>
                 ))
               )}
