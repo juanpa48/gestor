@@ -164,7 +164,9 @@ export const AreaDatabase = () => {
                     <td className="row-num">{index + 2}</td>
                     {exactCols.map(c => (
                       <td key={c.key}>
-                        {c.key === 'novedadNomina' ? (row[c.key] ? 'Sí' : 'No') : (row[c.key] || '')}
+                        {c.key === 'novedadNomina' 
+                           ? (row[c.key] ? 'Sí' : 'No') 
+                           : (typeof row[c.key] === 'object' && row[c.key] !== null ? JSON.stringify(row[c.key]) : (row[c.key] || ''))}
                       </td>
                     ))}
                   </tr>

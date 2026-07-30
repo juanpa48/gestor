@@ -818,21 +818,25 @@ app.put('/api/settings/:area', async (req, res) => {
 // ==========================================
 app.get('/api/notificaciones', async (req, res) => {
   try {
-    const result = await pool.query('SELECT datos FROM notificaciones WHERE id = 1');
-    if (result.rows.length === 0) {
-      return res.json([]);
+    await pool.query(`CREATE TABLE IF NOT EXISTS app_notificaciones (id INT PRIMARY KEY, datos JSONB, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);`);
+    const result = await pool.query('SELECT datos FROM app_notificaciones WHERE id = 1');
+    if (result.rows.length > 0) {
+      res.json(result.rows[0].datos);
+    } else {
+      res.json([]);
     }
-    res.json(result.rows[0].datos);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Error obteniendo notificaciones:', err);
+    res.status(500).json({ error: 'Error interno' });
   }
 });
 
 app.put('/api/notificaciones', async (req, res) => {
   try {
     const { notificaciones } = req.body;
+    await pool.query(`CREATE TABLE IF NOT EXISTS app_notificaciones (id INT PRIMARY KEY, datos JSONB, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);`);
     await pool.query(
-      `INSERT INTO notificaciones (id, datos, updated_at) 
+      `INSERT INTO app_notificaciones (id, datos, updated_at) 
        VALUES (1, $1, NOW())
        ON CONFLICT (id) DO UPDATE SET datos = $1, updated_at = NOW()`,
       [JSON.stringify(notificaciones || [])]
