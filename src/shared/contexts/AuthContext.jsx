@@ -36,7 +36,10 @@ export const AuthProvider = ({ children }) => {
                 nombreReal: freshUser.nombreReal,
                 role: freshUser.role,
                 area: freshUser.area,
-                cargo: freshUser.cargo || ''
+                cargo: freshUser.cargo || '',
+                cedula: freshUser.cedula || '',
+                celular: freshUser.celular || '',
+                jefeInmediato: freshUser.jefeInmediato || ''
               };
               setCurrentUser(userData);
               localStorage.setItem('session_token', JSON.stringify({

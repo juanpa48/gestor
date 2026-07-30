@@ -134,7 +134,10 @@ app.post('/api/auth/login', async (req, res) => {
       nombreReal: user.nombre_real,
       role: user.role,
       area: user.area,
-      cargo: user.cargo || ''
+      cargo: user.cargo || '',
+      cedula: user.cedula || '',
+      celular: user.celular || '',
+      jefeInmediato: user.jefe_inmediato || ''
     };
     
     res.json({ success: true, user: userData });
