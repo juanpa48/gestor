@@ -144,3 +144,42 @@ sudo systemctl restart nginx
 | Archivos adjuntos (uploads) | `/home/juan/gestor/backend/uploads/` |
 | Logs del backend | `pm2 logs gestor-backend` |
 | Proceso del backend | `pm2 info gestor-backend` |
+
+---
+
+## 🚀 Despliegue Automático (La forma más rápida)
+
+En lugar de hacer los pasos anteriores uno por uno, ahora tenemos un script que hace todo automáticamente.
+
+### 1. ¿Cómo usar el script?
+Solo abre tu terminal en Windows (PowerShell) dentro de la carpeta del proyecto y ejecuta:
+```powershell
+.\deploy.ps1
+```
+El script se encargará de:
+1. Construir el frontend (`npm run build`).
+2. Comprimir la carpeta en `.zip`.
+3. Enviar todo al servidor mediante `scp`.
+4. Conectarse a Ubuntu para descomprimir, copiar y reiniciar servicios.
+
+---
+
+## 🔑 Configurar Llaves SSH (Para no escribir contraseñas)
+
+Si usas el script desde otra computadora o servidor y no quieres estar escribiendo la contraseña a cada rato, debes configurar una Llave SSH. Esto vincula tu computadora actual con el servidor de forma segura.
+
+Ejecuta estos dos comandos en PowerShell **uno por uno**:
+
+**Paso 1: Crear la llave en tu Windows**
+```powershell
+ssh-keygen -t ed25519
+```
+*(Cuando te pregunte dónde guardarla o te pida "passphrase", **NO escribas nada**, solo presiona la tecla `Enter` 3 veces).*
+
+**Paso 2: Enviar la llave al servidor Ubuntu**
+```powershell
+Get-Content ~/.ssh/id_ed25519.pub | ssh juan@192.168.1.9 "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys"
+```
+*(Aquí te pedirá la contraseña del servidor por única y última vez).*
+
+¡Listo! A partir de ahora, cuando ejecutes `.\deploy.ps1` desde ese PC, entrará directo sin pedirte la clave.
