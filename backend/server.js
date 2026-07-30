@@ -643,7 +643,10 @@ app.put('/api/sistemas', async (req, res) => {
       
       const now = new Date();
       const cutoff = new Date(now);
-      cutoff.setHours(0, 0, 0, 0); // 12:00 AM
+      
+      // Ajustado a las 15:11 hora Colombia (COT es UTC-5, así que 15 + 5 = 20)
+      cutoff.setUTCHours(20, 11, 0, 0); 
+      
       if (now.getTime() < cutoff.getTime()) {
         cutoff.setDate(cutoff.getDate() - 1);
       }
@@ -659,8 +662,11 @@ app.put('/api/sistemas', async (req, res) => {
           // Limpieza de DB: Eliminar de la tabla diaria
           await pool.query('DELETE FROM asistencia_diaria WHERE fecha = $1', [username]);
           
-          // Registrar histórico automático si no estaba finalizado y no era de oficina
-          if (record.estado !== 'Resuelto' && record.ubicacion !== 'Oficina') {
+          // Registrar histórico automático si no estaba finalizado (INCLUYENDO OFICINA)
+          if (record.estado !== 'Resuelto') {
+            const fechaFin = new Date(cutoffTime);
+            const isoString = fechaFin.toISOString();
+
             await pool.query(
               `INSERT INTO asistencia_historico (nombre, ubicacion, accion, fecha_iso, detalles, timestamp)
                VALUES ($1, $2, $3, $4, $5, $6)`,
@@ -668,9 +674,15 @@ app.put('/api/sistemas', async (req, res) => {
                 record.nombre || username,
                 record.ubicacion,
                 'Fin de Turno (Automático)',
-                cutoff.toISOString(),
-                record.detalles ? JSON.stringify(record.detalles) : null,
-                Date.now()
+                isoString,
+                JSON.stringify({
+                    ...(record.detalles || {}),
+                    estado: 'Resuelto',
+                    fechaInicioISO: record.fechaISO || record.detalles?.fechaInicioISO,
+                    fechaFinISO: isoString,
+                    fechaFinTimestamp: cutoffTime
+                }),
+                cutoffTime
               ]
             );
           }
