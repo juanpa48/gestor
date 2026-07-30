@@ -13,14 +13,17 @@ Tu misión es ejecutar la migración del proyecto "Gestor" siguiendo ESTRICTAMEN
 **REGLAS DE ORO PARA ESTA SESIÓN:**
 1. **NO PUEDES** saltarte fases ni hacer todo al mismo tiempo. Trabajarás exclusivamente en una fase a la vez.
 2. **NO PUEDES** avanzar a la siguiente fase hasta que yo te diga explícitamente "Procede con la siguiente fase".
-3. Debes usar un archivo `task.md` en la raíz para ir marcando con `[x]` las tareas que vayas completando, de modo que ni tú ni yo perdamos el hilo.
+3. **CONTROL DE CONTEXTO:** El documento `MIGRATION_GUIDE.md` es enorme. Para no agotar tu ventana de contexto ni confundirte, **SÓLO lee a profundidad la fase en la que estamos trabajando actualmente**. Haz lecturas rápidas del resto solo si es estrictamente necesario.
+4. **PLANEACIÓN:** Antes de tirar una sola línea de código en cada fase, debes crear/actualizar un archivo `implementation_plan.md` con los pasos técnicos que vas a dar en esa fase específica y pedirme aprobación.
+5. Debes usar un archivo `task.md` en la raíz para ir marcando con `[x]` las tareas que vayas completando.
 
 **PASOS INICIALES (HAZ ESTO AHORA MISMO):**
-1. Lee detenidamente el archivo `docs/MIGRATION_GUIDE.md` para entender todo el contexto, el inventario actual, el esquema SQL (Fase 2), los endpoints (Fase 3), la refactorización frontend (Fase 4) y el despliegue (Fase 5).
-2. Lee los archivos de arquitectura en `docs/` (`ARCHITECTURE.md`, `TECHNICAL_SPECS.md`, etc.) si necesitas contexto adicional del proyecto.
-3. Analiza el `task.md` existente (o crea uno nuevo `task_migration.md`) basándote en las fases del `MIGRATION_GUIDE.md` para que podamos llevar el control de la ejecución del código.
-4. Cuando termines de leer todo, dame un resumen de 3 líneas confirmando que entendiste, dime qué herramienta o comando vas a usar para crear la base de datos, y **ESPERA** a que yo te dé la orden de iniciar a ejecutar la Fase 2 (Creación de BD).
+1. Abre y lee el archivo `docs/MIGRATION_GUIDE.md` de forma GENERAL para entender de qué va, pero detente a leer **a máxima profundidad SÓLO la Fase 2 (Esquema SQL)**.
+2. Lee los archivos de arquitectura en `docs/` (`ARCHITECTURE.md`, `TECHNICAL_SPECS.md`, etc.) solo si necesitas contexto general.
+3. Analiza el `task.md` existente (o crea uno nuevo `task_migration.md`) basándote en las fases del `MIGRATION_GUIDE.md`.
+4. Crea un `implementation_plan.md` detallando exclusivamente cómo vas a ejecutar la Fase 2 (Creación de BD).
+5. Cuando termines, dame un resumen de 3 líneas confirmando que estás listo, y **ESPERA** a que yo revise tu plan y te dé la orden de arrancar a programar la Fase 2.
 
-¡No escribas código de la migración todavía! Solo lee, prepárate, y avísame cuando estés listo para recibir órdenes.
+¡No escribas código de la migración todavía! Solo lee, crea el plan de la Fase 2, prepara el task, y avísame.
 
 **[HASTA AQUÍ]**
