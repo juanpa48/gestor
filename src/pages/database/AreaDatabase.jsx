@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useActiveArea } from '../../shared/contexts/ActiveAreaContext';
 import { useAuth, hashPassword } from '../../shared/contexts/AuthContext';
+import { downloadReport, getColumnsConfig } from '../../shared/utils/exportHelpers';
 import '../../shared/styles/themes/database-theme.css';
 
 export const AreaDatabase = () => {
@@ -68,35 +69,7 @@ export const AreaDatabase = () => {
     }
   };
 
-  let exactCols = [
-    { title: 'Fecha de Creación', key: 'fechaCreacion' },
-    { title: 'Solicitante', key: 'solicitante' },
-    { title: 'Cargo', key: 'cargo' },
-    { title: 'Solicitud del usuario', key: 'solicitud' },
-    { title: 'Tipo de Ticket', key: 'tipo' },
-    { title: 'Prioridad', key: 'prioridad' },
-    { title: 'Estado', key: 'estado' },
-    { title: 'Grupo de actividad', key: 'grupo' },
-    { title: 'Grupo', key: 'grupoExtra' },
-    { title: 'Fecha de Inicio', key: 'fechaInicio' },
-    { title: 'Fecha de Finalización', key: 'fechaFin' },
-    { title: 'Tiempo', key: 'tiempo' },
-    { title: 'Clasificacion', key: 'clasificacion' },
-    { title: 'Accion tenica', key: 'accion' },
-    { title: 'Fecha progamada', key: 'fechaProgramada' },
-    { title: 'Detalles (opcional)', key: 'detalles' },
-    { title: 'Responsable', key: 'responsable' },
-    { title: 'Fecha de Pausa (SLA)', key: 'fechaPausa' },
-    { title: 'Tiempo Pausado (ms)', key: 'tiempoPausadoTotal' }
-  ];
-
-  if (area === 'gh' || area === 'ge') {
-    exactCols = exactCols.filter(c => c.key !== 'tipo' && c.key !== 'prioridad');
-  }
-  
-  if (area === 'gh') {
-    exactCols.splice(exactCols.findIndex(c => c.key === 'estado') + 1, 0, { title: 'Novedad de Nómina', key: 'novedadNomina' });
-  }
+  const exactCols = getColumnsConfig(area);
 
   const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S'];
 
@@ -156,7 +129,27 @@ export const AreaDatabase = () => {
 
       {activeTab === 'actividades' && (
         <div className="db-table-container">
-          <button className="btn-refresh" onClick={refreshTickets}>Recargar Datos de Actividades</button>
+          <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
+            <button className="btn-refresh" onClick={refreshTickets}>
+              <i className="fa-solid fa-rotate-right"></i> Recargar Datos
+            </button>
+            <button 
+              className="btn-primary" 
+              onClick={() => downloadReport(actividades, exactCols, area, 'xlsx')}
+              style={{ background: '#10b981', borderColor: '#059669', color: '#fff' }}
+              title="Exportar base de datos a Excel (XLSX)"
+            >
+              <i className="fa-solid fa-file-excel"></i> Descargar a Excel (XLSX)
+            </button>
+            <button 
+              className="btn-primary" 
+              onClick={() => downloadReport(actividades, exactCols, area, 'csv')}
+              style={{ background: '#3b82f6', borderColor: '#2563eb', color: '#fff' }}
+              title="Exportar base de datos a CSV"
+            >
+              <i className="fa-solid fa-file-csv"></i> Descargar a Excel (CSV)
+            </button>
+          </div>
           
           <table className="db-table">
             <thead>

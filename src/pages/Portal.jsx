@@ -15,7 +15,7 @@ import { useAuth } from '../shared/contexts/AuthContext';
 export const Portal = () => {
   const { area } = useParams();
   const navigate = useNavigate();
-  const { currentUser } = useAuth();
+  const { currentUser, logout } = useAuth();
   
   // El nombre ahora es inmutable y viene de la sesión (preferimos el Nombre Real)
   const nombre = currentUser?.nombreReal || currentUser?.username || '';
@@ -28,12 +28,17 @@ export const Portal = () => {
   if (!area) {
     return (
       <div className="portal-container">
-        <header className="portal-header">
+        <header className="portal-header" style={{ position: 'relative' }}>
           <div className="logo-placeholder">
             <img src="/img/acyt.png" alt="Logo de Empresa" />
           </div>
-          <div className="header-title">
+          <div className="header-title" style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', margin: 0 }}>
             Portal de Autogestión
+          </div>
+          <div style={{ marginLeft: 'auto' }}>
+            <button className="btn-secondary" onClick={() => logout()} style={{ padding: '8px 16px', background: '#ef4444', border: '1px solid #dc2626', color: '#fff', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', boxShadow: '0 2px 4px rgba(220, 38, 38, 0.3)' }}>
+              <i className="fa-solid fa-arrow-right-from-bracket"></i> Salir
+            </button>
           </div>
         </header>
                 <div className="area-selector-container">

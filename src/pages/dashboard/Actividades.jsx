@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useActiveArea } from '../../shared/contexts/ActiveAreaContext';
 import { getAreaSettings } from '../../shared/services/SettingsManager';
 import { calculateSlaBadge, parseFechaCreacion, getSlaRemainingMs } from '../../shared/utils/timeHelpers';
+import { downloadReport, getColumnsConfig } from '../../shared/utils/exportHelpers';
 
 export const Actividades = () => {
   const { ctx, area } = useActiveArea();
@@ -197,6 +198,24 @@ export const Actividades = () => {
         <div className="filter-group">
           <button className="btn-clear-filters" id="btnLimpiarFiltros" onClick={clearFilters}>
             <i className="fa-solid fa-xmark"></i> Limpiar
+          </button>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'row', gap: '5px', alignItems: 'flex-end', paddingBottom: '3px' }}>
+          <button 
+            className="btn-primary" 
+            onClick={() => downloadReport(filteredActividades, getColumnsConfig(area), area, 'xlsx')}
+            style={{ background: '#10b981', borderColor: '#059669', color: '#fff', height: '40px', padding: '0 12px' }}
+            title="Exportar a Excel (XLSX)"
+          >
+            <i className="fa-solid fa-file-excel"></i> XLSX
+          </button>
+          <button 
+            className="btn-primary" 
+            onClick={() => downloadReport(filteredActividades, getColumnsConfig(area), area, 'csv')}
+            style={{ background: '#3b82f6', borderColor: '#2563eb', color: '#fff', height: '40px', padding: '0 12px' }}
+            title="Exportar a CSV"
+          >
+            <i className="fa-solid fa-file-csv"></i> CSV
           </button>
         </div>
       </div>
