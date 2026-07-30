@@ -4,6 +4,7 @@ import { getAreaSettings } from '../../shared/services/SettingsManager';
 import { calculateSlaBadge } from '../../shared/utils/timeHelpers';
 import { ActaDeduccion } from './modals/ActaDeduccion';
 import { ActaAuxilioPdf } from './modals/ActaAuxilioPdf';
+import { UploadService } from '../../shared/services/UploadService';
 
 export const Gestion = () => {
   const { ctx, config, area } = useActiveArea();
@@ -34,6 +35,7 @@ export const Gestion = () => {
   });
   const [archivosVistos, setArchivosVistos] = useState(new Set());
   const [showActa, setShowActa] = useState(false);
+  const [certificadoFile, setCertificadoFile] = useState(null);
 
   // Escuchar el evento de busqueda global del Topbar
   useEffect(() => {
@@ -120,6 +122,7 @@ export const Gestion = () => {
       adjuntos: t.adjuntos || []
     });
     setArchivosVistos(new Set()); // Resetear vistos al abrir nuevo ticket
+    setCertificadoFile(null);
     setModalOpen(true);
   };
 
@@ -147,6 +150,16 @@ export const Gestion = () => {
   const saveEdits = async () => {
     setModalLoading(true);
     try {
+      let finalDetalles = ticketEdit.detalles;
+      if (certificadoFile) {
+        const urls = await UploadService.uploadFiles([certificadoFile], ticketEdit.id, area);
+        if (urls && urls.length > 0) {
+          const parsedDetalles = typeof finalDetalles === 'string' ? JSON.parse(finalDetalles || '{}') : finalDetalles || {};
+          parsedDetalles.certificadoResolutor = urls[0];
+          finalDetalles = parsedDetalles;
+        }
+      }
+
       await updateTicket(ticketEdit.id, {
         estado: ticketEdit.estado,
         responsable: ticketEdit.responsable,
@@ -155,7 +168,7 @@ export const Gestion = () => {
         grupoExtra: ticketEdit.clasificacion,
         clasificacion: ticketEdit.clasificacion,
         novedadNomina: ticketEdit.novedadNomina,
-        detalles: ticketEdit.detalles,
+        detalles: finalDetalles,
         fechaProgramada: ticketEdit.fechaProgramada,
         accion: ticketEdit.accion
       });
@@ -608,7 +621,22 @@ export const Gestion = () => {
                 </div>
               )}
 
-              <div className="form-group">
+              {ticketEdit.tipoSolicitud === 'Certificado Laboral' && (
+                <div className="form-group form-group-full" style={{ background: 'rgba(34, 197, 94, 0.05)', padding: '15px', borderRadius: '8px', border: '1px solid rgba(34, 197, 94, 0.2)', marginTop: '10px' }}>
+                  <label className="form-label" style={{ marginBottom: '10px', color: 'var(--green)' }}><i className="fa-solid fa-file-pdf"></i> Adjuntar Certificado Laboral (Generado)</label>
+                  <input 
+                    type="file" 
+                    accept=".pdf"
+                    className="glass-input" 
+                    onChange={(e) => setCertificadoFile(e.target.files[0])}
+                  />
+                  <small style={{ color: 'var(--text-muted)', display: 'block', marginTop: '5px' }}>
+                    * Al subir este documento, el solicitante podrá descargarlo desde su portal de tickets recientes.
+                  </small>
+                </div>
+              )}
+
+              <div className="form-group form-group-full">
                 <label className="form-label">Fecha Programada</label>
                 <input type="date" id="m_fechaProgramada" className="form-input form-input-full" value={ticketEdit.fechaProgramada} onChange={handleModalChange} />
               </div>

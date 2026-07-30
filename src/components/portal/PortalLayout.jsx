@@ -280,6 +280,16 @@ export const PortalLayout = ({ areaConfig, areaContext, onBack, children, nombre
                             <i className="fa-solid fa-file-pdf" style={{ color: '#ef4444' }}></i> Ver Acta
                           </button>
                         )}
+                        {t.tipoSolicitud === 'Certificado Laboral' && t.detalles?.certificadoResolutor && (
+                          <button 
+                            className="btn-secondary" 
+                            style={{ fontSize: '11px', padding: '3px 8px', margin: 0, borderRadius: '4px', cursor: 'pointer', borderColor: 'var(--primary)', color: 'var(--primary)' }}
+                            title="Descargar Certificado Laboral"
+                            onClick={(e) => { e.stopPropagation(); window.open(t.detalles.certificadoResolutor, '_blank'); }}
+                          >
+                            <i className="fa-solid fa-file-arrow-down"></i> Descargar
+                          </button>
+                        )}
                       </div>
                     </div>
                   );
