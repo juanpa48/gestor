@@ -300,10 +300,10 @@ app.post('/api/tickets', async (req, res) => {
         cargo_solicitante, fecha_creacion, fecha_iso, fecha_inicio, fecha_inicio_timestamp,
         fecha_fin, fecha_fin_timestamp, fecha_pausa, fecha_cierre_timestamp, tiempo,
         tiempo_pausado_total, agent_pause_start, fecha_permiso, hora_salida, hora_llegada,
-        adjuntos, nombre, area, detalles, grupo_extra
+        adjuntos, nombre, area, detalles, grupo_extra, novedad_nomina
       ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
-        $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34
+        $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35
       ) RETURNING *`,
       [
         codigo, t.areaKey, t.solicitante, t.solicitud, t.descripcion,
@@ -318,7 +318,7 @@ app.post('/api/tickets', async (req, res) => {
         t.fechaPermiso, t.horaSalida, t.horaLlegada,
         t.adjuntos ? JSON.stringify(t.adjuntos) : null,
         t.nombre || t.solicitante, t.area || t.tipoSolicitud || 'General',
-        t.detalles ? JSON.stringify(t.detalles) : null, t.grupoExtra || null
+        t.detalles ? JSON.stringify(t.detalles) : null, t.grupoExtra || null, t.novedadNomina || false
       ]
     );
     
@@ -342,8 +342,8 @@ app.put('/api/tickets/:codigo', async (req, res) => {
         fecha_inicio = $11, fecha_inicio_timestamp = $12, fecha_fin = $13, fecha_fin_timestamp = $14,
         fecha_pausa = $15, fecha_cierre_timestamp = $16, tiempo = $17, tiempo_pausado_total = $18,
         agent_pause_start = $19, fecha_permiso = $20, hora_salida = $21, hora_llegada = $22,
-        adjuntos = $23, nombre = $24, area = $25, empresa = $26, nit = $27, cargo_solicitante = $28, detalles = $29, grupo_extra = $30
-       WHERE codigo = $31 RETURNING *`,
+        adjuntos = $23, nombre = $24, area = $25, empresa = $26, nit = $27, cargo_solicitante = $28, detalles = $29, grupo_extra = $30, novedad_nomina = $31
+       WHERE codigo = $32 RETURNING *`,
       [
         t.solicitante, t.solicitud, t.descripcion, t.estado, t.prioridad,
         t.tipo, t.tipoSolicitud, t.clasificacion, t.responsable, t.accion,
@@ -352,7 +352,7 @@ app.put('/api/tickets/:codigo', async (req, res) => {
         t.fechaCierreTimestamp, t.tiempo, t.tiempoPausadoTotal,
         t.agentPauseStart, t.fechaPermiso, t.horaSalida, t.horaLlegada,
         t.adjuntos ? JSON.stringify(t.adjuntos) : null,
-        t.nombre, t.area, t.empresa, t.nit, t.cargoSolicitante, t.detalles ? JSON.stringify(t.detalles) : null, t.grupoExtra || null,
+        t.nombre, t.area, t.empresa, t.nit, t.cargoSolicitante, t.detalles ? JSON.stringify(t.detalles) : null, t.grupoExtra || null, t.novedadNomina || false,
         codigo
       ]
     );
@@ -380,13 +380,17 @@ app.put('/api/tickets/bulk/:area_key', async (req, res) => {
             estado = $1, prioridad = $2, responsable = $3, accion = $4,
             fecha_inicio = $5, fecha_inicio_timestamp = $6, fecha_fin = $7,
             fecha_fin_timestamp = $8, fecha_pausa = $9, fecha_cierre_timestamp = $10,
-            tiempo = $11, tiempo_pausado_total = $12, agent_pause_start = $13
-          WHERE codigo = $14 AND area_key = $15`,
+            tiempo = $11, tiempo_pausado_total = $12, agent_pause_start = $13,
+            novedad_nomina = $14, detalles = $15, grupo_extra = $16,
+            clasificacion = $17, tipo_solicitud = $18
+          WHERE codigo = $19 AND area_key = $20`,
           [
             t.estado, t.prioridad, t.responsable, t.accion,
             t.fechaInicio, t.fechaInicioTimestamp, t.fechaFin,
             t.fechaFinTimestamp, t.fechaPausa || null, t.fechaCierreTimestamp,
             t.tiempo, t.tiempoPausadoTotal || 0, t.agentPauseStart || null,
+            t.novedadNomina || false, t.detalles ? JSON.stringify(t.detalles) : null, t.grupoExtra || null,
+            t.clasificacion || null, t.tipoSolicitud || null,
             t.id, area_key
           ]
         );
@@ -943,7 +947,8 @@ function mapTicketFromDB(row) {
     nombre: row.nombre,
     area: row.area,
     detalles: row.detalles ? (typeof row.detalles === 'string' ? JSON.parse(row.detalles) : row.detalles) : null,
-    grupoExtra: row.grupo_extra
+    grupoExtra: row.grupo_extra,
+    novedadNomina: row.novedad_nomina || false
   };
 }
 

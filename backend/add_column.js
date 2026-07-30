@@ -1,0 +1,1 @@
+const pool = require('./db/pool'); (async () => { try { await pool.query('ALTER TABLE tickets ADD COLUMN IF NOT EXISTS novedad_nomina BOOLEAN DEFAULT FALSE;'); console.log('Columna agregada.'); } catch(e) { console.error(e); } finally { pool.end(); } })();
