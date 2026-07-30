@@ -89,18 +89,22 @@ export const AreaDatabase = () => {
 
   const [rawSolicitantes, setRawSolicitantes] = useState([]);
   const [dbHistorico, setDbHistorico] = useState([]);
+  const [dbAsistencia, setDbAsistencia] = useState({});
 
-  const loadHistorico = async () => {
+  const loadAsistencias = async () => {
     if (area === 'gh') {
       const { DbService } = await import('../../shared/services/DbService');
       const historico = await DbService.getHistoricoAsistencia();
       setDbHistorico(Array.isArray(historico) ? historico : []);
+      
+      const asistencia = await DbService.getAsistenciaDiaria();
+      setDbAsistencia(asistencia || {});
     }
   };
 
   useEffect(() => {
     loadSolicitantes();
-    loadHistorico();
+    loadAsistencias();
   }, [area]);
 
   return (
@@ -130,7 +134,10 @@ export const AreaDatabase = () => {
         <button className={`db-tab-btn ${activeTab === 'actividades' ? 'active' : ''}`} onClick={() => setActiveTab('actividades')}>Actividades</button>
         <button className={`db-tab-btn ${activeTab === 'solicitantes' ? 'active' : ''}`} onClick={() => setActiveTab('solicitantes')}>Solicitantes</button>
         {area === 'gh' && (
-          <button className={`db-tab-btn ${activeTab === 'historico_asistencia' ? 'active' : ''}`} onClick={() => setActiveTab('historico_asistencia')}>Histórico de Asistencia</button>
+          <>
+            <button className={`db-tab-btn ${activeTab === 'asistencia' ? 'active' : ''}`} onClick={() => setActiveTab('asistencia')}>Asistencia en Vivo (Hoy)</button>
+            <button className={`db-tab-btn ${activeTab === 'historico_asistencia' ? 'active' : ''}`} onClick={() => setActiveTab('historico_asistencia')}>Histórico de Asistencia</button>
+          </>
         )}
       </div>
 
@@ -233,10 +240,44 @@ export const AreaDatabase = () => {
           </div>
         )}
 
+      {area === 'gh' && activeTab === 'asistencia' && (
+        <div className="db-table-container">
+          <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
+            <button className="btn-refresh" onClick={loadAsistencias}>Recargar Asistencia</button>
+          </div>
+          <table className="db-table list-table">
+            <thead>
+              <tr>
+                <th>Usuario</th>
+                <th>Nombre</th>
+                <th>Estado</th>
+                <th>Ubicación</th>
+                <th>Última Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.keys(dbAsistencia).length === 0 ? (
+                <tr><td colSpan={5} className="empty-msg" style={{textAlign:'center'}}>Nadie ha reportado asistencia hoy.</td></tr>
+              ) : (
+                Object.entries(dbAsistencia).map(([username, datos]) => (
+                  <tr key={username}>
+                    <td>{username}</td>
+                    <td>{datos.nombre || username}</td>
+                    <td>{datos.estado}</td>
+                    <td>{datos.ubicacion}</td>
+                    <td>{new Date(datos.timestamp).toLocaleTimeString()}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+
       {area === 'gh' && activeTab === 'historico_asistencia' && (
         <div className="db-table-container">
           <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
-            <button className="btn-refresh" onClick={loadHistorico}>Recargar Histórico</button>
+            <button className="btn-refresh" onClick={loadAsistencias}>Recargar Histórico</button>
             <button className="btn-secondary" onClick={() => downloadReport(dbHistorico, [
               { title: 'ID', key: 'id' },
               { title: 'Nombre', key: 'nombre' },
