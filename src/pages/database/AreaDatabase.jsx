@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useActiveArea } from '../../shared/contexts/ActiveAreaContext';
-import { useAuth, hashPassword } from '../../shared/contexts/AuthContext';
-import { downloadReport, getColumnsConfig } from '../../shared/utils/exportHelpers';
+import { useAuth } from '../../shared/contexts/AuthContext';
 import '../../shared/styles/themes/database-theme.css';
+import { downloadReport, getColumnsConfig } from '../../shared/utils/exportHelpers';
 
+import { apiClient } from '../../shared/services/api';
 export const AreaDatabase = () => {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
@@ -33,39 +34,52 @@ export const AreaDatabase = () => {
       window.alert('El nombre real y el usuario son obligatorios.');
       return;
     }
-    const users = JSON.parse(localStorage.getItem('db_usuarios')) || [];
-    if (users.some(u => u.username === newSoliUsername.trim())) {
-      window.alert('Este usuario ya existe.');
-      return;
+    try {
+      const data = await apiClient('/usuarios', {
+        method: 'POST',
+        body: JSON.stringify({
+          codigo: `U-${String(rawSolicitantes.length + 10).padStart(2, '0')}`,
+          username: newSoliUsername.trim(),
+          nombreReal: newSoliNombreReal.trim(),
+          password: '12345',
+          role: 'solicitante',
+          cargo: newSoliCargo.trim() || 'Empleado'
+        })
+      });
+      if (!data.success) {
+        window.alert(data.message || 'Error al crear usuario.');
+        return;
+      }
+      await loadSolicitantes();
+      setNewSoliNombreReal('');
+      setNewSoliUsername('');
+      setNewSoliCargo('');
+      window.alert(`Empleado creado. Contraseña por defecto: 12345`);
+    } catch (error) {
+      console.error('Error creando solicitante:', error);
+      window.alert('Error de conexión con el servidor.');
     }
-    const empHash = await hashPassword('12345');
-    const newUser = {
-      id: `U-${String(users.length + 1).padStart(2, '0')}`,
-      username: newSoliUsername.trim(),
-      nombreReal: newSoliNombreReal.trim(),
-      passwordHash: empHash,
-      role: 'solicitante',
-      cargo: newSoliCargo.trim() || 'Empleado',
-      bloqueado: false,
-      intentosFallidos: 0
-    };
-    users.push(newUser);
-    localStorage.setItem('db_usuarios', JSON.stringify(users));
-    setRawSolicitantes(users.filter(u => u.role === 'solicitante'));
-    setNewSoliNombreReal('');
-    setNewSoliUsername('');
-    setNewSoliCargo('');
-    window.alert(`Empleado creado. Contraseña por defecto: 12345`);
   };
 
 
 
   const handleDeleteSoli = async (username) => {
     if (window.confirm('¿Eliminar este registro de usuario permanentemente?')) {
-      let users = JSON.parse(localStorage.getItem('db_usuarios')) || [];
-      users = users.filter(u => u.username !== username);
-      localStorage.setItem('db_usuarios', JSON.stringify(users));
+      try {
+        await apiClient(`/usuarios/${username}`, { method: 'DELETE' });
+        await loadSolicitantes();
+      } catch (error) {
+        console.error('Error eliminando solicitante:', error);
+      }
+    }
+  };
+
+  const loadSolicitantes = async () => {
+    try {
+      const users = await apiClient('/usuarios');
       setRawSolicitantes(users.filter(u => u.role === 'solicitante'));
+    } catch (error) {
+      console.error('Error cargando solicitantes:', error);
     }
   };
 
@@ -74,23 +88,19 @@ export const AreaDatabase = () => {
   const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S'];
 
   const [rawSolicitantes, setRawSolicitantes] = useState([]);
-  const [dbAsistencia, setDbAsistencia] = useState([]);
   const [dbHistorico, setDbHistorico] = useState([]);
 
-  const loadData = () => {
-    const users = JSON.parse(localStorage.getItem('db_usuarios')) || [];
-    setRawSolicitantes(users.filter(u => u.role === 'solicitante'));
-    
+  const loadHistorico = async () => {
     if (area === 'gh') {
-      const asistencia = JSON.parse(localStorage.getItem('db_asistencia_diaria')) || {};
-      setDbAsistencia(Object.values(asistencia));
-      const historico = JSON.parse(localStorage.getItem('db_historico_asistencia')) || [];
-      setDbHistorico(historico);
+      const { DbService } = await import('../../shared/services/DbService');
+      const historico = await DbService.getHistoricoAsistencia();
+      setDbHistorico(Array.isArray(historico) ? historico : []);
     }
   };
 
   useEffect(() => {
-    loadData();
+    loadSolicitantes();
+    loadHistorico();
   }, [area]);
 
   return (
@@ -98,7 +108,7 @@ export const AreaDatabase = () => {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <div>
           <h1 style={{ margin: 0 }}>Base de Datos Local - {config.nombre}</h1>
-          <p style={{ margin: 0 }}>Vista de datos en <code>localStorage</code> (Modo SuperAdmin).</p>
+          <p style={{ margin: 0 }}>Vista de datos en <code>PostgreSQL</code> (Modo SuperAdmin).</p>
         </div>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
           <div className="btn-group" style={{ display: 'flex', gap: '5px', background: 'rgba(255,255,255,0.05)', padding: '5px', borderRadius: '8px' }}>
@@ -120,35 +130,16 @@ export const AreaDatabase = () => {
         <button className={`db-tab-btn ${activeTab === 'actividades' ? 'active' : ''}`} onClick={() => setActiveTab('actividades')}>Actividades</button>
         <button className={`db-tab-btn ${activeTab === 'solicitantes' ? 'active' : ''}`} onClick={() => setActiveTab('solicitantes')}>Solicitantes</button>
         {area === 'gh' && (
-          <>
-            <button className={`db-tab-btn ${activeTab === 'asistencia_diaria' ? 'active' : ''}`} onClick={() => setActiveTab('asistencia_diaria')}>Asistencia Diaria (En Vivo)</button>
-            <button className={`db-tab-btn ${activeTab === 'historico_asistencia' ? 'active' : ''}`} onClick={() => setActiveTab('historico_asistencia')}>Histórico de Asistencia</button>
-          </>
+          <button className={`db-tab-btn ${activeTab === 'historico_asistencia' ? 'active' : ''}`} onClick={() => setActiveTab('historico_asistencia')}>Histórico de Asistencia</button>
         )}
       </div>
 
       {activeTab === 'actividades' && (
         <div className="db-table-container">
           <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
-            <button className="btn-refresh" onClick={refreshTickets}>
-              <i className="fa-solid fa-rotate-right"></i> Recargar Datos
-            </button>
-            <button 
-              className="btn-primary" 
-              onClick={() => downloadReport(actividades, exactCols, area, 'xlsx')}
-              style={{ background: '#10b981', borderColor: '#059669', color: '#fff' }}
-              title="Exportar base de datos a Excel (XLSX)"
-            >
-              <i className="fa-solid fa-file-excel"></i> Descargar a Excel (XLSX)
-            </button>
-            <button 
-              className="btn-primary" 
-              onClick={() => downloadReport(actividades, exactCols, area, 'csv')}
-              style={{ background: '#3b82f6', borderColor: '#2563eb', color: '#fff' }}
-              title="Exportar base de datos a CSV"
-            >
-              <i className="fa-solid fa-file-csv"></i> Descargar a Excel (CSV)
-            </button>
+            <button className="btn-refresh" onClick={refreshTickets}>Recargar Datos de Actividades</button>
+            <button className="btn-secondary" onClick={() => downloadReport(actividades, exactCols, area, 'xlsx')} style={{ padding: '6px 12px', background: 'var(--blue)', color: 'white', border: 'none' }}>Descargar a Excel (XLSX)</button>
+            <button className="btn-secondary" onClick={() => downloadReport(actividades, exactCols, area, 'csv')} style={{ padding: '6px 12px' }}>Descargar a Excel (CSV)</button>
           </div>
           
           <table className="db-table">
@@ -173,7 +164,7 @@ export const AreaDatabase = () => {
                     <td className="row-num">{index + 2}</td>
                     {exactCols.map(c => (
                       <td key={c.key}>
-                        {c.key === 'novedadNomina' ? (row[c.key] ? 'Sí' : 'No') : (typeof row[c.key] === 'object' && row[c.key] !== null ? JSON.stringify(row[c.key]) : (row[c.key] || ''))}
+                        {c.key === 'novedadNomina' ? (row[c.key] ? 'Sí' : 'No') : (row[c.key] || '')}
                       </td>
                     ))}
                   </tr>
@@ -237,81 +228,58 @@ export const AreaDatabase = () => {
               )}
             </tbody>
           </table>
-        </div>
-      )}
-
-      {area === 'gh' && activeTab === 'asistencia_diaria' && (
-        <div className="db-table-container">
-          <button className="btn-refresh" onClick={loadData}>Recargar Datos (db_asistencia_diaria)</button>
-          <table className="db-table list-table">
-            <thead>
-              <tr>
-                <th className="row-num"></th>
-                <th>Nombre</th>
-                <th>Ubicación</th>
-                <th>Estado</th>
-                <th>Fecha ISO</th>
-                <th>Timestamp</th>
-                <th>Fecha Fin ISO</th>
-                <th>Fecha Fin Timestamp</th>
-                <th>Detalles</th>
-              </tr>
-            </thead>
-            <tbody>
-              {dbAsistencia.length === 0 ? (
-                <tr><td colSpan={9} className="empty-msg" style={{textAlign:'center'}}>No hay registros de asistencia en vivo hoy.</td></tr>
-              ) : (
-                dbAsistencia.map((row, idx) => (
-                  <tr key={row.nombre}>
-                    <td className="row-num">{idx + 2}</td>
-                    <td>{row.nombre}</td>
-                    <td>{row.ubicacion}</td>
-                    <td>{row.estado || 'Activo'}</td>
-                    <td>{row.fechaISO}</td>
-                    <td>{row.timestamp}</td>
-                    <td>{row.fechaFinISO || ''}</td>
-                    <td>{row.fechaFinTimestamp || ''}</td>
-                    <td>{row.detalles ? JSON.stringify(row.detalles) : ''}</td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
+          </div>
+        )}
 
       {area === 'gh' && activeTab === 'historico_asistencia' && (
         <div className="db-table-container">
-          <button className="btn-refresh" onClick={loadData}>Recargar Datos (db_historico_asistencia)</button>
-          <table className="db-table list-table">
+          <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
+            <button className="btn-refresh" onClick={loadHistorico}>Recargar Histórico</button>
+            <button className="btn-secondary" onClick={() => downloadReport(dbHistorico, [
+              { title: 'ID', key: 'id' },
+              { title: 'Nombre', key: 'nombre' },
+              { title: 'Ubicación', key: 'ubicacion' },
+              { title: 'Acción', key: 'accion' },
+              { title: 'Fecha (ISO)', key: 'fecha_iso' },
+              { title: 'Detalles (JSON)', key: 'detalles' }
+            ], area, 'xlsx')} style={{ padding: '6px 12px', background: 'var(--blue)', color: 'white', border: 'none' }}>Descargar a Excel (XLSX)</button>
+          </div>
+          <table className="db-table">
             <thead>
               <tr>
                 <th className="row-num"></th>
+                <th className="col-letter">A</th>
+                <th className="col-letter">B</th>
+                <th className="col-letter">C</th>
+                <th className="col-letter">D</th>
+                <th className="col-letter">E</th>
+                <th className="col-letter">F</th>
+              </tr>
+              <tr>
+                <th className="row-num" className="col-letter"></th>
                 <th>ID</th>
-                <th>Fecha Registro</th>
-                <th>Acción</th>
                 <th>Nombre</th>
                 <th>Ubicación</th>
-                <th>Estado</th>
-                <th>Fecha Inicio ISO</th>
-                <th>Fecha Fin ISO</th>
+                <th>Acción</th>
+                <th>Fecha</th>
+                <th>Detalles (JSON)</th>
               </tr>
             </thead>
             <tbody>
               {dbHistorico.length === 0 ? (
-                <tr><td colSpan={9} className="empty-msg" style={{textAlign:'center'}}>No hay historial registrado.</td></tr>
+                <tr>
+                  <td colSpan={7} className="empty-msg" style={{textAlign:'center'}}>No hay registros en el histórico de asistencia.</td>
+                </tr>
               ) : (
                 dbHistorico.map((row, idx) => (
-                  <tr key={row.id || idx}>
-                    <td className="row-num">{idx + 2}</td>
+                  <tr key={idx}>
+                    <td className="row-num">{idx + 1}</td>
                     <td>{row.id}</td>
-                    <td>{row.fechaRegistro}</td>
-                    <td><strong>{row.accion}</strong></td>
                     <td>{row.nombre}</td>
                     <td>{row.ubicacion}</td>
-                    <td>{row.estado || 'Activo'}</td>
-                    <td>{row.fechaISO}</td>
-                    <td>{row.fechaFinISO || ''}</td>
+                    <td>{row.accion}</td>
+                    <td>{row.fecha_iso}</td>
+                    <td>{JSON.stringify(row.detalles || {})}</td>
                   </tr>
                 ))
               )}
@@ -319,8 +287,7 @@ export const AreaDatabase = () => {
           </table>
         </div>
       )}
+
     </div>
   );
 };
-
-

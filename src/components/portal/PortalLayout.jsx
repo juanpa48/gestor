@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../shared/contexts/AuthContext';
 import { ActaDeduccion } from '../../pages/dashboard/modals/ActaDeduccion';
 import { ActaAuxilioPdf } from '../../pages/dashboard/modals/ActaAuxilioPdf';
+import { DbService } from '../../shared/services/DbService';
+import { apiClient } from '../../shared/services/api';
 
 export const PortalLayout = ({ areaConfig, areaContext, onBack, children, nombre, setNombre }) => {
   const { actividades, solicitantes, responsables, updateTicket } = areaContext();
@@ -10,19 +12,20 @@ export const PortalLayout = ({ areaConfig, areaContext, onBack, children, nombre
   const [personalTI, setPersonalTI] = useState({});
   const [actaTicket, setActaTicket] = useState(null);
   const [activeAsistencia, setActiveAsistencia] = useState(null);
-  // Sync systems & IT staff from localStorage
+  // Sync systems & IT staff using Polling (every 15s)
   useEffect(() => {
-    const handleStorage = () => {
+    const fetchSysAndStaff = async () => {
       try {
-        const sys = JSON.parse(localStorage.getItem('db_sistemas') || '{}');
-        setSistemas(sys);
-        const stf = JSON.parse(localStorage.getItem('db_estado_personal') || '{}');
-        setPersonalTI(stf);
+        const sysData = await apiClient('/sistemas');
+        if (sysData) setSistemas(sysData);
+        
+        const stfData = await apiClient('/estado-personal');
+        if (stfData) setPersonalTI(stfData);
       } catch (e) { }
     };
-    handleStorage();
-    window.addEventListener('storage', handleStorage);
-    return () => window.removeEventListener('storage', handleStorage);
+    fetchSysAndStaff();
+    const intervalId = setInterval(fetchSysAndStaff, 15000);
+    return () => clearInterval(intervalId);
   }, []);
 
   useEffect(() => {
@@ -34,7 +37,15 @@ export const PortalLayout = ({ areaConfig, areaContext, onBack, children, nombre
       const { DbService } = await import('../../shared/services/DbService.js');
       const db = await DbService.getAsistenciaDiaria();
       const miAsistencia = db[nombre];
-      if (miAsistencia) {
+      
+      const now = new Date();
+      const cutoff = new Date(now);
+      cutoff.setHours(0, 0, 0, 0);
+      if (now.getTime() < cutoff.getTime()) {
+        cutoff.setDate(cutoff.getDate() - 1);
+      }
+
+      if (miAsistencia && miAsistencia.timestamp >= cutoff.getTime()) {
         setActiveAsistencia(miAsistencia);
       } else {
         setActiveAsistencia(null);
@@ -193,42 +204,41 @@ export const PortalLayout = ({ areaConfig, areaContext, onBack, children, nombre
           </div>
           
           {activeAsistencia && (
-            <div style={{ background: activeAsistencia.estado === 'Resuelto' ? 'rgba(34, 197, 94, 0.1)' : 'rgba(34, 197, 94, 0.1)', border: `1px solid ${activeAsistencia.estado === 'Resuelto' ? '#16a34a' : '#22c55e'}`, borderRadius: '8px', padding: '12px', marginBottom: '15px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#16a34a', fontWeight: 'bold' }}>
-                <i className={`fa-solid ${activeAsistencia.estado === 'Resuelto' ? 'fa-check-circle' : 'fa-map-location-dot'}`}></i>
-                <span>{activeAsistencia.estado === 'Resuelto' ? 'Jornada finalizada: ' : 'Actualmente en turno: '} {activeAsistencia.ubicacion}</span>
-              </div>
-              {activeAsistencia.estado !== 'Resuelto' && (
-                <button 
-                  className="btn-secondary" 
-                  style={{ fontSize: '12px', padding: '6px 12px', margin: 0, borderRadius: '4px', cursor: 'pointer', background: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5', fontWeight: 'bold', alignSelf: 'flex-start' }}
-                  title="Registrar fin de su jornada"
-                  onClick={async (e) => { 
-                    e.stopPropagation(); 
-                    if (window.confirm('¿Está seguro de que desea marcar el FIN de su jornada?')) {
-                      const { DbService } = await import('../../shared/services/DbService.js');
-                      const currentDb = await DbService.getAsistenciaDiaria();
-                      if (currentDb[nombre]) {
-                        currentDb[nombre].estado = 'Resuelto';
-                        currentDb[nombre].fechaFinTimestamp = Date.now();
-                        currentDb[nombre].fechaFinISO = new Date().toISOString();
-                        await DbService.saveAsistenciaDiaria(currentDb);
-                        await DbService.registrarHistoricoAsistencia({
-                          ...currentDb[nombre],
-                          accion: 'Fin de Turno'
-                        });
-                        window.dispatchEvent(new Event('storage'));
-                        window.dispatchEvent(new Event('asistenciaActualizada'));
-                        showToast('Jornada finalizada exitosamente.', 'success', 'check');
+              <div style={{ background: activeAsistencia.estado === 'Resuelto' ? 'rgba(34, 197, 94, 0.1)' : 'rgba(34, 197, 94, 0.1)', border: `1px solid ${activeAsistencia.estado === 'Resuelto' ? '#16a34a' : '#22c55e'}`, borderRadius: '8px', padding: '12px', marginBottom: '15px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#16a34a', fontWeight: 'bold' }}>
+                  <i className={`fa-solid ${activeAsistencia.estado === 'Resuelto' ? 'fa-check-circle' : 'fa-map-location-dot'}`}></i>
+                  <span>{activeAsistencia.estado === 'Resuelto' ? 'Jornada finalizada: ' : 'Actualmente en turno: '} {activeAsistencia.ubicacion}</span>
+                </div>
+                {activeAsistencia.estado !== 'Resuelto' && activeAsistencia.ubicacion !== 'Oficina' && (
+                  <button 
+                    className="btn-secondary" 
+                    style={{ fontSize: '12px', padding: '6px 12px', margin: 0, borderRadius: '4px', cursor: 'pointer', background: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5', fontWeight: 'bold', alignSelf: 'flex-start' }}
+                    title="Registrar fin de su jornada"
+                    onClick={async (e) => { 
+                      e.stopPropagation(); 
+                      if (window.confirm('¿Está seguro de que desea marcar el FIN de su jornada?')) {
+                        const { DbService } = await import('../../shared/services/DbService.js');
+                        const currentDb = await DbService.getAsistenciaDiaria();
+                        if (currentDb[nombre]) {
+                          currentDb[nombre].estado = 'Resuelto';
+                          currentDb[nombre].fechaFinTimestamp = Date.now();
+                          await DbService.saveAsistenciaDiaria(currentDb);
+                          await DbService.registrarHistoricoAsistencia({
+                            ...currentDb[nombre],
+                            accion: 'Fin de Turno'
+                          });
+                          window.dispatchEvent(new Event('storage'));
+                          window.dispatchEvent(new Event('asistenciaActualizada'));
+                          showToast('Jornada finalizada exitosamente.', 'success', 'check');
+                        }
                       }
-                    }
-                  }}
-                >
-                  <i className="fa-solid fa-right-from-bracket"></i> Marcar Fin
-                </button>
-              )}
-            </div>
-          )}
+                    }}
+                  >
+                    <i className="fa-solid fa-right-from-bracket"></i> Marcar Fin
+                  </button>
+                )}
+              </div>
+            )}
 
           <div id="historialLista">
             {!nombre ? (
@@ -250,7 +260,7 @@ export const PortalLayout = ({ areaConfig, areaContext, onBack, children, nombre
                   else if (estadoTxt.includes('esuelto') || estadoTxt.includes('errado')) bqClass = 'resuelto';
 
                   const truncar = t.solicitud ? (t.solicitud.length > 40 ? t.solicitud.substring(0, 40) + '...' : t.solicitud) : 'Sin detalles';
-                  const isActa = t.tipoSolicitud === 'Convenios' || t.tipoSolicitud === 'Auxilio Educativo' || (t.solicitud && t.solicitud.includes('Convenio de Nómina')) || (t.solicitud && t.solicitud.includes('Auxilio Educativo'));
+                  const isActa = t.tipoSolicitud && (t.tipoSolicitud.includes('Convenio') || t.tipoSolicitud.includes('Auxilio Educativo')) || (t.solicitud && t.solicitud.includes('Convenio')) || (t.solicitud && t.solicitud.includes('Auxilio Educativo'));
 
                   return (
                     <div key={t.id} className="history-ticket">
@@ -302,11 +312,9 @@ export const PortalLayout = ({ areaConfig, areaContext, onBack, children, nombre
               </div>
             ) : (
               responsables.map((resp, idx) => {
-                const sysUsers = JSON.parse(localStorage.getItem('db_usuarios') || '[]');
                 const n = typeof resp === 'object' ? resp.nombre : resp;
-                const foundUser = sysUsers.find(u => u.nombreReal === n || u.username === n);
-                const cargo = foundUser?.cargo || (typeof resp === 'object' ? resp.cargo : 'Personal TI');
-                const foto = foundUser?.avatar || ((typeof resp === 'object' && resp.foto) ? resp.foto : `https://i.pravatar.cc/150?u=${n.replace(' ','')}`);
+                const cargo = typeof resp === 'object' ? resp.cargo : 'Personal TI';
+                const foto = (typeof resp === 'object' && resp.foto) ? resp.foto : `https://i.pravatar.cc/150?u=${n.replace(' ','')}`;
                 
                 const info = personalTI[n];
                 const st = getEstadoDetails(info ? info.estado : 'disponible');
@@ -329,8 +337,8 @@ export const PortalLayout = ({ areaConfig, areaContext, onBack, children, nombre
       </div>
       <div id="toast" className="toast"></div>
 
-      {actaTicket && actaTicket.tipoSolicitud === 'Convenios' && <ActaDeduccion ticket={actaTicket} onClose={() => setActaTicket(null)} />}
-      {actaTicket && actaTicket.tipoSolicitud === 'Auxilio Educativo' && <ActaAuxilioPdf ticket={actaTicket} onClose={() => setActaTicket(null)} />}
+      {actaTicket && actaTicket.tipoSolicitud && actaTicket.tipoSolicitud.includes('Convenio') && <ActaDeduccion ticket={actaTicket} onClose={() => setActaTicket(null)} />}
+      {actaTicket && actaTicket.tipoSolicitud && actaTicket.tipoSolicitud.includes('Auxilio Educativo') && <ActaAuxilioPdf ticket={actaTicket} onClose={() => setActaTicket(null)} />}
     </div>
   );
 };

@@ -1,355 +1,259 @@
-// ===================================
-// SERVICIO DE BASE DE DATOS (Local/Mock)
-// ===================================
-// Adaptado a React (ES Modules) manteniendo localStorage y Promesas
+import { apiClient } from './api';
 
 export const DbService = {
   getSolicitantes: async () => {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        const rawList = JSON.parse(localStorage.getItem('db_usuarios')) || [];
-        const parsedList = rawList
-          .filter(u => u.role === 'solicitante')
-          .map(u => u.nombreReal || u.username);
-        resolve(parsedList);
-      }, 300);
-    });
+    try {
+      const users = await apiClient('/usuarios');
+      return users
+        .filter(u => u.role === 'solicitante')
+        .map(u => u.nombreReal || u.username);
+    } catch (error) {
+      console.error('Error fetching solicitantes:', error);
+      return [];
+    }
   },
 
   saveSolicitantes: async (sols) => {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        localStorage.setItem('db_solicitantes', JSON.stringify(sols));
-        resolve({ success: true });
-      }, 300);
-    });
+    return { success: true };
   },
-
   
   getResponsables: async (areaOrKey = 'db_responsables') => {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        // Extraemos el ID del área ('ge', 'gh', 'ti') a partir de la key o el string directo.
-        const areaId = areaOrKey.replace('db_responsables_', '');
-        const rawList = JSON.parse(localStorage.getItem('db_usuarios')) || [];
-        
-        // Filtramos usuarios que pertenezcan a esa área y cuyo rol no sea 'solicitante'
-        const responsables = rawList
-          .filter(u => u.area === areaId && u.role !== 'solicitante')
-          .map(u => ({ nombre: u.nombreReal, cargo: u.cargo || 'Gestor' }));
-          
-        resolve(responsables);
-      }, 300);
-    });
+    try {
+      const areaId = areaOrKey.replace('db_responsables_', '');
+      const users = await apiClient('/usuarios');
+      
+      return users
+        .filter(u => u.area === areaId && u.role !== 'solicitante')
+        .map(u => ({ nombre: u.nombreReal, cargo: u.cargo || 'Gestor' }));
+    } catch (error) {
+      console.error('Error fetching responsables:', error);
+      return [];
+    }
   },
 
   saveResponsables: async (resps, key = 'db_responsables') => {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        localStorage.setItem(key, JSON.stringify(resps));
-        resolve({ success: true });
-      }, 300);
-    });
+    return { success: true };
   },
 
   getFestivos: async () => {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        const festivos = JSON.parse(localStorage.getItem('db_festivos')) || [];
-        resolve(festivos);
-      }, 100);
-    });
+    try {
+      return await apiClient('/festivos');
+    } catch (error) {
+      console.error('Error fetching festivos:', error);
+      return [];
+    }
   },
 
   saveFestivos: async (festivos) => {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        localStorage.setItem('db_festivos', JSON.stringify(festivos));
-        resolve({ success: true });
-      }, 100);
-    });
+    try {
+      return await apiClient('/festivos', {
+        method: 'POST',
+        body: JSON.stringify({ festivos })
+      });
+    } catch (error) {
+      console.error('Error saving festivos:', error);
+      return { success: false };
+    }
   },
   
   getDashboardStats: async (key = 'db_actividades') => {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        const acts = JSON.parse(localStorage.getItem(key)) || [];
-        const open = acts.filter(a => a.estado === 'Pendiente').length;
-        const inProg = acts.filter(a => a.estado === 'En progreso').length;
-        const urgent = acts.filter(a => a.prioridad === 'Urgente').length;
-        const resolved = acts.filter(a => a.estado === 'Resuelto' || a.estado === 'Cerrado').length;
-        resolve({success: true, totalOpen: open, inProgress: inProg, urgentTasks: urgent, resolvedTickets: resolved});
-      }, 300);
-    });
+    try {
+      return await apiClient(`/tickets/stats?area_key=${encodeURIComponent(key)}`);
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+      return { success: false, totalOpen: 0, inProgress: 0, urgentTasks: 0, resolvedTickets: 0 };
+    }
   },
   
   getRecentTickets: async (key = 'db_actividades') => {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        const acts = JSON.parse(localStorage.getItem(key)) || [];
-        const tickets = acts.slice(-5).reverse().map(a => ({
-          titulo: a.solicitud || a.nombre,
-          timeAgo: a.fechaCreacion,
-          isUrgent: a.prioridad === 'Urgente' || a.prioridad === 'Alta'
-        }));
-        resolve({success: true, tickets: tickets});
-      }, 300);
-    });
+    try {
+      return await apiClient(`/tickets/recent?area_key=${encodeURIComponent(key)}`);
+    } catch (error) {
+      console.error('Error fetching recent tickets:', error);
+      return { success: false, tickets: [] };
+    }
   },
   
   getNetworkPulse: async () => {
-    return new Promise(resolve => {
-      setTimeout(() => resolve({metrics: [{nombre: 'Uso de CPU', porcentaje: 45, tipo: 'cpu'}, {nombre: 'Uso de RAM', porcentaje: 65, tipo: 'cpu'}]}), 300);
-    });
+    return { metrics: [
+      { nombre: 'Uso de CPU', porcentaje: 45, tipo: 'cpu' }, 
+      { nombre: 'Uso de RAM', porcentaje: 65, tipo: 'cpu' }
+    ]};
   },
   
   guardarActividad: async (formObj, key = 'db_actividades', prefix = 'TKT') => {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        const acts = JSON.parse(localStorage.getItem(key)) || [];
-        const newId = `${prefix}-` + String(acts.length + 1).padStart(3, '0');
-        formObj.id = newId;
-        formObj.fechaISO = new Date().toISOString();
-        formObj.fechaCreacion = new Date().toLocaleString();
-        formObj.nombre = formObj.solicitante;
-        formObj.area = formObj.tipoSolicitud || formObj.clasificacion || 'General';
-        acts.push(formObj);
-        localStorage.setItem(key, JSON.stringify(acts));
-        
-        // Emite un evento global para sincronización local
+    try {
+      const data = await apiClient('/tickets', {
+        method: 'POST',
+        body: JSON.stringify({ ...formObj, areaKey: key, prefix })
+      });
+      
+      if (data.success) {
         window.dispatchEvent(new CustomEvent('actividadGuardada', { 
-          detail: { ticket: formObj, key: key } 
+          detail: { ticket: data.ticket, key: key } 
         }));
-        
-        resolve({success: true, message: `Actividad ${newId} guardada.`});
-      }, 800);
-    });
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error guardando actividad:', error);
+      return { success: false, message: 'Error de conexión con el servidor.' };
+    }
   },
   
   buscarActividades: async (q, key = 'db_actividades') => {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        const acts = JSON.parse(localStorage.getItem(key)) || [];
-        const term = (q || '').toLowerCase();
-        const results = acts.filter(a => !term || (a.id || '').toLowerCase().includes(term) || (a.solicitud || '').toLowerCase().includes(term));
-        resolve({success: true, resultados: results.reverse()});
-      }, 300);
-    });
+    try {
+      return await apiClient(`/tickets/search?q=${encodeURIComponent(q || '')}&area_key=${encodeURIComponent(key)}`);
+    } catch (error) {
+      console.error('Error buscando actividades:', error);
+      return { success: false, resultados: [] };
+    }
   },
   
   getActividades: async (key = 'db_actividades') => {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        let acts = JSON.parse(localStorage.getItem(key)) || [];
-        
-        // MIGRACIÓN AUTOMÁTICA: Limpieza de Tipo y Prioridad para GH
-        if (key === 'db_actividades_gh') {
-          let dirty = false;
-          acts = acts.map(a => {
-            if (a.tipo !== undefined || a.prioridad !== undefined) {
-              delete a.tipo;
-              delete a.prioridad;
-              dirty = true;
-            }
-            return a;
-          });
-          if (dirty) {
-            localStorage.setItem(key, JSON.stringify(acts));
-          }
-        }
-
-        resolve(acts);
-      }, 300);
-    });
+    try {
+      return await apiClient(`/tickets?area_key=${encodeURIComponent(key)}`);
+    } catch (error) {
+      console.error('Error fetching actividades:', error);
+      return [];
+    }
   },
   
   saveActividades: async (acts, key = 'db_actividades') => {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        localStorage.setItem(key, JSON.stringify(acts));
-        window.dispatchEvent(new Event('ticketActualizado'));
-        resolve({ success: true });
-      }, 300);
-    });
+    try {
+      const data = await apiClient(`/tickets/bulk/${encodeURIComponent(key)}`, {
+        method: 'PUT',
+        body: JSON.stringify({ tickets: acts })
+      });
+      
+      window.dispatchEvent(new Event('ticketActualizado'));
+      
+      return data;
+    } catch (error) {
+      console.error('Error saving actividades:', error);
+      return { success: false };
+    }
   },
   
   getSistemas: async () => {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        const sys = JSON.parse(localStorage.getItem('db_sistemas')) || {
-          servidor: { estado: 'ok', mensaje: '' },
-          contable: { estado: 'ok', mensaje: '' },
-          red: { estado: 'ok', mensaje: '' }
-        };
-        resolve(sys);
-      }, 300);
-    });
+    try {
+      const data = await apiClient('/sistemas');
+      return {
+        servidor: data.servidor || { estado: 'ok', mensaje: '' },
+        contable: data.contable || { estado: 'ok', mensaje: '' },
+        red: data.red || { estado: 'ok', mensaje: '' },
+        ...data
+      };
+    } catch (error) {
+      console.error('Error fetching sistemas:', error);
+      return {
+        servidor: { estado: 'ok', mensaje: '' },
+        contable: { estado: 'ok', mensaje: '' },
+        red: { estado: 'ok', mensaje: '' }
+      };
+    }
   },
   
   saveSistemas: async (sysObj) => {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        localStorage.setItem('db_sistemas', JSON.stringify(sysObj));
-        resolve({ success: true });
-      }, 300);
-    });
+    try {
+      return await apiClient('/sistemas', {
+        method: 'PUT',
+        body: JSON.stringify(sysObj)
+      });
+    } catch (error) {
+      console.error('Error saving sistemas:', error);
+      return { success: false };
+    }
   },
   
-  cleanAsistenciaDiariaSync: () => {
-    let db = JSON.parse(localStorage.getItem('db_asistencia_diaria')) || {};
-    const now = new Date();
-    const cutoff = new Date(now);
-    cutoff.setHours(11, 39, 0, 0); 
-    if (now.getTime() < cutoff.getTime()) {
-      cutoff.setDate(cutoff.getDate() - 1);
-    }
-    const cutoffTime = cutoff.getTime();
-    let changed = false;
-    let historico = null;
-    
-    Object.keys(db).forEach(user => {
-      const record = db[user];
-      if (record.timestamp < cutoffTime) {
-        if (record.estado !== 'Resuelto' && record.ubicacion !== 'Oficina') {
-          if (!historico) historico = JSON.parse(localStorage.getItem('db_historico_asistencia')) || [];
-          historico.push({
-            ...record,
-            estado: 'Resuelto',
-            fechaFinISO: cutoff.toISOString(),
-            accion: 'Fin de Turno (Automático)',
-            id: Date.now().toString() + Math.random().toString().slice(2,5),
-            fechaRegistro: new Date().toLocaleString()
-          });
-        }
-        delete db[user];
-        changed = true;
-      }
-    });
-    
-    if (changed) {
-      localStorage.setItem('db_asistencia_diaria', JSON.stringify(db));
-      if (historico) localStorage.setItem('db_historico_asistencia', JSON.stringify(historico));
-    }
-    return db;
-  },
-
   getAsistenciaDiaria: async () => {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        resolve(DbService.cleanAsistenciaDiariaSync());
-      }, 300);
-    });
+    try {
+      return await apiClient('/asistencia');
+    } catch (error) {
+      console.error('Error fetching asistencia:', error);
+      return {};
+    }
   },
 
   saveAsistenciaDiaria: async (asistenciaObj) => {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        localStorage.setItem('db_asistencia_diaria', JSON.stringify(asistenciaObj));
-        resolve({ success: true });
-      }, 300);
-    });
+    try {
+      return await apiClient('/asistencia', {
+        method: 'PUT',
+        body: JSON.stringify(asistenciaObj)
+      });
+    } catch (error) {
+      console.error('Error saving asistencia:', error);
+      return { success: false };
+    }
+  },
+
+  getHistoricoAsistencia: async () => {
+    try {
+      return await apiClient('/asistencia/historico');
+    } catch (error) {
+      console.error('Error fetching historico:', error);
+      return [];
+    }
   },
 
   registrarHistoricoAsistencia: async (registro) => {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        const historico = JSON.parse(localStorage.getItem('db_historico_asistencia')) || [];
-        historico.push({
-          ...registro,
-          id: Date.now().toString(),
-          fechaRegistro: new Date().toLocaleString()
-        });
-        localStorage.setItem('db_historico_asistencia', JSON.stringify(historico));
-        resolve({ success: true });
-      }, 100);
-    });
+    try {
+      return await apiClient('/asistencia/historico', {
+        method: 'POST',
+        body: JSON.stringify(registro)
+      });
+    } catch (error) {
+      console.error('Error saving historico:', error);
+      return { success: false };
+    }
   },
 
   getEstadoPersonal: async () => {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        const db = JSON.parse(localStorage.getItem('db_estado_personal')) || {};
-        resolve(db);
-      }, 300);
-    });
+    try {
+      return await apiClient('/estado-personal');
+    } catch (error) {
+      console.error('Error fetching estado personal:', error);
+      return {};
+    }
   },
   
   saveEstadoPersonal: async (estObj) => {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        localStorage.setItem('db_estado_personal', JSON.stringify(estObj));
-        resolve({ success: true });
-      }, 300);
-    });
+    try {
+      return await apiClient('/estado-personal', {
+        method: 'PUT',
+        body: JSON.stringify(estObj)
+      });
+    } catch (error) {
+      console.error('Error saving estado personal:', error);
+      return { success: false };
+    }
   },
 
   autoCloseTickets: async (key = 'db_actividades', gracePeriodHours = 72) => {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        let acts = JSON.parse(localStorage.getItem(key)) || [];
-        let modified = false;
-        const now = Date.now();
-        
-        acts = acts.map(a => {
-          if (a.estado === 'Resuelto' && a.fechaFinTimestamp) {
-            const hoursElapsed = (now - a.fechaFinTimestamp) / (1000 * 60 * 60);
-            if (hoursElapsed >= gracePeriodHours) {
-              a.estado = 'Cerrado';
-              a.fechaCierreTimestamp = now;
-              a.accion = (a.accion ? a.accion + '\n' : '') + `[SISTEMA]: Ticket cerrado automáticamente tras expirar periodo de gracia de ${gracePeriodHours}h.`;
-              modified = true;
-            }
-          }
-          return a;
-        });
-
-        if (modified) {
-          localStorage.setItem(key, JSON.stringify(acts));
-          window.dispatchEvent(new Event('ticketActualizado'));
-        }
-        resolve({ success: true, updated: modified });
-      }, 0); // Resolución inmediata para no bloquear la carga inicial
-    });
+    try {
+      return await apiClient('/tickets/auto-close', {
+        method: 'POST',
+        body: JSON.stringify({ area_key: key, gracePeriodHours })
+      });
+    } catch (error) {
+      console.error('Error en auto-close:', error);
+      return { success: false, updated: false };
+    }
   },
 
   updateTicketsAgentPauseState: async (agentName, isPaused) => {
-    return new Promise(async (resolve) => {
-      // Usamos import dinamico para la funcion ya que no esta exportada globalmente y evitamos problemas de bundler aqui
-      const { calculateWorkingMilliseconds } = await import('../utils/businessHours.js');
-      
-      const areas = ['db_actividades_ge', 'db_actividades_gh', 'db_actividades_ti'];
-      
-      for (const key of areas) {
-        let activities = JSON.parse(localStorage.getItem(key)) || [];
-        let updated = false;
-
-        activities = activities.map(ticket => {
-          if (ticket.responsable === agentName && ['Pendiente', 'En progreso', 'Suspendido'].includes(ticket.estado)) {
-            if (isPaused) {
-              if (!ticket.agentPauseStart) {
-                ticket.agentPauseStart = Date.now();
-                updated = true;
-              }
-            } else {
-              if (ticket.agentPauseStart) {
-                const pausedTimeMs = calculateWorkingMilliseconds(ticket.agentPauseStart, Date.now());
-                ticket.tiempoPausadoTotal = (ticket.tiempoPausadoTotal || 0) + pausedTimeMs;
-                ticket.agentPauseStart = null;
-                updated = true;
-              }
-            }
-          }
-          return ticket;
-        });
-
-        if (updated) {
-          localStorage.setItem(key, JSON.stringify(activities));
-        }
-      }
+    try {
+      const data = await apiClient('/tickets/agent-pause', {
+        method: 'POST',
+        body: JSON.stringify({ agentName, isPaused })
+      });
       
       window.dispatchEvent(new Event('ticketActualizado'));
-      window.dispatchEvent(new Event('storage'));
-      resolve({ success: true });
-    });
+      
+      return data;
+    } catch (error) {
+      console.error('Error en agent pause:', error);
+      return { success: false };
+    }
   }
 };

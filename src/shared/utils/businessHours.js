@@ -23,13 +23,13 @@ function getBusinessHoursForDay(date) {
 
   // Validar si es día festivo
   try {
-    const festivos = JSON.parse(localStorage.getItem('db_festivos')) || [];
+    const festivos = window.__FESTIVOS_CACHE || [];
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const dayDate = String(date.getDate()).padStart(2, '0');
     const localDateString = `${year}-${month}-${dayDate}`;
     
-    if (festivos.some(f => f.fecha === localDateString)) {
+    if (festivos.some(f => (f.fecha || f) === localDateString)) {
       return null; // Tratar como día no laboral
     }
   } catch(e) {}

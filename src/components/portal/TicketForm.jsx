@@ -18,6 +18,7 @@ export const TicketForm = () => {
   const [archivos, setArchivos] = useState([]);
 
   const handleChange = (e) => {
+    const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -41,10 +42,8 @@ export const TicketForm = () => {
     setLoading(true);
     setSuccess('');
 
-    // 1. Generar ID
-    const rawActs = JSON.parse(localStorage.getItem('db_actividades_ge') || '[]');
-    const numReq = rawActs.filter(t => (t.id || '').startsWith('GE-')).length + 1;
-    const newId = `GE-${String(numReq).padStart(3, '0')}`;
+    // 1. El ID del ticket se genera automáticamente en el servidor
+    const newId = 'GE-TEMP';
 
     // 2. Subir archivos
     let adjuntosUrls = [];

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { DbService } from '../services/DbService';
 import { calculateWorkingMilliseconds } from '../utils/businessHours';
+import { apiClient } from '../services/api';
 
 export const createAreaContext = (config) => {
   const {
@@ -33,14 +34,16 @@ export const createAreaContext = (config) => {
       setLoading(true);
       try {
         await DbService.autoCloseTickets(storageKey, 72);
-        const [tickets, sols, resps] = await Promise.all([
+        const [tickets, sols, resps, festivos] = await Promise.all([
           DbService.getActividades(storageKey),
           DbService.getSolicitantes(),
-          DbService.getResponsables(responsablesKey)
+          DbService.getResponsables(responsablesKey),
+          DbService.getFestivos()
         ]);
         setActividades(tickets);
         setSolicitantes(sols);
         setResponsables(resps);
+        window.__FESTIVOS_CACHE = festivos;
       } catch (error) {
         console.error('Error loading initial data:', error);
       } finally {
@@ -56,18 +59,19 @@ export const createAreaContext = (config) => {
       const handleTicketUpdate = () => {
         fetchTickets();
       };
-      const handleStorage = (e) => {
-        if (e.key === storageKey) fetchTickets();
-      };
 
       window.addEventListener('actividadGuardada', handleTicketUpdate);
       window.addEventListener('ticketActualizado', handleTicketUpdate);
-      window.addEventListener('storage', handleStorage);
+
+      // Polling cada 15 segundos para sincronización entre pestañas (Short Polling)
+      const intervalId = setInterval(() => {
+        fetchTickets();
+      }, 15000);
 
       return () => {
         window.removeEventListener('actividadGuardada', handleTicketUpdate);
         window.removeEventListener('ticketActualizado', handleTicketUpdate);
-        window.removeEventListener('storage', handleStorage);
+        clearInterval(intervalId);
       };
     }, [fetchTickets]);
 
@@ -157,45 +161,35 @@ export const createAreaContext = (config) => {
     };
 
     const addSolicitante = async (solData) => {
-      const rawList = JSON.parse(localStorage.getItem('db_solicitantes')) || [];
-      rawList.push(solData);
-      await DbService.saveSolicitantes(rawList);
-
+      // Los solicitantes ahora son usuarios; se crean desde el panel de usuarios
       const nombre = typeof solData === 'object' ? solData.nombre : solData;
       const newSols = [...solicitantes, nombre];
       setSolicitantes(newSols);
     };
 
     const removeSolicitante = async (index) => {
-      const rawList = JSON.parse(localStorage.getItem('db_solicitantes')) || [];
-      rawList.splice(index, 1);
-      await DbService.saveSolicitantes(rawList);
-
       const newSols = [...solicitantes];
       newSols.splice(index, 1);
       setSolicitantes(newSols);
     };
 
-    const getSolicitanteCargo = (nombre) => {
-      const rawList = JSON.parse(localStorage.getItem('db_usuarios')) || [];
-      const found = rawList.find(u => u.role === 'solicitante' && (u.nombreReal === nombre || u.username === nombre));
-      return found ? found.cargo || '' : '';
+    const getSolicitanteCargo = async (nombre) => {
+      try {
+        const users = await apiClient('/usuarios');
+        const found = users.find(u => u.role === 'solicitante' && (u.nombreReal === nombre || u.username === nombre));
+        return found ? found.cargo || '' : '';
+      } catch (error) {
+        console.error('Error fetching cargo:', error);
+        return '';
+      }
     };
 
     const addResponsable = async (respData) => {
-      const rawList = JSON.parse(localStorage.getItem(responsablesKey)) || [];
-      rawList.push(respData);
-      await DbService.saveResponsables(rawList, responsablesKey);
-      
-      const newResps = [...responsables, respData.nombre];
+      const newResps = [...responsables, respData];
       setResponsables(newResps);
     };
 
     const removeResponsable = async (index) => {
-      const rawList = JSON.parse(localStorage.getItem(responsablesKey)) || [];
-      rawList.splice(index, 1);
-      await DbService.saveResponsables(rawList, responsablesKey);
-      
       const newResps = [...responsables];
       newResps.splice(index, 1);
       setResponsables(newResps);

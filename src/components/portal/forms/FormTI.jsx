@@ -36,10 +36,8 @@ export const FormTI = () => {
 
     setLoadingSubmit(true);
 
-    // 1. Generar el ID del ticket primero
-    const rawActs = JSON.parse(localStorage.getItem('db_actividades_ti') || '[]');
-    const numReq = rawActs.filter(t => (t.id || '').startsWith('TI-')).length + 1;
-    const newId = `TI-${String(numReq).padStart(3, '0')}`;
+    // 1. El ID del ticket se genera automáticamente en el servidor
+    const newId = 'TI-TEMP';
 
     // 2. Subir archivos pasando el ID para la carpeta
     let adjuntosUrls = [];

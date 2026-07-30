@@ -43,13 +43,11 @@ export const WidgetMiEstado = () => {
 
     localStorage.setItem(`db_mi_seleccion_${config.id}`, JSON.stringify(estadoObj));
 
-    const allStates = JSON.parse(localStorage.getItem('db_estado_personal') || '{}');
-    allStates[miNombre] = estadoObj;
-    localStorage.setItem('db_estado_personal', JSON.stringify(allStates));
-
-    // Force cross-tab sync by triggering a custom storage event locally, 
-    // since we use standard storage event across tabs
-    window.dispatchEvent(new Event('storage'));
+    try {
+      await DbService.saveEstadoPersonal({ [miNombre]: estadoObj });
+    } catch (e) {
+      console.error('Error actualizando estado personal:', e);
+    }
 
     const toast = document.getElementById('toast');
     if (toast) {

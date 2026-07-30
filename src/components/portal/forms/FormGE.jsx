@@ -14,7 +14,7 @@ export const FormGE = () => {
   const tiposSolicitud = settings.tiposSolicitud || [];
   const [tipo, setTipo] = useState('Requerimiento');
   const [solicitud, setSolicitud] = useState('');
-  const [prioridad, setPrioridad] = useState('Urgente');
+  const [prioridad, setPrioridad] = useState('Media');
   const [archivos, setArchivos] = useState([]);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
 
@@ -38,10 +38,8 @@ export const FormGE = () => {
 
     setLoadingSubmit(true);
 
-    // 1. Generar el ID del ticket primero
-    const rawActs = JSON.parse(localStorage.getItem('db_actividades_ge') || '[]');
-    const numReq = rawActs.filter(t => (t.id || '').startsWith('GE-')).length + 1;
-    const newId = `GE-${String(numReq).padStart(3, '0')}`;
+    // 1. El ID del ticket se genera automáticamente en el servidor
+    const newId = 'GE-TEMP';
 
     // 2. Subir archivos pasando el ID para la carpeta
     let adjuntosUrls = [];
@@ -129,7 +127,25 @@ export const FormGE = () => {
         </div>
       </div>
 
-
+      <div className="form-group form-group-full">
+        <label className="form-label">TIPO DE TICKET</label>
+        <div className="type-selector-container">
+          <div 
+            className={`type-selector-card ${tipo === 'Incidente' ? 'active incidente' : ''}`}
+            onClick={() => { setTipo('Incidente'); setPrioridad('Alta'); }}
+          >
+            <i className="fa-solid fa-triangle-exclamation"></i>
+            <span>Incidente / Problema</span>
+          </div>
+          <div 
+            className={`type-selector-card ${tipo === 'Requerimiento' ? 'active requerimiento' : ''}`}
+            onClick={() => { setTipo('Requerimiento'); setPrioridad('Media'); }}
+          >
+            <i className="fa-solid fa-file-lines"></i>
+            <span>Requerimiento / Solicitud</span>
+          </div>
+        </div>
+      </div>
 
       <div className="form-group">
         <label className="form-label">DESCRIPCIÓN DE LA SOLICITUD</label>
@@ -157,7 +173,20 @@ export const FormGE = () => {
         </div>
       </div>
 
-
+      <div className="form-group">
+        <label className="form-label">PRIORIDAD</label>
+        <div className="priority-group">
+          {['Baja', 'Media', 'Alta', 'Urgente'].map(p => (
+            <div 
+              key={p} 
+              className={`priority-btn ${prioridad === p ? 'active' : ''}`}
+              onClick={() => setPrioridad(p)}
+            >
+              {p.toUpperCase()}
+            </div>
+          ))}
+        </div>
+      </div>
 
       <button type="submit" className={`btn-submit ${loadingSubmit ? 'loading' : ''}`} disabled={loadingSubmit}>
         {loadingSubmit ? (

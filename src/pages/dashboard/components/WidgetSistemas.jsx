@@ -1,21 +1,19 @@
 import React, { useState } from 'react';
+import { DbService } from '../../../shared/services/DbService';
 
 export const WidgetSistemas = () => {
   const [sistema, setSistema] = useState('servidor');
   const [estado, setEstado] = useState('ok');
   const [mensaje, setMensaje] = useState('');
 
-  const publicarEstadoSistema = () => {
-    const systems = JSON.parse(localStorage.getItem('db_sistemas') || '{}');
-    
-    systems[sistema] = {
-      estado: estado,
-      mensaje: mensaje,
-      timestamp: Date.now()
-    };
-    
-    localStorage.setItem('db_sistemas', JSON.stringify(systems));
-    window.dispatchEvent(new Event('storage'));
+  const publicarEstadoSistema = async () => {
+    try {
+      await DbService.saveSistemas({
+        [sistema]: { estado, mensaje }
+      });
+    } catch (error) {
+      console.error('Error publicando estado de sistema:', error);
+    }
 
     const toast = document.getElementById('toast');
     if (toast) {

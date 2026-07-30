@@ -7,7 +7,7 @@ import { ActaAuxilioPdf } from './modals/ActaAuxilioPdf';
 
 export const Gestion = () => {
   const { ctx, config, area } = useActiveArea();
-  const { actividades, responsables, updateTicket } = ctx;
+  const { actividades, responsables, updateTicket, refreshTickets } = ctx;
   const settings = getAreaSettings(area);
   const slas = settings.slas || { Urgente: 2, Alta: 8, Media: 24, Baja: 48 };
   
@@ -67,10 +67,13 @@ export const Gestion = () => {
       }
 
       if (searchQuery) {
-        const matchesId = (a.id || '').toLowerCase().includes(searchQuery);
-        const matchesSol = (a.solicitud || '').toLowerCase().includes(searchQuery);
-        const matchesNom = (a.nombre || a.solicitante || '').toLowerCase().includes(searchQuery);
-        const matchesResp = (a.responsable || '').toLowerCase().includes(searchQuery);
+        const solString = typeof a.solicitante === 'string' ? a.solicitante : (a.solicitante?.nombreReal || '');
+        const respString = typeof a.responsable === 'string' ? a.responsable : (a.responsable?.nombre || '');
+        
+        const matchesId = (String(a.id) || '').toLowerCase().includes(searchQuery);
+        const matchesSol = (String(a.solicitud) || '').toLowerCase().includes(searchQuery);
+        const matchesNom = (String(a.nombre || solString) || '').toLowerCase().includes(searchQuery);
+        const matchesResp = (String(respString) || '').toLowerCase().includes(searchQuery);
         if (!matchesId && !matchesSol && !matchesNom && !matchesResp) return false;
       }
       return true;
@@ -134,9 +137,6 @@ export const Gestion = () => {
   };
 
   const renderTramites = () => {
-    if (area === 'gh' && ticketEdit.tipoSolicitud === 'Solicitudes Internas') {
-      return <option key="Novedades para nómina" value="Novedades para nómina">Novedades para nómina</option>;
-    }
     const grupoEncontrado = config.tiposSolicitud?.find(g => ticketEdit.tipoSolicitud.includes(g.nombre) || g.nombre.includes(ticketEdit.tipoSolicitud)) || config.grupos?.find(g => ticketEdit.tipoSolicitud.includes(g.nombre) || g.nombre.includes(ticketEdit.tipoSolicitud));
     if (grupoEncontrado) {
       return grupoEncontrado.tramites.map(t => <option key={t} value={t}>{t}</option>);
@@ -238,7 +238,7 @@ export const Gestion = () => {
               <i className="fa-solid fa-columns"></i> Kanban
             </button>
           </div>
-          <button className="btn-refresh" id="btnRefreshGestion" onClick={() => window.location.reload()}>
+          <button className="btn-refresh" id="btnRefreshGestion" onClick={() => { if (refreshTickets) refreshTickets(); }}>
             <i className="fa-solid fa-rotate-right"></i>
           </button>
         </div>
@@ -258,11 +258,11 @@ export const Gestion = () => {
               <thead>
                 <tr>
                   <th>ID</th>
-                  {area === 'ti' ? <th>Tipo</th> : <th>Tipo de Solicitud</th>}
+                  {area !== 'gh' && <th>Tipo</th>}
                   <th>Solicitud</th>
                   <th>Solicitante</th>
                   <th>Estado</th>
-                  {area === 'ti' && <th>Prioridad</th>}
+                  {area !== 'gh' && <th>Prioridad</th>}
                   {area === 'gh' && <th>Nómina</th>}
                   <th>SLA (Restante)</th>
                   <th>Responsable</th>
@@ -274,28 +274,26 @@ export const Gestion = () => {
                   const prio = t.prioridad || 'Baja';
                   const dot = prioColor[prio] || '#94a3b8';
                   const rawEstado = t.estado || 'Pendiente';
-                  const estadoClase = rawEstado.toLowerCase().replace(' ', '-');
+                  const estadoClase = String(rawEstado).toLowerCase().replace(' ', '-');
                   return (
                     <tr key={t.id} className="ticket-row-clickable" data-ticket-id={t.id} onClick={() => openModal(t.id)}>
                       <td><strong>{t.id || ''}</strong></td>
-                      {area === 'ti' ? (
+                      {area !== 'gh' && (
                         <td>
                           {t.tipo ? (
-                            <span className={`tipo-badge ${t.tipo.toLowerCase()}`}>
+                            <span className={`tipo-badge ${String(t.tipo).toLowerCase()}`}>
                               <i className={t.tipo === 'Incidente' ? 'fa-solid fa-triangle-exclamation' : 'fa-solid fa-file-lines'} style={{ marginRight: '4px' }}></i>
                               {t.tipo}
                             </span>
                           ) : <span style={{ color: 'var(--text-muted)', fontSize: '11px' }}>N/A</span>}
                         </td>
-                      ) : (
-                        <td><span style={{ fontSize: '13px', fontWeight: '500', color: 'var(--text-color)' }}>{t.tipoSolicitud || 'N/A'}</span></td>
                       )}
                       <td style={{ maxWidth: '350px', whiteSpace: 'normal', overflowWrap: 'anywhere', wordBreak: 'break-word', lineHeight: '1.4' }}>
                         {t.solicitud || t.nombre || ''}
                       </td>
-                      <td>{t.nombre || t.solicitante || ''}</td>
+                      <td>{t.nombre || (typeof t.solicitante === 'string' ? t.solicitante : t.solicitante?.nombreReal) || ''}</td>
                       <td><span className={`status-badge ${estadoClase}`}>{t.estado || ''}</span></td>
-                      {area === 'ti' && (
+                      {area !== 'gh' && (
                         <td>
                           <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
                             <span className="prioridad-dot" style={{ background: dot }}></span>{prio}
@@ -306,7 +304,7 @@ export const Gestion = () => {
                         <td style={{textAlign: 'center'}}>{t.novedadNomina ? <i className="fa-solid fa-check" style={{color: 'var(--success)'}}></i> : <i className="fa-solid fa-xmark" style={{color: 'var(--text-muted)'}}></i>}</td>
                       )}
                       <td>{calculateSlaBadge(t, slas)}</td>
-                      <td>{t.responsable || 'Sin asignar'}</td>
+                      <td>{typeof t.responsable === 'string' ? t.responsable : (t.responsable?.nombre || 'Sin asignar')}</td>
                       <td style={{ color: '#64748b', fontSize: '11px' }}>{t.fechaCreacion || ''}</td>
                     </tr>
                   );
@@ -337,11 +335,11 @@ export const Gestion = () => {
                       const prio = t.prioridad || 'Baja';
                       const dot = prioColor[prio] || '#94a3b8';
                       return (
-                        <div key={t.id} className={`kanban-card ${prio.toLowerCase()}`} data-ticket-id={t.id} onClick={() => openModal(t.id)}>
+                        <div key={t.id} className={`kanban-card ${String(prio).toLowerCase()}`} data-ticket-id={t.id} onClick={() => openModal(t.id)}>
                           <div className="kanban-card-id">
                             {t.id || ''}
-                            {t.tipo && area === 'ti' && (
-                              <span className={`tipo-badge ${t.tipo.toLowerCase()}`} style={{ float: 'right', fontSize: '9px', padding: '2px 6px', marginTop: '-2px' }}>
+                            {t.tipo && (
+                              <span className={`tipo-badge ${String(t.tipo).toLowerCase()}`} style={{ float: 'right', fontSize: '9px', padding: '2px 6px', marginTop: '-2px' }}>
                                 {t.tipo}
                               </span>
                             )}
@@ -349,12 +347,12 @@ export const Gestion = () => {
                           <div className="kanban-card-title">{t.solicitud || t.nombre || ''}</div>
                           <div className="kanban-card-who" style={{ marginBottom: '6px', color: '#475569' }}>
                             <i className="fa-regular fa-user" style={{ fontSize: '10px', marginRight: '4px' }}></i>
-                            {t.nombre || t.solicitante || 'Desconocido'}
+                            {t.nombre || (typeof t.solicitante === 'string' ? t.solicitante : t.solicitante?.nombreReal) || 'Desconocido'}
                           </div>
                           <div className="kanban-card-footer">
                             <span className="kanban-card-who" title="Responsable asignado">
                               <i className="fa-solid fa-user-tie" style={{ fontSize: '10px', marginRight: '4px' }}></i>
-                              {t.responsable || 'Sin asignar'}
+                              {typeof t.responsable === 'string' ? t.responsable : (t.responsable?.nombre || 'Sin asignar')}
                             </span>
                             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '11px' }}>
                               <span className="prioridad-dot" style={{ background: dot }}></span>{prio}
@@ -401,7 +399,7 @@ export const Gestion = () => {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                   <strong style={{ color: 'var(--navy)' }}><i className="fa-solid fa-list-check"></i> Detalles Específicos del Trámite</strong>
                   
-                  {(ticketEdit.tipoSolicitud === 'Convenios' || ticketEdit.tipoSolicitud === 'Auxilio Educativo') && (
+                  {ticketEdit.tipoSolicitud && (ticketEdit.tipoSolicitud.includes('Convenio') || ticketEdit.tipoSolicitud.includes('Auxilio Educativo')) && (
                     <button type="button" className="btn-primary" style={{ padding: '6px 12px', fontSize: '12px', background: 'var(--red)' }} onClick={() => setShowActa(true)}>
                       <i className="fa-solid fa-file-pdf"></i> Generar Acta PDF
                     </button>
@@ -421,11 +419,9 @@ export const Gestion = () => {
                     // Fallback para tickets viejos: Si el campo está vacío, intentar buscarlo en la BD de usuarios actual
                     let finalValue = value;
                     if (!finalValue) {
-                      try {
-                        const users = JSON.parse(localStorage.getItem('db_usuarios') || '[]');
-                        const userProfile = users.find(u => u.nombreReal === ticketEdit.nombre) || {};
-                        if (userProfile[key]) finalValue = userProfile[key];
-                      } catch (e) {}
+                      // Fallback: intentar buscar en datos de usuario cacheados (si aplica)
+                      // En futuras versiones, esto debería usar un contexto con datos precargados
+                      finalValue = null;
                     }
 
                     const displayValue = finalValue || <span style={{ fontStyle: 'italic', color: 'var(--text-muted)' }}>No registrado</span>;
@@ -445,7 +441,7 @@ export const Gestion = () => {
                     const formattedKey = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
                     
                     let finalDisplayElement = displayValue;
-                    if (finalValue && !isNaN(finalValue) && (key.toLowerCase().includes('valor') || key.toLowerCase().includes('monto') || key.toLowerCase().includes('cuota') || key.toLowerCase().includes('precio'))) {
+                    if (finalValue && !isNaN(finalValue) && (String(key).toLowerCase().includes('valor') || String(key).toLowerCase().includes('monto') || String(key).toLowerCase().includes('cuota') || String(key).toLowerCase().includes('precio'))) {
                       finalDisplayElement = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(finalValue);
                     }
 
@@ -522,7 +518,7 @@ export const Gestion = () => {
                 </div>
               </div>
 
-              {area === 'ti' && (
+              {area !== 'gh' && (
                 <div className="form-group">
                   <label className="form-label">Prioridad</label>
                   <div className="select-wrapper">
@@ -544,10 +540,9 @@ export const Gestion = () => {
                   <i className="fa-solid fa-users-gear select-icon-left"></i>
                   <select id="m_tipoSolicitud" className="form-select padded-left" value={ticketEdit.tipoSolicitud} onChange={handleModalChange}>
                     <option value="" disabled>Seleccione el Tipo...</option>
-                    {(config.tiposSolicitud || config.grupos || []).filter(g => g.nombre !== 'Solicitudes Internas').map((g, idx) => (
+                    {(config.tiposSolicitud || config.grupos || []).map((g, idx) => (
                       <option key={idx} value={g.nombre}>{g.nombre}</option>
                     ))}
-                    {area === 'gh' && <option value="Solicitudes Internas">Solicitudes Internas</option>}
                   </select>
                   <i className="fa-solid fa-chevron-down select-arrow"></i>
                 </div>
@@ -719,10 +714,10 @@ export const Gestion = () => {
       )}
 
       {/* RENDER ACTA DE DEDUCCIÓN / BONO EDUCATIVO (PRINTABLE) */}
-      {showActa && ticketEdit && ticketEdit.tipoSolicitud === 'Convenios' && (
+      {showActa && ticketEdit && ticketEdit.tipoSolicitud && ticketEdit.tipoSolicitud.includes('Convenio') && (
         <ActaDeduccion ticket={ticketEdit} onClose={() => setShowActa(false)} />
       )}
-      {showActa && ticketEdit && ticketEdit.tipoSolicitud === 'Auxilio Educativo' && (
+      {showActa && ticketEdit && ticketEdit.tipoSolicitud && ticketEdit.tipoSolicitud.includes('Auxilio Educativo') && (
         <ActaAuxilioPdf ticket={ticketEdit} onClose={() => setShowActa(false)} />
       )}
 

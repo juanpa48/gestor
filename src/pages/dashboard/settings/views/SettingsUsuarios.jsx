@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx';
-import { hashPassword, useAuth } from '../../../../shared/contexts/AuthContext';
+import { useAuth } from '../../../../shared/contexts/AuthContext';
 import { useActiveArea } from '../../../../shared/contexts/ActiveAreaContext';
 
+import { apiClient } from '../../../../shared/services/api';
 export const SettingsUsuarios = () => {
   const { currentUser } = useAuth();
   const { area: currentArea } = useActiveArea();
@@ -23,16 +24,19 @@ export const SettingsUsuarios = () => {
   const [jefeInmediato, setJefeInmediato] = useState('');
   const [role, setRole] = useState('solicitante');
   const [area, setArea] = useState('');
-  const [avatar, setAvatar] = useState('');
-  const [activeTab, setActiveTab] = useState('resolutores'); // resolutores | solicitantes
+  const [activeTab, setActiveTab] = useState('resolutores');
 
   useEffect(() => {
     loadUsers();
   }, []);
 
-  const loadUsers = () => {
-    const db = JSON.parse(localStorage.getItem('db_usuarios') || '[]');
-    setUsers(db);
+  const loadUsers = async () => {
+    try {
+      const data = await apiClient('/usuarios');
+      setUsers(data);
+    } catch (error) {
+      console.error('Error cargando usuarios:', error);
+    }
   };
 
   if (!isAdmin || currentArea !== 'ti') {
@@ -66,7 +70,6 @@ export const SettingsUsuarios = () => {
       setJefeInmediato(user.jefeInmediato || '');
       setRole(user.role || 'solicitante');
       setArea(user.area || '');
-      setAvatar(user.avatar || '');
     } else {
       setEditingUsername(null);
       setNombreReal('');
@@ -77,7 +80,6 @@ export const SettingsUsuarios = () => {
       setJefeInmediato('');
       setRole('solicitante');
       setArea('');
-      setAvatar('');
     }
     setModalOpen(true);
   };
@@ -104,6 +106,87 @@ export const SettingsUsuarios = () => {
     XLSX.writeFile(wb, "Plantilla_Usuarios.xlsx");
   };
 
+  const handleSaveUser = async (e) => {
+    e.preventDefault();
+    if (!nombreReal.trim() || !username.trim()) {
+      showToast('Nombre y usuario son obligatorios', 'error');
+      return;
+    }
+    if ((role === 'gestor' || role === 'admin_ti') && !area) {
+      showToast('Debes asignar un área obligatoriamente para Gestores y Admins.', 'error');
+      return;
+    }
+
+    try {
+      if (editingUsername) {
+        // Actualizar usuario existente
+        const data = await apiClient(`/usuarios/${editingUsername}`, {
+          method: 'PUT',
+          body: JSON.stringify({
+            nombreReal: nombreReal.trim(),
+            cargo: cargo.trim() || ((role === 'solicitante') ? 'Empleado' : 'Gestor'),
+            cedula: cedula.trim(),
+            jefeInmediato: jefeInmediato.trim(),
+            celular: celular.trim(),
+            role: role,
+            area: (role === 'solicitante') ? null : area,
+            bloqueado: undefined
+          })
+        });
+        
+        if (data.success) {
+          // Si el usuario editado es el mismo que está logueado, actualizar su sesión
+          if (currentUser && currentUser.username === editingUsername) {
+            const session = JSON.parse(localStorage.getItem('session_token'));
+            if (session) {
+              session.user.nombreReal = nombreReal.trim();
+              session.user.cargo = cargo.trim();
+              session.user.role = role;
+              session.user.cedula = cedula.trim();
+              session.user.jefeInmediato = jefeInmediato.trim();
+              session.user.area = (role === 'solicitante') ? null : area;
+              localStorage.setItem('session_token', JSON.stringify(session));
+            }
+          }
+          showToast(`Usuario ${editingUsername} actualizado.`);
+        } else {
+          showToast(data.message || 'Error al actualizar', 'error');
+        }
+      } else {
+        // Crear nuevo usuario
+        const codigo = `U-${String(users.length + 1).padStart(2, '0')}`;
+        const data = await apiClient('/usuarios', {
+          method: 'POST',
+          body: JSON.stringify({
+            codigo,
+            username: username.trim(),
+            nombreReal: nombreReal.trim(),
+            password: '12345',
+            role: role,
+            area: (role === 'solicitante') ? null : area,
+            cedula: cedula.trim(),
+            jefeInmediato: jefeInmediato.trim(),
+            cargo: cargo.trim() || ((role === 'solicitante') ? 'Empleado' : 'Gestor'),
+            celular: celular.trim()
+          })
+        });
+        
+        if (data.success) {
+          showToast(`Usuario creado. Contraseña: 12345`);
+        } else {
+          showToast(data.message || 'Error al crear usuario', 'error');
+          return;
+        }
+      }
+      
+      await loadUsers();
+      closeModal();
+    } catch (error) {
+      console.error('Error guardando usuario:', error);
+      showToast('Error de conexión con el servidor', 'error');
+    }
+  };
+
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -118,18 +201,13 @@ export const SettingsUsuarios = () => {
         const firstSheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[firstSheetName];
         
-        // Convertir a JSON
         const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
-        
-        // Fase 3: Procesar los datos (stub para la fase 2)
         await processImportData(jsonData);
       } catch (error) {
         console.error("Error leyendo el archivo:", error);
         showToast("Error al leer el archivo. Asegúrate de que sea un Excel válido.", "error");
         setIsImporting(false);
       }
-      
-      // Limpiar el input file
       e.target.value = null;
     };
 
@@ -142,7 +220,6 @@ export const SettingsUsuarios = () => {
   };
 
   const processImportData = async (jsonData) => {
-    let db = [...users];
     let importedCount = 0;
     let skippedCount = 0;
 
@@ -159,136 +236,60 @@ export const SettingsUsuarios = () => {
         continue;
       }
 
-      // Evitar duplicados
-      if (db.some(u => u.username.toLowerCase() === rowUsername.trim().toLowerCase())) {
-        skippedCount++;
-        continue;
-      }
-
-      // La contraseña es la cédula, o '12345' si no tiene cédula
-      const plainPassword = rowCedula.trim() ? rowCedula.trim() : '12345';
-      const empHash = await hashPassword(plainPassword);
-
-      const newUser = {
-        id: `U-${String(db.length + 1).padStart(2, '0')}`,
+      const codigo = `U-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`;
+      
+      const payload = {
+        codigo,
         username: rowUsername.trim(),
         nombreReal: rowNombre.trim(),
-        passwordHash: empHash,
-        role: 'solicitante', // Siempre Empleado por seguridad
-        area: null,
-        avatar: '',
         cargo: rowCargo.trim(),
+        role: 'solicitante',
+        area: null,
+        password: '12345',
         cedula: rowCedula.trim(),
-        celular: String(rowCelular).trim(),
-        jefeInmediato: rowJefe.trim(),
-        bloqueado: false,
-        intentosFallidos: 0
+        celular: rowCelular.trim(),
+        jefeInmediato: rowJefe.trim()
       };
-      
-      db.push(newUser);
-      importedCount++;
+
+      const res = await apiClient('/usuarios', { method: 'POST', body: JSON.stringify(payload) });
+      if (res.success) importedCount++;
+      else skippedCount++;
     }
 
-    if (importedCount > 0) {
-      localStorage.setItem('db_usuarios', JSON.stringify(db));
-      setUsers(db);
-      showToast(`¡${importedCount} usuarios importados con éxito! (${skippedCount} omitidos)`);
-    } else {
-      showToast(`No se importó ningún usuario. Revisa la plantilla. (${skippedCount} omitidos)`, 'error');
-    }
-
+    await loadUsers();
     setIsImporting(false);
     closeImportModal();
+    showToast(`Importación completa: ${importedCount} agregados, ${skippedCount} omitidos/fallidos.`);
   };
 
-  const handleSaveUser = async (e) => {
-    e.preventDefault();
-    if (!nombreReal.trim() || !username.trim()) {
-      showToast('Nombre y usuario son obligatorios', 'error');
-      return;
-    }
-    if ((role === 'gestor' || role === 'admin_ti') && !area) {
-      showToast('Debes asignar un área obligatoriamente para Gestores y Admins.', 'error');
-      return;
-    }
-
-    const db = [...users];
-
-    if (editingUsername) {
-      const userIndex = db.findIndex(u => u.username === editingUsername);
-      if (userIndex !== -1) {
-        db[userIndex].nombreReal = nombreReal.trim();
-        db[userIndex].cargo = cargo.trim() || ((role === 'solicitante') ? 'Empleado' : 'Gestor');
-        db[userIndex].cedula = cedula.trim();
-        db[userIndex].celular = celular.trim();
-        db[userIndex].jefeInmediato = jefeInmediato.trim();
-        db[userIndex].role = role;
-        db[userIndex].area = (role === 'solicitante') ? null : area;
-        db[userIndex].avatar = avatar.trim();
-        
-        localStorage.setItem('db_usuarios', JSON.stringify(db));
-        
-        // Si el usuario editado es el mismo que está logueado, actualizar su sesión
-        if (currentUser && currentUser.username === editingUsername) {
-          const session = JSON.parse(localStorage.getItem('session_token'));
-          if (session) {
-            session.user = db[userIndex];
-            localStorage.setItem('session_token', JSON.stringify(session));
-          }
-        }
-
-        setUsers(db);
-        showToast(`Usuario ${editingUsername} actualizado.`);
-        closeModal();
-      }
-    } else {
-      if (db.some(u => u.username.toLowerCase() === username.trim().toLowerCase())) {
-        showToast('El nombre de usuario ya existe.', 'error');
-        return;
-      }
-
-      const empHash = await hashPassword('12345');
-      const newUser = {
-        id: `U-${String(db.length + 1).padStart(2, '0')}`,
-        username: username.trim(),
-        nombreReal: nombreReal.trim(),
-        passwordHash: empHash,
-        role: role,
-        area: (role === 'solicitante') ? null : area,
-        avatar: avatar.trim(),
-        cargo: cargo.trim() || ((role === 'solicitante') ? 'Empleado' : 'Gestor'),
-        cedula: cedula.trim(),
-        celular: celular.trim(),
-        jefeInmediato: jefeInmediato.trim(),
-        bloqueado: false,
-        intentosFallidos: 0
-      };
-      db.push(newUser);
-      localStorage.setItem('db_usuarios', JSON.stringify(db));
-      setUsers(db);
-      showToast(`Usuario creado. Contraseña: 12345`);
-      closeModal();
-    }
-  };
-
-  const handleToggleSuspendUser = (username) => {
-    const db = [...users];
-    const userIndex = db.findIndex(u => u.username === username);
-    if (userIndex !== -1) {
-      db[userIndex].bloqueado = !db[userIndex].bloqueado;
-      db[userIndex].intentosFallidos = 0;
-      localStorage.setItem('db_usuarios', JSON.stringify(db));
-      setUsers(db);
+  const handleToggleSuspendUser = async (username) => {
+    try {
+      const user = users.find(u => u.username === username);
+      if (!user) return;
+      
+      await apiClient(`/usuarios/${username}`, {
+        method: 'PUT',
+        body: JSON.stringify({ bloqueado: !user.bloqueado })
+      });
+      
+      await loadUsers();
       showToast(`Estado de ${username} actualizado.`);
+    } catch (error) {
+      console.error('Error actualizando estado:', error);
+      showToast('Error de conexión', 'error');
     }
   };
 
-  const handleDeleteUser = (username) => {
+  const handleDeleteUser = async (username) => {
     if (window.confirm(`¿Estás seguro de ELIMINAR PERMANENTEMENTE a ${username}?`)) {
-      const db = users.filter(u => u.username !== username);
-      localStorage.setItem('db_usuarios', JSON.stringify(db));
-      setUsers(db);
-      showToast(`Usuario ${username} eliminado.`);
+      try {
+        await apiClient(`/usuarios/${username}`, { method: 'DELETE' });
+        await loadUsers();
+        showToast(`Usuario ${username} eliminado.`);
+      } catch (error) {
+        console.error('Error eliminando usuario:', error);
+        showToast('Error de conexión', 'error');
+      }
     }
   };
 
@@ -299,16 +300,16 @@ export const SettingsUsuarios = () => {
         window.alert('La contraseña debe tener al menos 5 caracteres.');
         return;
       }
-      const hashed = await hashPassword(newPass);
-      const db = [...users];
-      const user = db.find(u => u.username === username);
-      if (user) {
-        user.passwordHash = hashed;
-        user.bloqueado = false;
-        user.intentosFallidos = 0;
-        localStorage.setItem('db_usuarios', JSON.stringify(db));
-        setUsers(db);
+      try {
+        await apiClient(`/usuarios/${username}`, {
+          method: 'PUT',
+          body: JSON.stringify({ password: newPass, bloqueado: false })
+        });
+        await loadUsers();
         showToast(`Contraseña actualizada.`);
+      } catch (error) {
+        console.error('Error reseteando contraseña:', error);
+        showToast('Error de conexión', 'error');
       }
     }
   };
@@ -324,8 +325,8 @@ export const SettingsUsuarios = () => {
           <i className="fa-solid fa-users-gear"></i> Gestión de Usuarios
         </h2>
         <div style={{ display: 'flex', gap: '10px' }}>
-          <button className="btn-primary" onClick={() => setImportModalOpen(true)} style={{ padding: '8px 16px', fontSize: '14px', background: '#10b981', borderColor: '#059669', color: '#fff' }}>
-            <i className="fa-solid fa-file-import"></i> Importar Masivamente
+          <button className="btn-secondary" onClick={() => setImportModalOpen(true)} style={{ padding: '8px 16px', fontSize: '14px', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <i className="fa-solid fa-file-import"></i> Importar Masivo
           </button>
           <button className="btn-primary" onClick={() => openModal()} style={{ padding: '8px 16px', fontSize: '14px' }}>
             <i className="fa-solid fa-user-plus"></i> Nuevo Usuario
@@ -471,13 +472,6 @@ export const SettingsUsuarios = () => {
                 <input type="text" className="glass-input" value={jefeInmediato} onChange={e => setJefeInmediato(e.target.value)} />
               </div>
 
-              {role !== 'solicitante' && (
-                <div className="form-group">
-                  <label className="form-label">URL de Imagen (Avatar)</label>
-                  <input type="text" className="glass-input" value={avatar} onChange={e => setAvatar(e.target.value)} placeholder="https://ejemplo.com/foto.jpg" />
-                </div>
-              )}
-
               <div className="form-group">
                 <label className="form-label">Rol en el Sistema *</label>
                 <select className="glass-input" value={role} onChange={e => setRole(e.target.value)}>
@@ -513,12 +507,12 @@ export const SettingsUsuarios = () => {
       {/* --- MODAL DE IMPORTACIÓN MASIVA --- */}
       {importModalOpen && (
         <div className="modal-overlay active" onClick={closeImportModal}>
-          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '400px', background: 'var(--card-bg)' }}>
+          <div className="modal-content glass-panel" onClick={e => e.stopPropagation()} style={{ maxWidth: '400px' }}>
             <div className="modal-header">
-              <h3><i className="fa-solid fa-file-import"></i> Importar Empleados</h3>
-              <button className="btn-close" onClick={closeImportModal}><i className="fa-solid fa-xmark"></i></button>
+              <h3 style={{ color: 'var(--navy)' }}><i className="fa-solid fa-file-import"></i> Importar Empleados</h3>
+              <button className="modal-close" onClick={closeImportModal}><i className="fa-solid fa-xmark"></i></button>
             </div>
-            <div className="modal-body" style={{ textAlign: 'center' }}>
+            <div className="modal-body" style={{ textAlign: 'center', padding: '20px' }}>
               <p style={{ color: 'var(--text-muted)', marginBottom: '20px', fontSize: '14px' }}>
                 Descarga la plantilla oficial, rellénala y súbela aquí para registrar usuarios masivamente.
               </p>
@@ -527,7 +521,7 @@ export const SettingsUsuarios = () => {
                 type="button" 
                 onClick={downloadTemplate} 
                 className="btn-primary" 
-                style={{ width: '100%', marginBottom: '20px', background: '#3b82f6', borderColor: '#2563eb' }}
+                style={{ width: '100%', marginBottom: '20px', background: '#3b82f6', borderColor: '#2563eb', padding: '10px' }}
               >
                 <i className="fa-solid fa-download"></i> Descargar Plantilla Base
               </button>
@@ -546,12 +540,9 @@ export const SettingsUsuarios = () => {
 
               {isImporting && (
                 <div style={{ marginTop: '15px', color: '#10b981', fontWeight: 'bold' }}>
-                  <i className="fa-solid fa-spinner fa-spin"></i> Importando y encriptando...
+                  <i className="fa-solid fa-spinner fa-spin"></i> Importando al servidor...
                 </div>
               )}
-            </div>
-            <div className="modal-footer">
-              <button className="btn-secondary" onClick={closeImportModal} disabled={isImporting}>Cancelar</button>
             </div>
           </div>
         </div>

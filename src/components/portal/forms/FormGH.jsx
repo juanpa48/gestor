@@ -9,6 +9,7 @@ import { FormVacaciones } from './gh/FormVacaciones';
 import { FormCesantias } from './gh/FormCesantias';
 import { FormAuxilioEducativo } from './gh/FormAuxilioEducativo';
 import { DbService } from '../../../shared/services/DbService';
+import { apiClient } from '../../../shared/services/api';
 
 export const FormGH = () => {
   const { currentUser } = useAuth();
@@ -21,12 +22,18 @@ export const FormGH = () => {
     const fetchAsistencia = async () => {
       const db = await DbService.getAsistenciaDiaria();
       
+      const now = new Date();
+      const cutoff = new Date(now);
+      cutoff.setHours(19, 14, 0, 0);
+      if (now.getTime() < cutoff.getTime()) {
+        cutoff.setDate(cutoff.getDate() - 1);
+      }
+
       const miAsistencia = db[nombre];
-      if (miAsistencia) {
+      if (miAsistencia && miAsistencia.timestamp >= cutoff.getTime()) {
         setActiveReport({ 
           tipoTramite: miAsistencia.ubicacion, 
-          detalles: miAsistencia.detalles || {},
-          estado: miAsistencia.estado || 'Activo'
+          detalles: miAsistencia.detalles || {} 
         });
       } else {
         setActiveReport(null);
@@ -44,19 +51,24 @@ export const FormGH = () => {
   const [tipoSolicitud, setTipoSolicitud] = useState('');
   const [tipoTramite, setTipoTramite] = useState('');
   const settings = getAreaSettings('gh');
-  // Filtramos "Solicitudes Internas" para que no se muestre a los usuarios normales
-  const tiposSolicitud = (settings.tiposSolicitud || []).filter(g => g.nombre !== 'Solicitudes Internas');
+  const tiposSolicitud = settings.tiposSolicitud || [];
   const [solicitud, setSolicitud] = useState('');
   const [archivos, setArchivos] = useState([]);
   const [detalles, setDetalles] = useState({}); // Estado dinámico inyectado por sub-componentes
   const [loadingSubmit, setLoadingSubmit] = useState(false);
 
-  const clientesDB = useMemo(() => {
-    try {
-      return JSON.parse(localStorage.getItem('db_clientes') || '[]');
-    } catch {
-      return [];
-    }
+  const [clientesDB, setClientesDB] = useState([]);
+  
+  useEffect(() => {
+    const fetchClientes = async () => {
+      try {
+        const data = await apiClient('/clientes');
+        setClientesDB(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error('Error fetching clientes:', error);
+      }
+    };
+    fetchClientes();
   }, []);
 
   const showToast = (message, type = 'success', icon = 'check') => {
@@ -76,33 +88,41 @@ export const FormGH = () => {
     }
 
     if ((tipoSolicitud === 'Convenios' || tipoSolicitud === 'Auxilio Educativo') && detalles.consentimientoLegal) {
-      const users = JSON.parse(localStorage.getItem('db_usuarios') || '[]');
-      const targetUser = users.find(u => u.username === currentUser?.username);
-      if (targetUser) {
-        const inputHash = await hashPassword(detalles.firmaClave || '');
-        if (inputHash !== targetUser.passwordHash) {
+      // Verificar firma electrónica via API
+      try {
+        const loginData = await apiClient('/auth/login', {
+          method: 'POST',
+          body: JSON.stringify({ username: currentUser?.username, password: detalles.firmaClave || '' })
+        });
+        
+        if (!loginData.success) {
           showToast('Firma Inválida: La contraseña ingresada es incorrecta.', 'error', 'lock');
           return;
         }
-
-        if (!targetUser.cedula) {
+        
+        // Verificar cédula via API
+        const users = await apiClient('/usuarios');
+        const targetUser = users.find(u => u.username === currentUser?.username);
+        
+        if (targetUser && !targetUser.cedula) {
           showToast('Error: Su perfil de usuario no tiene una cédula registrada. Contacte a Soporte TI.', 'error', 'id-card');
           return;
         }
         
-        if (detalles.firmaCedula.trim() !== targetUser.cedula.trim()) {
+        if (targetUser && detalles.firmaCedula.trim() !== (targetUser.cedula || '').trim()) {
           showToast('Firma Inválida: La cédula ingresada no coincide con sus registros.', 'error', 'id-card');
           return;
         }
+      } catch (error) {
+        showToast('Error de conexión al validar firma.', 'error', 'triangle-exclamation');
+        return;
       }
     }
 
     setLoadingSubmit(true);
 
-    // 1. Generar el ID del ticket primero
-    const rawActs = JSON.parse(localStorage.getItem('db_actividades_gh') || '[]');
-    const numReq = rawActs.filter(t => (t.id || '').startsWith('GH-')).length + 1;
-    const newId = `GH-${String(numReq).padStart(3, '0')}`;
+    // 1. El ID del ticket se genera automáticamente en el servidor
+    const newId = 'GH-TEMP'; // Se reemplazará por el servidor
 
     // 1.5. Limpiar datos y extraer archivos especiales (ej. Cesantías)
     const sanitizedDetalles = { ...detalles };
@@ -331,14 +351,11 @@ export const FormGH = () => {
 
       {tipoSolicitud === 'Reporte de Asistencia' ? (
         activeReport ? (
-          <div style={{ padding: '15px', background: activeReport.estado === 'Resuelto' ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)', color: activeReport.estado === 'Resuelto' ? '#16a34a' : '#ef4444', border: `1px solid ${activeReport.estado === 'Resuelto' ? '#22c55e' : '#ef4444'}`, borderRadius: '8px', textAlign: 'center', fontWeight: 'bold' }}>
-            <i className={`fa-solid ${activeReport.estado === 'Resuelto' ? 'fa-check-circle' : 'fa-triangle-exclamation'}`}></i> 
-            {activeReport.estado === 'Resuelto'
-              ? ` Ya completaste tu jornada hoy en ${activeReport.tipoTramite}.`
-              : ` Ya tienes una jornada en curso (${activeReport.tipoTramite}).${activeReport.detalles?.registradoManualmentePor ? ' (Asignada por Gestión Humana).' : ' Finalízala antes de registrar otra.'}`}
+          <div style={{ padding: '15px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid #ef4444', borderRadius: '8px', textAlign: 'center', fontWeight: 'bold' }}>
+            <i className="fa-solid fa-triangle-exclamation"></i> Ya tienes una jornada en curso ({activeReport.tipoTramite || activeReport.clasificacion || activeReport.grupoExtra || 'Oficina'}). {activeReport.detalles?.registradoManualmentePor ? ' (Asignada por Gestión Humana).' : ' Finalízala antes de registrar otra.'}
           </div>
         ) : (
-          <button type="submit" className={`btn-submit ${loadingSubmit ? 'loading' : ''}`} style={{ background: '#22c55e', boxShadow: '0 4px 15px rgba(34,197,94,0.3)', color: 'white' }} disabled={loadingSubmit}>
+          <button type="submit" className={`btn-submit ${loadingSubmit ? 'loading' : ''}`} style={{ background: 'var(--green)', boxShadow: '0 4px 15px rgba(34,197,94,0.3)' }} disabled={loadingSubmit}>
             {loadingSubmit ? (
               <><span>Registrando Inicio...</span><i className="fa-solid fa-spinner fa-spin"></i></>
             ) : (

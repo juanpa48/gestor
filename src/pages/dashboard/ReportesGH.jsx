@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useActiveArea } from '../../shared/contexts/ActiveAreaContext';
 import { parseFechaCreacion } from '../../shared/utils/timeHelpers';
 import { DbService } from '../../shared/services/DbService';
+import { apiClient } from '../../shared/services/api';
 
 export const ReportesGH = () => {
   const { ctx, config } = useActiveArea();
@@ -22,13 +23,7 @@ export const ReportesGH = () => {
     }
   };
 
-  const [asistencias, setAsistencias] = useState(() => {
-    try {
-      return DbService.cleanAsistenciaDiariaSync();
-    } catch {
-      return {};
-    }
-  });
+  const [asistencias, setAsistencias] = useState({});
 
   useEffect(() => {
     const fetchAsistencia = async () => {
@@ -60,14 +55,29 @@ export const ReportesGH = () => {
     };
   }, []);
 
-  // Get users
-  const allUsers = useMemo(() => {
-    try {
-      return JSON.parse(localStorage.getItem('db_usuarios') || '[]');
-    } catch {
-      return [];
-    }
+  // Get users from API
+  const [allUsers, setAllUsers] = useState([]);
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const data = await apiClient('/usuarios');
+        setAllUsers(data.filter(u => u.role !== 'admin_ti'));
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
+    };
+    fetchUsers();
   }, [userTick]);
+
+  const [festivos, setFestivos] = useState([]);
+  
+  useEffect(() => {
+    const loadFestivos = async () => {
+      const data = await DbService.getFestivos();
+      setFestivos(data.map(f => f.fecha || f));
+    };
+    loadFestivos();
+  }, []);
 
   const isHoyFestivoOFinDeSemana = useMemo(() => {
     const hoy = new Date();
@@ -76,23 +86,33 @@ export const ReportesGH = () => {
     // Simplification for Phase 3/4
     const isWeekend = hoy.getDay() === 0 || hoy.getDay() === 6;
     let isFestivo = false;
-    try {
-      const festivos = JSON.parse(localStorage.getItem('db_festivos') || '[]');
-      const hoyStr = hoy.toISOString().split('T')[0];
-      if (festivos.includes(hoyStr)) isFestivo = true;
-    } catch {}
+    const hoyStr = hoy.toISOString().split('T')[0];
+    if (festivos.includes(hoyStr)) isFestivo = true;
 
     return isWeekend || isFestivo;
-  }, []);
+  }, [festivos]);
 
   const enrichedUsers = useMemo(() => {
+    const now = new Date();
+    const cutoff = new Date(now);
+    cutoff.setHours(0, 0, 0, 0);
+    if (now.getTime() < cutoff.getTime()) {
+      cutoff.setDate(cutoff.getDate() - 1);
+    }
+
     return allUsers.map(user => {
       const miAsistencia = asistencias[user.nombreReal] || asistencias[user.username];
+      let ubicacion = 'No Reportado';
+      let validAsistencia = null;
+      if (miAsistencia && miAsistencia.timestamp >= cutoff.getTime()) {
+        ubicacion = miAsistencia.ubicacion;
+        validAsistencia = miAsistencia;
+      }
       return {
         ...user,
         displayName: user.nombreReal || user.username,
-        ticket: miAsistencia || null,
-        ubicacion: miAsistencia ? miAsistencia.ubicacion : 'No Reportado'
+        ticket: validAsistencia,
+        ubicacion
       };
     }).sort((a, b) => a.displayName.localeCompare(b.displayName));
   }, [allUsers, asistencias]);

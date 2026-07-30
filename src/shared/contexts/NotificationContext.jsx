@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { apiClient } from '../services/api';
 
 const NotificationContext = createContext();
 
@@ -11,36 +12,44 @@ export const NotificationProvider = ({ children }) => {
   const [notificaciones, setNotificaciones] = useState([]);
   const [panelOpen, setPanelOpen] = useState(false);
 
-  const load = useCallback(() => {
+  const load = useCallback(async () => {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      return stored ? JSON.parse(stored) : [];
+      const data = await apiClient('/notificaciones');
+      return Array.isArray(data) ? data : [];
     } catch (e) {
       return [];
     }
   }, []);
 
-  const save = useCallback((items) => {
+  const save = useCallback(async (items) => {
     const sliced = items.slice(0, MAX_ITEMS);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(sliced));
-    setNotificaciones(sliced);
+    try {
+      await apiClient('/notificaciones', {
+        method: 'PUT',
+        body: JSON.stringify({ notificaciones: sliced })
+      });
+      setNotificaciones(sliced);
+    } catch (e) {}
   }, []);
 
-  useEffect(() => {
-    setNotificaciones(load());
-    
-    // Sincronizar estado entre múltiples pestañas (Portal vs Dashboard)
-    const handleStorage = (e) => {
-      if (e.key === STORAGE_KEY) {
-        setNotificaciones(JSON.parse(e.newValue || '[]'));
-      }
-    };
-    window.addEventListener('storage', handleStorage);
-    return () => window.removeEventListener('storage', handleStorage);
+  const fetchNotifs = useCallback(async () => {
+    const data = await load();
+    setNotificaciones(data);
   }, [load]);
 
-  const addNotification = useCallback((titulo, texto) => {
-    const items = load();
+  useEffect(() => {
+    fetchNotifs();
+    
+    // Sincronizar estado usando Short Polling (cada 30s) en lugar de 'storage' event
+    const intervalId = setInterval(() => {
+      fetchNotifs();
+    }, 30000);
+    
+    return () => clearInterval(intervalId);
+  }, [fetchNotifs]);
+
+  const addNotification = useCallback(async (titulo, texto) => {
+    const items = await load();
     const newNotif = {
       id: 'N-' + Date.now(),
       titulo,
@@ -49,16 +58,17 @@ export const NotificationProvider = ({ children }) => {
       leida: false
     };
     items.unshift(newNotif);
-    save(items);
+    await save(items);
   }, [load, save]);
 
-  const markAllRead = useCallback(() => {
-    const items = load().map(n => ({ ...n, leida: true }));
-    save(items);
+  const markAllRead = useCallback(async () => {
+    const items = await load();
+    const updated = items.map(n => ({ ...n, leida: true }));
+    await save(updated);
   }, [load, save]);
 
-  const clearNotifications = useCallback(() => {
-    save([]);
+  const clearNotifications = useCallback(async () => {
+    await save([]);
   }, [save]);
 
   const togglePanel = useCallback(() => {

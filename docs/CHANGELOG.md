@@ -16,6 +16,13 @@
 
 ## Julio 2026
 
+### [2026-07-30] — Refactorización del Frontend y Conexión al Backend en Producción 🚀
+- **Variables de Entorno:** Integración de `.env` y `.env.production` para gestionar la URL base del API (`VITE_API_BASE_URL`), permitiendo apuntar al servidor Ubuntu (192.168.1.9).
+- **Capa de Servicios Desacoplada:** Migración de la persistencia en `localStorage` a consumo de API REST mediante `fetch` en `DbService.js`, `SettingsManager.js` y `UploadService.js`.
+- **Autenticación Real (PostgreSQL):** `AuthContext.jsx` refactorizado para consumir el endpoint `/auth/login` del backend, verificando sesiones reales en lugar de un arreglo local.
+- **Saneamiento de 17 Fugas de LocalStorage:** Intervención en componentes críticos (Widgets del Dashboard, Formularios de Solicitud, Contextos de Área, Reportes GH) para forzarlos a leer/escribir a través de los servicios centralizados, erradicando escrituras directas a `localStorage`.
+- **Sincronización Inteligente (Short Polling):** Desprecado el uso de `window.addEventListener('storage')` para sincronización inter-pestañas. Se introdujo Short Polling ligero (15-30s) en `PortalLayout.jsx`, `createAreaContext.jsx` y `NotificationContext.jsx` para mantener la reactividad en tiempo real sin saturar la base de datos.
+
 ### [2026-07-29] — Motor de Exportación Avanzado y Carga Masiva de Usuarios 🚀
 - **Exportación Dual (CSV/XLSX):** Se implementó un motor de exportación avanzado en las Bases de Datos y tableros de Actividades que permite descargar los reportes consolidados, aplanando los datos estructurados en JSON (como los detalles dinámicos) en columnas legibles. Soporta la librería `xlsx` para la generación de libros Excel reales y archivos `.csv` con codificación UTF-8 BOM.
 - **Botón Inteligente de Descarga:** Los tableros cuentan con un botón "Descargar a Excel (CSV)" que asigna automáticamente el nombre del área y la fecha al archivo generado (ej. `Exportacion_GH_2026-07-29.csv`).

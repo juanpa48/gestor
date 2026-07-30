@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { apiClient } from '../../../../shared/services/api';
 
 export const SettingsClientes = () => {
   const [clientes, setClientes] = useState([]);
@@ -10,13 +11,14 @@ export const SettingsClientes = () => {
   const [editMode, setEditMode] = useState(false);
   const [currentCliente, setCurrentCliente] = useState({ id: '', nombre: '', nit: '' });
 
-  const loadClientes = () => {
+  const loadClientes = async () => {
     try {
-      const db = JSON.parse(localStorage.getItem('db_clientes') || '[]');
-      // Sort alphabetically by nombre
+      const data = await apiClient('/clientes');
+      const db = Array.isArray(data) ? data : [];
       db.sort((a, b) => a.nombre.localeCompare(b.nombre));
       setClientes(db);
-    } catch {
+    } catch (error) {
+      console.error('Error cargando clientes:', error);
       setClientes([]);
     }
     setLoading(false);
@@ -26,22 +28,29 @@ export const SettingsClientes = () => {
     loadClientes();
   }, []);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!currentCliente.nombre || !currentCliente.nombre.trim()) return;
 
-    let updatedList = [...clientes];
-    
-    if (editMode) {
-      updatedList = updatedList.map(c => c.id === currentCliente.id ? { ...currentCliente } : c);
-    } else {
-      const newId = `CLI-${Date.now()}`;
-      updatedList.push({ ...currentCliente, id: newId });
+    try {
+      if (editMode) {
+        await apiClient(`/clientes/${currentCliente.id}`, {
+          method: 'PUT',
+          body: JSON.stringify(currentCliente)
+        });
+      } else {
+        await apiClient('/clientes', {
+          method: 'POST',
+          body: JSON.stringify({ nombre: currentCliente.nombre, nit: currentCliente.nit })
+        });
+      }
+      
+      await loadClientes();
+      setShowModal(false);
+      setCurrentCliente({ id: '', nombre: '', nit: '' });
+    } catch (error) {
+      console.error('Error saving cliente', error);
+      alert('Error guardando cliente');
     }
-
-    localStorage.setItem('db_clientes', JSON.stringify(updatedList));
-    setClientes(updatedList.sort((a, b) => a.nombre.localeCompare(b.nombre)));
-    setShowModal(false);
-    setCurrentCliente({ id: '', nombre: '', nit: '' });
   };
 
   const handleEdit = (cliente) => {
@@ -50,11 +59,15 @@ export const SettingsClientes = () => {
     setShowModal(true);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm('¿Está seguro de que desea eliminar este cliente? Esta acción no se puede deshacer.')) {
-      const updatedList = clientes.filter(c => c.id !== id);
-      localStorage.setItem('db_clientes', JSON.stringify(updatedList));
-      setClientes(updatedList);
+      try {
+        await apiClient(`/clientes/${id}`, { method: 'DELETE' });
+        await loadClientes();
+      } catch (error) {
+        console.error('Error deleting cliente', error);
+        alert('Error eliminando cliente');
+      }
     }
   };
 

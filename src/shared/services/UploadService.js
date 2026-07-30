@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3001/api/upload';
+const API_URL = import.meta.env.VITE_API_BASE_URL ? `${import.meta.env.VITE_API_BASE_URL}/upload` : 'http://localhost:3001/api/upload';
 
 export const UploadService = {
   /**
@@ -15,23 +15,33 @@ export const UploadService = {
     if (area) {
       formData.append('area', area);
     }
-    // Importante: agregar el ticketId ANTES de los archivos
     if (ticketId) {
       formData.append('ticketId', ticketId);
     }
 
-    // 'adjuntos' debe coincidir con el nombre esperado en backend: upload.array('adjuntos')
     for (let i = 0; i < files.length; i++) {
       formData.append('adjuntos', files[i]);
     }
 
+    const token = localStorage.getItem('jwt_token');
+    const headers = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    // NOTA: NO agregar Content-Type: application/json, el navegador lo auto-asigna a multipart/form-data con el boundary
+
     try {
       const response = await fetch(API_URL, {
         method: 'POST',
+        headers,
         body: formData,
       });
 
       if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('jwt_token');
+          window.location.href = '/login';
+        }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 

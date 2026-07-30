@@ -134,9 +134,14 @@ export const Actividades = () => {
     <section id="section-recents" className="section active">
       <div className="section-header">
         <h2 className="section-title">Actividades</h2>
-        <button className="btn-refresh" id="btnRefreshActivityTable" onClick={() => window.location.reload()}>
-          <i className="fa-solid fa-rotate-right"></i> Actualizar
-        </button>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button className="btn-secondary" onClick={() => downloadReport(filteredActividades, getColumnsConfig(area), area, 'xlsx')} style={{ padding: '8px 16px', fontSize: '13px', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <i className="fa-solid fa-file-excel"></i> Exportar
+          </button>
+          <button className="btn-refresh" id="btnRefreshActivityTable" onClick={() => window.location.reload()}>
+            <i className="fa-solid fa-rotate-right"></i> Actualizar
+          </button>
+        </div>
       </div>
 
       <div className="filters-container">

@@ -1,13 +1,25 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { apiClient } from '../../../shared/services/api';
 
 export const ActaAuxilioPdf = ({ ticket, onClose }) => {
   const d = ticket.detalles || {};
   const fechaGeneracion = new Date().toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' });
   
-  // Buscar datos del solicitante en la BD local
-  const usuarios = JSON.parse(localStorage.getItem('db_usuarios') || '[]');
+  // Buscar datos del solicitante desde la API
+  const [userObj, setUserObj] = useState({});
   const solicitanteStr = typeof ticket.solicitante === 'string' ? ticket.solicitante : (ticket.solicitante?.nombreReal || 'Usuario');
-  const userObj = usuarios.find(u => u.nombreReal === solicitanteStr) || {};
+  
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const usuarios = await apiClient('/usuarios');
+        setUserObj(usuarios.find(u => u.nombreReal === solicitanteStr) || {});
+      } catch (error) {
+        console.error('Error fetching user:', error);
+      }
+    };
+    fetchUser();
+  }, [solicitanteStr]);
   
   const cedula = d.cedula || userObj.cedula || ticket.solicitante?.cedula || 'N/A';
   const cargo = userObj.cargo || ticket.solicitante?.cargo || 'N/A';
@@ -152,8 +164,8 @@ export const ActaAuxilioPdf = ({ ticket, onClose }) => {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <tbody>
               <tr>
-                <td style={{ width: '100%', verticalAlign: 'bottom' }}>
-                  <div style={{ borderBottom: '1px solid #000', marginBottom: '10px', width: '50%' }}>
+                <td style={{ width: '100%', paddingRight: '20px', verticalAlign: 'bottom' }}>
+                  <div style={{ borderBottom: '1px solid #000', marginBottom: '10px' }}>
                     <p style={{ margin: 0, paddingBottom: '2px', fontFamily: 'monospace', fontSize: '12px' }}>
                       FIRMA DIGITAL: {d.firmaTimestamp || new Date().getTime()}-{ticket.id}
                     </p>

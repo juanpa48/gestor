@@ -1,150 +1,55 @@
-import { AREAS } from '../../data/areasConfig';
+import { apiClient } from './api';
 
-// Default Data
-const defaultTiposSolicitudGE = [
-  {
-    nombre: 'Estructurales y Legales',
-    tramites: [
-      "Creación y/o Cancelación de empresas",
-      "Devolución de saldo a favor en rentas",
-      "RUT por primera vez",
-      "Constitución y cancelación de establecimientos de comercio",
-      "Cambio de representante legal y sus anexos",
-      "Anexo y retiro de revisoría fiscal",
-      "Venta de acciones y compraventas",
-      "Reforma de estatutos",
-      "Cambio de dirección de la empresa",
-      "Capitalización",
-      "Anexo y cambio de actividades económicas",
-      "Cambio de correos electrónicos y números telefónicos",
-      "Inscripción o renovación en el RUP",
-      "Inscripción o renovación en el RUB",
-      "Renovación o actualización de cámara de comercio",
-      "Otro (especificar en descripción)"
-    ]
-  },
-  {
-    nombre: 'Operativos y Documentales',
-    tramites: [
-      "Actualización de RUT",
-      "Resolución de facturación",
-      "Firma Electrónica",
-      "Facturas electrónicas",
-      "Documento soporte",
-      "Certificados",
-      "Firma electrónica de estados financieros y declaraciones de renta",
-      "Renovación de firma digital de Token",
-      "Otro (especificar en descripción)"
-    ]
-  }
-];
+let settingsCache = null;
 
-const defaultTiposSolicitudGH = [
-  {
-    nombre: 'Permisos',
-    tramites: ["Personal", "Salud", "Educativo", "Licencia no remunerada (LNR)"]
-  },
-  {
-    nombre: 'Convenios',
-    tramites: ["Servicio", "Smartfit", "Gafas", "Psicología", "Préstamo personal", "Bolsos", "Comfama cursos"]
-  },
-  {
-    nombre: 'Vacaciones',
-    tramites: ["Disfrute de Vacaciones", "Vacaciones compensadas"]
-  },
-  {
-    nombre: 'Cesantías',
-    tramites: ["Estudio", "Compra de vivienda", "Modificación de vivienda"]
-  },
-  {
-    nombre: 'Auxilio Educativo',
-    tramites: ["Posgrado", "Diplomado", "Curso"]
-  },
-  {
-    nombre: 'Certificado Laboral',
-    tramites: ["General"]
-  },
-  {
-    nombre: 'Sistema de Gestión',
-    tramites: ["General"]
-  },
-  {
-    nombre: 'Reporte de Asistencia',
-    tramites: ["Trabajo en Casa", "Cliente", "Oficina"]
-  },
-  {
-    nombre: 'Solicitudes Internas',
-    tramites: ["Novedades para nómina"],
-    internalOnly: true
+const refreshCache = async () => {
+  try {
+    const data = await apiClient('/settings');
+    settingsCache = data;
+    localStorage.setItem('db_settings_cache', JSON.stringify(data));
+  } catch (error) {
+    console.warn('[SettingsManager] Servidor no disponible, usando cache local.');
+    const cached = localStorage.getItem('db_settings_cache');
+    if (cached && !settingsCache) {
+      settingsCache = JSON.parse(cached);
+    }
   }
-];
+};
 
-const defaultTiposSolicitudTI = [
-  {
-    nombre: 'Soporte Técnico',
-    tramites: [
-      "Soporte"
-    ]
-  }
-];
+refreshCache();
 
 export const initSettingsDB = () => {
-  let settings = localStorage.getItem('db_settings');
-  const defaultSlas = {
-    Urgente: 2,
-    Alta: 8,
-    Media: 24,
-    Baja: 48
-  };
-  
-  if (!settings) {
-    settings = {
-      ge: { tiposSolicitud: defaultTiposSolicitudGE, slas: { ...defaultSlas } },
-      gh: { tiposSolicitud: defaultTiposSolicitudGH, slas: { ...defaultSlas } },
-      ti: { tiposSolicitud: defaultTiposSolicitudTI, slas: { ...defaultSlas } }
-    };
-  } else {
-    settings = JSON.parse(settings);
-    // Forzar siempre la estructura estricta de GH
-    if (!settings.gh) {
-      settings.gh = { tiposSolicitud: defaultTiposSolicitudGH, slas: { ...defaultSlas } };
-    } else {
-      settings.gh.tiposSolicitud = defaultTiposSolicitudGH;
-    }
-
-    // Auto-heal GE if accidentally wiped
-    if (!settings.ge || !settings.ge.tiposSolicitud || settings.ge.tiposSolicitud.length === 0) {
-      if (!settings.ge) settings.ge = { slas: { ...defaultSlas } };
-      settings.ge.tiposSolicitud = defaultTiposSolicitudGE;
-    }
-  }
-  localStorage.setItem('db_settings', JSON.stringify(settings));
+  refreshCache();
 };
 
 export const getAreaSettings = (areaId) => {
-  initSettingsDB();
-  const settings = JSON.parse(localStorage.getItem('db_settings'));
-  return settings[areaId] || { grupos: [] };
+  if (settingsCache && settingsCache[areaId]) {
+    return settingsCache[areaId];
+  }
+  
+  try {
+    const cached = localStorage.getItem('db_settings_cache');
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      if (parsed[areaId]) return parsed[areaId];
+    }
+  } catch (e) {}
+  
+  return { tiposSolicitud: [], slas: { Urgente: 2, Alta: 8, Media: 24, Baja: 48 } };
 };
 
-export const saveAreaSettings = (areaId, gruposOrTipos, slas) => {
-  initSettingsDB();
-  const settings = JSON.parse(localStorage.getItem('db_settings'));
-  const oldSettings = settings[areaId] || {};
-  
-  const newAreaSettings = { 
-    ...oldSettings,
-    slas: slas !== undefined ? slas : (oldSettings.slas || { Urgente: 2, Alta: 8, Media: 24, Baja: 48 })
+export const saveAreaSettings = (areaId, grupos, slas) => {
+  const config = {
+    tiposSolicitud: grupos,
+    slas: slas || { Urgente: 2, Alta: 8, Media: 24, Baja: 48 }
   };
-
-  if (gruposOrTipos) {
-    if (areaId === 'ti') {
-      newAreaSettings.grupos = gruposOrTipos;
-    } else {
-      newAreaSettings.tiposSolicitud = gruposOrTipos;
-    }
-  }
-
-  settings[areaId] = newAreaSettings;
-  localStorage.setItem('db_settings', JSON.stringify(settings));
+  
+  if (!settingsCache) settingsCache = {};
+  settingsCache[areaId] = config;
+  localStorage.setItem('db_settings_cache', JSON.stringify(settingsCache));
+  
+  apiClient(`/settings/${areaId}`, {
+    method: 'PUT',
+    body: JSON.stringify(config)
+  }).catch(err => console.error('Error saving settings:', err));
 };
