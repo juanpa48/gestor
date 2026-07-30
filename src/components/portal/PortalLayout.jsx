@@ -271,6 +271,7 @@ export const PortalLayout = ({ areaConfig, areaContext, onBack, children, nombre
                           <span className={`badge ${bqClass}`}>{estadoTxt}</span>
                           <span className="ht-date" style={{ marginLeft: '6px' }}>{t.id || '--'}</span>
                         </div>
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                         {isActa && (
                           <button 
                             className="btn-secondary" 
@@ -291,7 +292,14 @@ export const PortalLayout = ({ areaConfig, areaContext, onBack, children, nombre
                             <i className="fa-solid fa-file-arrow-down"></i> Descargar
                           </button>
                         )}
+                        </div>
                       </div>
+                      
+                      {t.detalles?.mensajeResolutor && (
+                        <div style={{ marginTop: '8px', padding: '8px', backgroundColor: 'rgba(59, 130, 246, 0.1)', borderLeft: '3px solid #3b82f6', borderRadius: '0 4px 4px 0', fontSize: '11px', color: '#1e293b' }}>
+                          <strong><i className="fa-solid fa-message"></i> Respuesta GH:</strong> {t.detalles.mensajeResolutor}
+                        </div>
+                      )}
                     </div>
                   );
                 })}

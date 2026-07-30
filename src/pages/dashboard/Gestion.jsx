@@ -13,22 +13,21 @@ export const Gestion = () => {
   const slas = settings.slas || { Urgente: 2, Alta: 8, Media: 24, Baja: 48 };
   
   const [view, setView] = useState('tabla'); // 'tabla' o 'kanban'
+  const [activeTab, setActiveTab] = useState('kanban');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedTicket, setSelectedTicket] = useState(null); // For detail view
+  
+  const [modalOpen, setModalOpen] = useState(false);
+  const [ticketEdit, setTicketEdit] = useState(null);
+  const [modalLoading, setModalLoading] = useState(false);
+  const [certificadoFile, setCertificadoFile] = useState(null);
+  const [archivosVistos, setArchivosVistos] = useState(new Set());
+  const [mensajeResolutor, setMensajeResolutor] = useState('');
   const [filtroEstado, setFiltroEstado] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [tick, setTick] = useState(0);
 
   // Modal State
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalLoading, setModalLoading] = useState(false);
-  const [ticketEdit, setTicketEdit] = useState({
-    id: '',
-    solicitud: '',
-    solicitante: '',
-    estado: 'Pendiente',
-    responsable: '',
-    prioridad: 'Baja',
-    tipoSolicitud: '',
-    clasificacion: '',
     detalles: '',
     novedadNomina: false,
     adjuntos: []
@@ -121,6 +120,13 @@ export const Gestion = () => {
       novedadNomina: !!t.novedadNomina,
       adjuntos: t.adjuntos || []
     });
+    
+    let parsedDetalles = t.detalles;
+    if (typeof parsedDetalles === 'string') {
+      try { parsedDetalles = JSON.parse(parsedDetalles); } catch(e) { parsedDetalles = {}; }
+    }
+    setMensajeResolutor(parsedDetalles?.mensajeResolutor || '');
+    
     setArchivosVistos(new Set()); // Resetear vistos al abrir nuevo ticket
     setCertificadoFile(null);
     setModalOpen(true);
@@ -151,14 +157,19 @@ export const Gestion = () => {
     setModalLoading(true);
     try {
       let finalDetalles = ticketEdit.detalles;
+      let parsedDetalles = typeof finalDetalles === 'string' ? JSON.parse(finalDetalles || '{}') : finalDetalles || {};
+      
       if (certificadoFile) {
         const urls = await UploadService.uploadFiles([certificadoFile], ticketEdit.id, area);
         if (urls && urls.length > 0) {
-          const parsedDetalles = typeof finalDetalles === 'string' ? JSON.parse(finalDetalles || '{}') : finalDetalles || {};
           parsedDetalles.certificadoResolutor = urls[0];
-          finalDetalles = parsedDetalles;
         }
       }
+      
+      if (mensajeResolutor) {
+        parsedDetalles.mensajeResolutor = mensajeResolutor;
+      }
+      finalDetalles = parsedDetalles;
 
       await updateTicket(ticketEdit.id, {
         estado: ticketEdit.estado,
@@ -642,7 +653,13 @@ export const Gestion = () => {
               </div>
 
               <div className="form-group form-group-full">
-                <label className="form-label">Acción Técnica / Notas</label>
+                <label className="form-label" style={{ color: 'var(--primary)' }}><i className="fa-solid fa-message"></i> Mensaje para el Solicitante (Visible en su portal)</label>
+                <textarea className="form-input form-input-full" rows="2" placeholder="Ej: Aprobado / Denegado. Recuerda traer el soporte original mañana..." value={mensajeResolutor} onChange={(e) => setMensajeResolutor(e.target.value)}></textarea>
+                <small style={{ color: 'var(--text-muted)', display: 'block', marginTop: '4px' }}>Este mensaje le aparecerá directamente al colaborador en su historial de tickets recientes.</small>
+              </div>
+
+              <div className="form-group form-group-full">
+                <label className="form-label">Acción Técnica / Notas Internas</label>
                 <textarea id="m_accion" className="form-input form-input-full" rows="2" placeholder="Describe lo que hiciste para resolverlo..." value={ticketEdit.accion} onChange={handleModalChange}></textarea>
               </div>
 
