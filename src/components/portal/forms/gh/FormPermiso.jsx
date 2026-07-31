@@ -185,7 +185,7 @@ export const FormPermiso = ({ detalles, setDetalles, tipoTramite }) => {
         </small>
       </div>
 
-      {tipoTramite === 'Personal' && (
+      {['Personal', 'Educativo'].includes(tipoTramite) && (
         <div className="form-group" style={{ animation: 'fadeIn 0.3s' }}>
           <label className="form-label" style={{ color: '#f59e0b' }}>
             <i className="fa-solid fa-triangle-exclamation"></i> ¿Cómo va a compensar el tiempo? *
