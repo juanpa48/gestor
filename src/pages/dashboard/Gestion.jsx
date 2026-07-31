@@ -24,18 +24,11 @@ export const Gestion = () => {
   const [archivosVistos, setArchivosVistos] = useState(new Set());
   const [mensajeResolutor, setMensajeResolutor] = useState('');
   const [filtroEstado, setFiltroEstado] = useState('');
-  const [filtroEstado, setFiltroEstado] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [tick, setTick] = useState(0);
 
   // Modal State
-    detalles: '',
-    novedadNomina: false,
-    adjuntos: []
-  });
-  const [archivosVistos, setArchivosVistos] = useState(new Set());
   const [showActa, setShowActa] = useState(false);
-  const [certificadoFile, setCertificadoFile] = useState(null);
 
   // Escuchar el evento de busqueda global del Topbar
   useEffect(() => {
